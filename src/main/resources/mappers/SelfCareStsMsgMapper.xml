@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.SelfCareStsMsgMapper">
+
+    <select id="selectSelfCareStsMsgList" parameterType="com.ERI.demo.vo.SelfCareStsMsgVO" resultType="com.ERI.demo.vo.SelfCareStsMsgVO">
+        SELECT
+            ROW_NUMBER() OVER (ORDER BY seq DESC) AS rowNum,
+            seq,
+            sts_msg_cd,
+            sts_msg_cntn,
+            sts_msg_rcmd_cd,
+            del_yn,
+            del_date,
+            reg_emp_id,
+            upd_emp_id,
+            reg_date,
+            upd_date
+        FROM
+            tb_self_care_sts_msg
+        <where>
+            <if test="seq != null">AND seq = #{seq}</if>
+            <if test="stsMsgCd != null and stsMsgCd != ''">AND sts_msg_cd = #{stsMsgCd}</if>
+        </where>
+    </select>
+
+    <select id="selectSelfCareStsMsg" parameterType="Long" resultType="com.ERI.demo.vo.SelfCareStsMsgVO">
+        SELECT
+            ROW_NUMBER() OVER (ORDER BY seq DESC) AS rowNum,
+            seq,
+            sts_msg_cd,
+            sts_msg_cntn,
+            sts_msg_rcmd_cd,
+            del_yn,
+            del_date,
+            reg_emp_id,
+            upd_emp_id,
+            reg_date,
+            upd_date
+        FROM
+            tb_self_care_sts_msg
+        WHERE
+            seq = #{seq}
+    </select>
+
+    <insert id="insertSelfCareStsMsg" parameterType="com.ERI.demo.vo.SelfCareStsMsgVO">
+        INSERT INTO tb_self_care_sts_msg (
+            seq,
+            sts_msg_cd,
+            sts_msg_cntn,
+            sts_msg_rcmd_cd,
+            del_yn,
+            del_date,
+            reg_emp_id,
+            upd_emp_id,
+            reg_date,
+            upd_date
+        ) VALUES (
+            #{seq},
+            #{stsMsgCd},
+            #{stsMsgCntn},
+            #{stsMsgRcmdCd},
+            #{delYn},
+            #{delDate},
+            #{regEmpId},
+            #{updEmpId},
+            #{regDate},
+            #{updDate}
+        )
+    </insert>
+
+    <update id="updateSelfCareStsMsg" parameterType="com.ERI.demo.vo.SelfCareStsMsgVO">
+        UPDATE tb_self_care_sts_msg
+        <set>
+            <if test="stsMsgCd != null and stsMsgCd != ''">sts_msg_cd = #{stsMsgCd},</if>
+            <if test="stsMsgCntn != null and stsMsgCntn != ''">sts_msg_cntn = #{stsMsgCntn},</if>
+            <if test="stsMsgRcmdCd != null and stsMsgRcmdCd != ''">sts_msg_rcmd_cd = #{stsMsgRcmdCd},</if>
+            <if test="delYn != null and delYn != ''">del_yn = #{delYn},</if>
+            <if test="delDate != null">del_date = #{delDate},</if>
+            <if test="regEmpId != null and regEmpId != ''">reg_emp_id = #{regEmpId},</if>
+            <if test="updEmpId != null and updEmpId != ''">upd_emp_id = #{updEmpId},</if>
+            <if test="regDate != null">reg_date = #{regDate},</if>
+            upd_date = NOW()
+        </set>
+        WHERE seq = #{seq}
+    </update>
+
+    <delete id="deleteSelfCareStsMsg" parameterType="Long">
+        DELETE FROM tb_self_care_sts_msg
+        WHERE seq = #{seq}
+    </delete>
+
+</mapper> 

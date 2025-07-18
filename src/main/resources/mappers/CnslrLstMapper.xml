@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.CnslrLstMapper">
+
+    <!-- 상담사 목록 조회 -->
+    <select id="selectCnslrLstList" parameterType="com.ERI.demo.vo.CnslrLstVO" resultType="com.ERI.demo.vo.CnslrLstVO">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY REG_DATE DESC) AS rowNum,
+            SEQ,
+            CNSLR_ID,
+            CNSLR_NM,
+            CNSLR_EMAIL,
+            CNSLR_TEL,
+            CNSLR_STS_CD,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_CNSLR_LST
+        <where>
+            <if test="cnslrId != null and cnslrId != ''">
+                AND CNSLR_ID LIKE CONCAT('%', #{cnslrId}, '%')
+            </if>
+            <if test="cnslrNm != null and cnslrNm != ''">
+                AND CNSLR_NM LIKE CONCAT('%', #{cnslrNm}, '%')
+            </if>
+            <if test="cnslrStsCd != null and cnslrStsCd != ''">
+                AND CNSLR_STS_CD = #{cnslrStsCd}
+            </if>
+        </where>
+        ORDER BY REG_DATE DESC
+    </select>
+
+    <!-- 상담사 상세 조회 -->
+    <select id="selectCnslrLst" parameterType="long" resultType="com.ERI.demo.vo.CnslrLstVO">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY REG_DATE DESC) AS rowNum,
+            SEQ,
+            CNSLR_ID,
+            CNSLR_NM,
+            CNSLR_EMAIL,
+            CNSLR_TEL,
+            CNSLR_STS_CD,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_CNSLR_LST
+        WHERE SEQ = #{seq}
+    </select>
+
+    <!-- 상담사 등록 -->
+    <insert id="insertCnslrLst" parameterType="com.ERI.demo.vo.CnslrLstVO">
+        INSERT INTO TB_CNSLR_LST (
+            CNSLR_ID,
+            CNSLR_NM,
+            CNSLR_EMAIL,
+            CNSLR_TEL,
+            CNSLR_STS_CD,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{cnslrId},
+            #{cnslrNm},
+            #{cnslrEmail},
+            #{cnslrTel},
+            #{cnslrStsCd},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 상담사 수정 -->
+    <update id="updateCnslrLst" parameterType="com.ERI.demo.vo.CnslrLstVO">
+        UPDATE TB_CNSLR_LST
+        SET CNSLR_NM = #{cnslrNm},
+            CNSLR_EMAIL = #{cnslrEmail},
+            CNSLR_TEL = #{cnslrTel},
+            CNSLR_STS_CD = #{cnslrStsCd},
+            UPD_DATE = NOW()
+        WHERE SEQ = #{seq}
+    </update>
+
+    <!-- 상담사 삭제 -->
+    <delete id="deleteCnslrLst" parameterType="long">
+        DELETE FROM TB_CNSLR_LST
+        WHERE SEQ = #{seq}
+    </delete>
+
+</mapper> 

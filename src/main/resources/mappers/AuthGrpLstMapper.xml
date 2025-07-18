@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.AuthGrpLstMapper">
+
+    <!-- 결과 매핑 -->
+    <resultMap id="AuthGrpLstResultMap" type="com.ERI.demo.vo.AuthGrpLstVO">
+        <id column="AUTH_GRP_CD" property="authGrpCd" />
+        <result column="AUTH_GRP_NM" property="authGrpNm" />
+        <result column="AUTH_GRP_DESC" property="authGrpDesc" />
+        <result column="RGST_DT" property="rgstDt" />
+        <result column="UPDT_DT" property="updtDt" />
+    </resultMap>
+
+    <!-- 권한 그룹 목록 조회 -->
+    <select id="selectAuthGrpLstList" parameterType="com.ERI.demo.vo.AuthGrpLstVO" resultMap="AuthGrpLstResultMap">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY AUTH_GRP_CD) AS rowNum,
+            AUTH_GRP_CD,
+            AUTH_GRP_NM,
+            AUTH_GRP_DESC,
+            TO_CHAR(REG_DATE, 'YYYY-MM-DD HH24:MI:SS') as RGST_DT,
+            TO_CHAR(UPD_DATE, 'YYYY-MM-DD HH24:MI:SS') as UPDT_DT
+        FROM TB_AUTH_GRP_LST
+        <where>
+            <if test="authGrpCd != null and authGrpCd != ''">
+                AND AUTH_GRP_CD = #{authGrpCd}
+            </if>
+        </where>
+        ORDER BY AUTH_GRP_CD
+    </select>
+
+    <!-- 권한 그룹 상세 조회 -->
+    <select id="selectAuthGrpLst" resultMap="AuthGrpLstResultMap">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY AUTH_GRP_CD) AS rowNum,
+            AUTH_GRP_CD,
+            AUTH_GRP_NM,
+            AUTH_GRP_DESC,
+            TO_CHAR(REG_DATE, 'YYYY-MM-DD HH24:MI:SS') as RGST_DT,
+            TO_CHAR(UPD_DATE, 'YYYY-MM-DD HH24:MI:SS') as UPDT_DT
+        FROM TB_AUTH_GRP_LST
+        WHERE AUTH_GRP_CD = #{authGrpCd}
+    </select>
+
+    <!-- 권한 그룹 등록 -->
+    <insert id="insertAuthGrpLst" parameterType="com.ERI.demo.vo.AuthGrpLstVO">
+        INSERT INTO TB_AUTH_GRP_LST (
+            AUTH_GRP_CD,
+            AUTH_GRP_NM,
+            AUTH_GRP_DESC,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{authGrpCd},
+            #{authGrpNm},
+            #{authGrpDesc},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 권한 그룹 수정 -->
+    <update id="updateAuthGrpLst" parameterType="com.ERI.demo.vo.AuthGrpLstVO">
+        UPDATE TB_AUTH_GRP_LST
+        SET 
+            AUTH_GRP_NM = #{authGrpNm},
+            AUTH_GRP_DESC = #{authGrpDesc},
+            UPD_DATE = NOW()
+        WHERE AUTH_GRP_CD = #{authGrpCd}
+    </update>
+
+    <!-- 권한 그룹 삭제 -->
+    <delete id="deleteAuthGrpLst">
+        DELETE FROM TB_AUTH_GRP_LST
+        WHERE AUTH_GRP_CD = #{authGrpCd}
+    </delete>
+
+    <!-- 직원별 권한 그룹 조회 -->
+    <select id="selectByEmpId" parameterType="string" resultMap="AuthGrpLstResultMap">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY agl.AUTH_GRP_CD) AS rowNum,
+            agl.AUTH_GRP_CD,
+            agl.AUTH_CNTN
+        FROM TB_AUTH_GRP_LST agl
+        INNER JOIN TB_EMP_AUTH ea ON agl.AUTH_GRP_CD = ea.AUTH_GRP_CD
+        WHERE ea.EMP_ID = #{empId}
+        ORDER BY agl.AUTH_GRP_CD
+    </select>
+
+</mapper> 

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.GnrlCnslMapper">
+
+    <!-- 일반 상담 목록 조회 -->
+    <select id="selectGnrlCnslList" parameterType="com.ERI.demo.vo.GnrlCnslVO" resultType="com.ERI.demo.vo.GnrlCnslVO">
+        SELECT 
+            APP_DT,
+            CNSL_APP_SEQ,
+            CNSL_SEQ,
+            CNSL_TY_CD,
+            CNSL_LCTN_CD,
+            CNSL_DT,
+            CNSL_TM,
+            CNSL_DUR,
+            CNSL_CNTN,
+            CNSL_STS_CD,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID
+        FROM TB_GNRL_CNSL
+        <where>
+            <if test="appDt != null">
+                AND APP_DT = #{appDt}
+            </if>
+            <if test="cnslAppSeq != null">
+                AND CNSL_APP_SEQ = #{cnslAppSeq}
+            </if>
+            <if test="cnslSeq != null">
+                AND CNSL_SEQ = #{cnslSeq}
+            </if>
+            <if test="cnslTyCd != null and cnslTyCd != ''">
+                AND CNSL_TY_CD = #{cnslTyCd}
+            </if>
+            <if test="cnslLctnCd != null and cnslLctnCd != ''">
+                AND CNSL_LCTN_CD = #{cnslLctnCd}
+            </if>
+            <if test="cnslDt != null">
+                AND CNSL_DT = #{cnslDt}
+            </if>
+            <if test="cnslStsCd != null and cnslStsCd != ''">
+                AND CNSL_STS_CD = #{cnslStsCd}
+            </if>
+            <if test="rgstEmpId != null and rgstEmpId != ''">
+                AND RGST_EMP_ID = #{rgstEmpId}
+            </if>
+        </where>
+        ORDER BY APP_DT DESC, CNSL_APP_SEQ DESC, CNSL_SEQ DESC
+    </select>
+
+    <!-- 일반 상담 상세 조회 -->
+    <select id="selectGnrlCnsl" resultType="com.ERI.demo.vo.GnrlCnslVO">
+        SELECT 
+            APP_DT,
+            CNSL_APP_SEQ,
+            CNSL_SEQ,
+            CNSL_TY_CD,
+            CNSL_LCTN_CD,
+            CNSL_DT,
+            CNSL_TM,
+            CNSL_DUR,
+            CNSL_CNTN,
+            CNSL_STS_CD,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID
+        FROM TB_GNRL_CNSL
+        WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CNSL_SEQ = #{cnslSeq}
+    </select>
+
+    <!-- 일반 상담 등록 -->
+    <insert id="insertGnrlCnsl" parameterType="com.ERI.demo.vo.GnrlCnslVO">
+        INSERT INTO TB_GNRL_CNSL (
+            APP_DT,
+            CNSL_APP_SEQ,
+            CNSL_SEQ,
+            CNSL_TY_CD,
+            CNSL_LCTN_CD,
+            CNSL_DT,
+            CNSL_TM,
+            CNSL_DUR,
+            CNSL_CNTN,
+            CNSL_STS_CD,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID
+        ) VALUES (
+            #{appDt},
+            #{cnslAppSeq},
+            #{cnslSeq},
+            #{cnslTyCd},
+            #{cnslLctnCd},
+            #{cnslDt},
+            #{cnslTm},
+            #{cnslDur},
+            #{cnslCntn},
+            #{cnslStsCd},
+            #{rgstDt},
+            #{rgstTm},
+            #{rgstEmpId}
+        )
+    </insert>
+
+    <!-- 일반 상담 수정 -->
+    <update id="updateGnrlCnsl" parameterType="com.ERI.demo.vo.GnrlCnslVO">
+        UPDATE TB_GNRL_CNSL
+        SET 
+            CNSL_TY_CD = #{cnslTyCd},
+            CNSL_LCTN_CD = #{cnslLctnCd},
+            CNSL_DT = #{cnslDt},
+            CNSL_TM = #{cnslTm},
+            CNSL_DUR = #{cnslDur},
+            CNSL_CNTN = #{cnslCntn},
+            CNSL_STS_CD = #{cnslStsCd},
+            UPDT_DT = #{updtDt},
+            UPDT_TM = #{updtTm},
+            UPDT_EMP_ID = #{updtEmpId}
+        WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CNSL_SEQ = #{cnslSeq}
+    </update>
+
+    <!-- 일반 상담 삭제 -->
+    <delete id="deleteGnrlCnsl">
+        DELETE FROM TB_GNRL_CNSL
+        WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CNSL_SEQ = #{cnslSeq}
+    </delete>
+
+</mapper> 

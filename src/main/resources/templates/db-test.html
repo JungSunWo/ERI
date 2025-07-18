@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERI 데이터베이스 연결 테스트</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗄️</text></svg>">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        .test-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .result.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .result.info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .loading {
+            display: none;
+            color: #007bff;
+            font-style: italic;
+        }
+        .table-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .table-status.exists {
+            background-color: #28a745;
+            color: white;
+        }
+        .table-status.missing {
+            background-color: #dc3545;
+            color: white;
+        }
+        .connection-info {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .connection-info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .connection-info th, .connection-info td {
+            padding: 5px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .connection-info th {
+            font-weight: bold;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ERI 데이터베이스 연결 테스트</h1>
+        
+        <!-- 데이터베이스 연결 테스트 -->
+        <div class="test-section">
+            <div class="test-title">1. 데이터베이스 연결 테스트</div>
+            <div class="test-description">
+                PostgreSQL 데이터베이스 연결 상태와 기본 정보를 확인합니다.
+                <br>- 연결 상태, 데이터베이스 버전, 드라이버 정보 등
+            </div>
+            <button class="btn" onclick="testConnection()">연결 테스트</button>
+            <div class="loading" id="connectionLoading">연결 테스트 중...</div>
+            <div class="result" id="connectionResult"></div>
+        </div>
+
+        <!-- Spring Batch 테이블 테스트 -->
+        <div class="test-section">
+            <div class="test-title">2. Spring Batch 메타데이터 테이블 확인</div>
+            <div class="test-description">
+                Spring Boot Batch 작업에 필요한 메타데이터 테이블들의 존재 여부를 확인합니다.
+                <br>- BATCH_JOB_INSTANCE, BATCH_JOB_EXECUTION, BATCH_STEP_EXECUTION 등
+            </div>
+            <button class="btn" onclick="testBatchTables()">Batch 테이블 확인</button>
+            <div class="loading" id="batchLoading">테이블 확인 중...</div>
+            <div class="result" id="batchResult"></div>
+        </div>
+
+        <!-- ERI 애플리케이션 테이블 테스트 -->
+        <div class="test-section">
+            <div class="test-title">3. ERI 애플리케이션 테이블 확인</div>
+            <div class="test-description">
+                ERI 애플리케이션에서 사용하는 주요 테이블들의 존재 여부를 확인합니다.
+                <br>- TB_EMP_LST, TB_EMP_ENCRYPT, TB_CMN_GRP_CD 등
+            </div>
+            <button class="btn" onclick="testEriTables()">ERI 테이블 확인</button>
+            <div class="loading" id="eriLoading">테이블 확인 중...</div>
+            <div class="result" id="eriResult"></div>
+        </div>
+
+        <!-- 쿼리 실행 테스트 -->
+        <div class="test-section">
+            <div class="test-title">4. 기본 쿼리 실행 테스트</div>
+            <div class="test-description">
+                데이터베이스에서 기본적인 쿼리를 실행하여 정상 작동을 확인합니다.
+                <br>- 현재 시간, 데이터베이스 버전, 활성 연결 수 등
+            </div>
+            <button class="btn" onclick="testQuery()">쿼리 실행 테스트</button>
+            <div class="loading" id="queryLoading">쿼리 실행 중...</div>
+            <div class="result" id="queryResult"></div>
+        </div>
+
+        <!-- 전체 테스트 -->
+        <div class="test-section">
+            <div class="test-title">5. 전체 테스트 실행</div>
+            <div class="test-description">
+                모든 테스트를 순차적으로 실행하여 전체적인 데이터베이스 상태를 확인합니다.
+            </div>
+            <button class="btn" onclick="runAllTests()">전체 테스트 실행</button>
+            <div class="loading" id="allLoading">전체 테스트 실행 중...</div>
+            <div class="result" id="allResult"></div>
+        </div>
+    </div>
+
+    <script>
+        function testConnection() {
+            const button = event.target;
+            const loading = document.getElementById('connectionLoading');
+            const result = document.getElementById('connectionResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('./api/db-test/connection-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ 연결 성공!</strong>\n\n`;
+                    html += `<strong>연결 정보:</strong>\n`;
+                    
+                    if (data.connectionInfo) {
+                        html += `<div class="connection-info">`;
+                        html += `<table>`;
+                        html += `<tr><th>항목</th><th>값</th></tr>`;
+                        for (const [key, value] of Object.entries(data.connectionInfo)) {
+                            html += `<tr><td>${key}</td><td>${value}</td></tr>`;
+                        }
+                        html += `</table></div>`;
+                    }
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `❌ 연결 실패!\n\n오류: ${data.message}\n\n시간: ${new Date().toLocaleString()}`;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function testBatchTables() {
+            const button = event.target;
+            const loading = document.getElementById('batchLoading');
+            const result = document.getElementById('batchResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('./api/db-test/batch-tables-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ Batch 테이블 확인 완료!</strong>\n\n`;
+                    
+                    if (data.tableStatus) {
+                        html += `<strong>테이블 상태:</strong>\n`;
+                        for (const [tableName, exists] of Object.entries(data.tableStatus)) {
+                            const statusClass = exists ? 'exists' : 'missing';
+                            const statusText = exists ? '존재' : '없음';
+                            html += `<span class="table-status ${statusClass}">${tableName}: ${statusText}</span> `;
+                        }
+                    }
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `❌ 테이블 확인 실패!\n\n오류: ${data.message}\n\n시간: ${new Date().toLocaleString()}`;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function testEriTables() {
+            const button = event.target;
+            const loading = document.getElementById('eriLoading');
+            const result = document.getElementById('eriResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('./api/db-test/eri-tables-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ ERI 테이블 확인 완료!</strong>\n\n`;
+                    
+                    if (data.tableStatus) {
+                        html += `<strong>테이블 상태:</strong>\n`;
+                        for (const [tableName, exists] of Object.entries(data.tableStatus)) {
+                            const statusClass = exists ? 'exists' : 'missing';
+                            const statusText = exists ? '존재' : '없음';
+                            html += `<span class="table-status ${statusClass}">${tableName}: ${statusText}</span> `;
+                        }
+                    }
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `❌ 테이블 확인 실패!\n\n오류: ${data.message}\n\n시간: ${new Date().toLocaleString()}`;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function testQuery() {
+            const button = event.target;
+            const loading = document.getElementById('queryLoading');
+            const result = document.getElementById('queryResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('./api/db-test/query-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ 쿼리 실행 성공!</strong>\n\n`;
+                    
+                    if (data.queryResults) {
+                        html += `<strong>쿼리 결과:</strong>\n`;
+                        for (const [key, value] of Object.entries(data.queryResults)) {
+                            html += `${key}: ${value}\n`;
+                        }
+                    }
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `❌ 쿼리 실행 실패!\n\n오류: ${data.message}\n\n시간: ${new Date().toLocaleString()}`;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        async function runAllTests() {
+            const button = event.target;
+            const loading = document.getElementById('allLoading');
+            const result = document.getElementById('allResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            const results = [];
+            
+            try {
+                // 1. 연결 테스트
+                const connectionResponse = await fetch('/api/db-test/connection-test', { method: 'POST' });
+                const connectionData = await connectionResponse.json();
+                results.push({ name: '연결 테스트', success: connectionData.success, message: connectionData.message });
+                
+                // 2. Batch 테이블 테스트
+                const batchResponse = await fetch('/api/db-test/batch-tables-test', { method: 'POST' });
+                const batchData = await batchResponse.json();
+                results.push({ name: 'Batch 테이블 확인', success: batchData.success, message: batchData.message });
+                
+                // 3. ERI 테이블 테스트
+                const eriResponse = await fetch('/api/db-test/eri-tables-test', { method: 'POST' });
+                const eriData = await eriResponse.json();
+                results.push({ name: 'ERI 테이블 확인', success: eriData.success, message: eriData.message });
+                
+                // 4. 쿼리 테스트
+                const queryResponse = await fetch('/api/db-test/query-test', { method: 'POST' });
+                const queryData = await queryResponse.json();
+                results.push({ name: '쿼리 실행 테스트', success: queryData.success, message: queryData.message });
+                
+                // 결과 표시
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                const allSuccess = results.every(r => r.success);
+                result.className = allSuccess ? 'result success' : 'result error';
+                
+                let html = `<strong>${allSuccess ? '✅' : '❌'} 전체 테스트 완료!</strong>\n\n`;
+                html += `<strong>테스트 결과:</strong>\n`;
+                
+                for (const testResult of results) {
+                    const status = testResult.success ? '✅' : '❌';
+                    html += `${status} ${testResult.name}: ${testResult.message}\n`;
+                }
+                
+                result.innerHTML = html;
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 전체 테스트 실패!\n\n오류: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            } finally {
+                button.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html> 

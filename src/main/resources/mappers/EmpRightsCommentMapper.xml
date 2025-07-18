@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.EmpRightsCommentMapper">
+
+    <!-- 댓글 목록 조회 -->
+    <select id="selectCommentList" resultType="com.ERI.demo.vo.EmpRightsCommentVO">
+        SELECT 
+            c.SEQ,
+            c.BOARD_SEQ,
+            c.PARENT_SEQ,
+            c.CNTN,
+            c.DEPTH,
+            c.LIKE_CNT,
+            c.DISLIKE_CNT,
+            c.SECRET_YN,
+            c.RGST_EMP_ID,
+            c.UPDT_EMP_ID,
+            c.DEL_YN,
+            c.DEL_DATE,
+            c.REG_EMP_ID,
+            c.UPD_EMP_ID,
+            c.REG_DATE,
+            c.UPD_DATE,
+            rgst.EMP_NM as rgstEmpNm,
+            updt.EMP_NM as updtEmpNm
+        FROM TB_EMP_RIGHTS_COMMENT c
+        LEFT JOIN TB_EMP_LST rgst ON c.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_LST updt ON c.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        WHERE c.BOARD_SEQ = #{boardSeq}
+        AND c.DEL_YN = 'N'
+        ORDER BY c.REG_DATE ASC
+    </select>
+
+    <!-- 댓글 상세 조회 -->
+    <select id="selectCommentBySeq" resultType="com.ERI.demo.vo.EmpRightsCommentVO">
+        SELECT 
+            c.SEQ,
+            c.BOARD_SEQ,
+            c.PARENT_SEQ,
+            c.CNTN,
+            c.DEPTH,
+            c.LIKE_CNT,
+            c.DISLIKE_CNT,
+            c.SECRET_YN,
+            c.RGST_EMP_ID,
+            c.UPDT_EMP_ID,
+            c.DEL_YN,
+            c.DEL_DATE,
+            c.REG_EMP_ID,
+            c.UPD_EMP_ID,
+            c.REG_DATE,
+            c.UPD_DATE,
+            rgst.EMP_NM as rgstEmpNm,
+            updt.EMP_NM as updtEmpNm
+        FROM TB_EMP_RIGHTS_COMMENT c
+        LEFT JOIN TB_EMP_LST rgst ON c.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_LST updt ON c.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        WHERE c.SEQ = #{seq}
+        AND c.DEL_YN = 'N'
+    </select>
+
+    <!-- 댓글 등록 -->
+    <insert id="insertComment" parameterType="com.ERI.demo.vo.EmpRightsCommentVO" useGeneratedKeys="true" keyProperty="seq">
+        INSERT INTO TB_EMP_RIGHTS_COMMENT (
+            BOARD_SEQ,
+            PARENT_SEQ,
+            CNTN,
+            DEPTH,
+            LIKE_CNT,
+            DISLIKE_CNT,
+            SECRET_YN,
+            RGST_EMP_ID,
+            UPDT_EMP_ID,
+            DEL_YN,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{boardSeq,jdbcType=BIGINT},
+            #{parentSeq,jdbcType=BIGINT},
+            #{cntn,jdbcType=LONGVARCHAR},
+            COALESCE(#{depth,jdbcType=INTEGER}, 0),
+            COALESCE(#{likeCnt,jdbcType=INTEGER}, 0),
+            COALESCE(#{dislikeCnt,jdbcType=INTEGER}, 0),
+            COALESCE(#{secretYn,jdbcType=CHAR}, 'N'),
+            #{rgstEmpId,jdbcType=VARCHAR},
+            #{updtEmpId,jdbcType=VARCHAR},
+            'N',
+            #{rgstEmpId,jdbcType=VARCHAR},
+            #{updtEmpId,jdbcType=VARCHAR},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 댓글 수정 -->
+    <update id="updateComment" parameterType="com.ERI.demo.vo.EmpRightsCommentVO">
+        UPDATE TB_EMP_RIGHTS_COMMENT
+        SET 
+            <if test="cntn != null">CNTN = #{cntn,jdbcType=LONGVARCHAR},</if>
+            <if test="secretYn != null">SECRET_YN = #{secretYn,jdbcType=CHAR},</if>
+            <if test="updtEmpId != null">UPDT_EMP_ID = #{updtEmpId,jdbcType=VARCHAR},</if>
+            UPD_EMP_ID = COALESCE(#{updtEmpId,jdbcType=VARCHAR}, #{rgstEmpId,jdbcType=VARCHAR}),
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 댓글 삭제 (논리 삭제) -->
+    <update id="deleteComment">
+        UPDATE TB_EMP_RIGHTS_COMMENT
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 댓글 좋아요 수 증가 -->
+    <update id="incrementCommentLikeCount">
+        UPDATE TB_EMP_RIGHTS_COMMENT
+        SET LIKE_CNT = LIKE_CNT + 1
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 댓글 좋아요 수 감소 -->
+    <update id="decrementCommentLikeCount">
+        UPDATE TB_EMP_RIGHTS_COMMENT
+        SET LIKE_CNT = GREATEST(LIKE_CNT - 1, 0)
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 댓글 싫어요 수 증가 -->
+    <update id="incrementCommentDislikeCount">
+        UPDATE TB_EMP_RIGHTS_COMMENT
+        SET DISLIKE_CNT = DISLIKE_CNT + 1
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 댓글 싫어요 수 감소 -->
+    <update id="decrementCommentDislikeCount">
+        UPDATE TB_EMP_RIGHTS_COMMENT
+        SET DISLIKE_CNT = GREATEST(DISLIKE_CNT - 1, 0)
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+</mapper> 

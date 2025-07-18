@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.encryption.EncryptHistoryMapper">
+
+    <!-- 암호화 이력 저장 -->
+    <insert id="insertEncryptHistory" parameterType="com.ERI.demo.vo.EncryptHistoryVO">
+        INSERT INTO TB_ENCRYPT_HISTORY (
+            EMP_SEQ, ORIG_EMP_NO, ENCRYPT_EMP_NO, ORIG_EMP_NM, RANDOM_EMP_NM, ORIG_EMP_EMAIL,
+            ENCRYPT_ALGORITHM, ENCRYPT_KEY_ID, ENCRYPT_IV, OPERATION_TYPE, OPERATION_DATE, OPERATOR_SEQ
+        ) VALUES (
+            #{empSeq}, #{origEmpNo}, #{encryptEmpNo}, #{origEmpNm}, #{randomEmpNm}, #{origEmpEmail},
+            #{encryptAlgorithm}, #{encryptKeyId}, #{encryptIv}, #{operationType}, CURRENT_TIMESTAMP, #{operatorSeq}
+        )
+    </insert>
+
+    <!-- 직원별 암호화 이력 조회 -->
+    <select id="selectHistoryByEmpSeq" resultType="com.ERI.demo.vo.EncryptHistoryVO">
+        SELECT 
+            HIST_ID, EMP_SEQ, ORIG_EMP_NO, ENCRYPT_EMP_NO, ORIG_EMP_NM, RANDOM_EMP_NM, ORIG_EMP_EMAIL,
+            ENCRYPT_ALGORITHM, ENCRYPT_KEY_ID, ENCRYPT_IV,
+            OPERATION_TYPE, OPERATION_DATE, OPERATOR_SEQ
+        FROM TB_ENCRYPT_HISTORY
+        WHERE EMP_SEQ = #{empSeq}
+        ORDER BY OPERATION_DATE DESC
+    </select>
+
+    <!-- 전체 암호화 이력 조회 -->
+    <select id="selectAllEncryptHistory" resultType="com.ERI.demo.vo.EncryptHistoryVO">
+        SELECT 
+            HIST_ID, EMP_SEQ, ORIG_EMP_NO, ENCRYPT_EMP_NO, ORIG_EMP_NM, RANDOM_EMP_NM, ORIG_EMP_EMAIL,
+            ENCRYPT_ALGORITHM, ENCRYPT_KEY_ID, ENCRYPT_IV,
+            OPERATION_TYPE, OPERATION_DATE, OPERATOR_SEQ
+        FROM TB_ENCRYPT_HISTORY
+        ORDER BY OPERATION_DATE DESC
+    </select>
+
+    <!-- 기간별 암호화 이력 조회 -->
+    <select id="selectHistoryByDateRange" resultType="com.ERI.demo.vo.EncryptHistoryVO">
+        SELECT 
+            HIST_ID, EMP_SEQ, ORIG_EMP_NO, ENCRYPT_EMP_NO, ORIG_EMP_NM, RANDOM_EMP_NM, ORIG_EMP_EMAIL,
+            ENCRYPT_ALGORITHM, ENCRYPT_KEY_ID, ENCRYPT_IV,
+            OPERATION_TYPE, OPERATION_DATE, OPERATOR_SEQ
+        FROM TB_ENCRYPT_HISTORY
+        WHERE OPERATION_DATE BETWEEN #{startDate}::timestamp AND #{endDate}::timestamp
+        ORDER BY OPERATION_DATE DESC
+    </select>
+
+    <!-- 작업 타입별 암호화 이력 조회 -->
+    <select id="selectHistoryByOperationType" resultType="com.ERI.demo.vo.EncryptHistoryVO">
+        SELECT 
+            HIST_ID, EMP_SEQ, ORIG_EMP_NO, ENCRYPT_EMP_NO, ORIG_EMP_NM, RANDOM_EMP_NM, ORIG_EMP_EMAIL,
+            ENCRYPT_ALGORITHM, ENCRYPT_KEY_ID, ENCRYPT_IV,
+            OPERATION_TYPE, OPERATION_DATE, OPERATOR_SEQ
+        FROM TB_ENCRYPT_HISTORY
+        WHERE OPERATION_TYPE = #{operationType}
+        ORDER BY OPERATION_DATE DESC
+    </select>
+
+    <!-- 작업자별 암호화 이력 조회 -->
+    <select id="selectEncryptHistoryByOperatorSeq" resultType="com.ERI.demo.vo.EncryptHistoryVO">
+        SELECT 
+            HIST_ID, EMP_SEQ, ORIG_EMP_NO, ENCRYPT_EMP_NO, ORIG_EMP_NM, RANDOM_EMP_NM, ORIG_EMP_EMAIL,
+            ENCRYPT_ALGORITHM, ENCRYPT_KEY_ID, ENCRYPT_IV,
+            OPERATION_TYPE, OPERATION_DATE, OPERATOR_SEQ
+        FROM TB_ENCRYPT_HISTORY
+        WHERE OPERATOR_SEQ = #{operatorSeq}
+        ORDER BY OPERATION_DATE DESC
+    </select>
+
+    <!-- 최근 암호화 이력 조회 -->
+    <select id="selectRecentEncryptHistory" resultType="com.ERI.demo.vo.EncryptHistoryVO">
+        SELECT 
+            HIST_ID, EMP_SEQ, ORIG_EMP_NO, ENCRYPT_EMP_NO, ORIG_EMP_NM, RANDOM_EMP_NM, ORIG_EMP_EMAIL,
+            ENCRYPT_ALGORITHM, ENCRYPT_KEY_ID, ENCRYPT_IV,
+            OPERATION_TYPE, OPERATION_DATE, OPERATOR_SEQ
+        FROM TB_ENCRYPT_HISTORY
+        ORDER BY OPERATION_DATE DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper> 

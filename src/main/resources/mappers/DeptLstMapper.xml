@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.DeptLstMapper">
+
+    <!-- 부서 목록 조회 -->
+    <select id="selectDeptLstList" parameterType="com.ERI.demo.vo.DeptLstVO" resultType="com.ERI.demo.vo.DeptLstVO">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY DEPT_CD) AS rowNum,
+            DEPT_CD,
+            DEPT_NM,
+            DEPT_DESC,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_DEPT_LST
+        <where>
+            <if test="deptCd != null and deptCd != ''">
+                AND DEPT_CD LIKE CONCAT('%', #{deptCd}, '%')
+            </if>
+            <if test="deptNm != null and deptNm != ''">
+                AND DEPT_NM LIKE CONCAT('%', #{deptNm}, '%')
+            </if>
+        </where>
+        ORDER BY DEPT_CD
+    </select>
+
+    <!-- 부서 상세 조회 -->
+    <select id="selectDeptLst" parameterType="string" resultType="com.ERI.demo.vo.DeptLstVO">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY DEPT_CD) AS rowNum,
+            DEPT_CD,
+            DEPT_NM,
+            DEPT_DESC,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_DEPT_LST
+        WHERE DEPT_CD = #{deptCd}
+    </select>
+
+    <!-- 부서 등록 -->
+    <insert id="insertDeptLst" parameterType="com.ERI.demo.vo.DeptLstVO">
+        INSERT INTO TB_DEPT_LST (
+            DEPT_CD,
+            DEPT_NM,
+            DEPT_DESC,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{deptCd},
+            #{deptNm},
+            #{deptDesc},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 부서 수정 -->
+    <update id="updateDeptLst" parameterType="com.ERI.demo.vo.DeptLstVO">
+        UPDATE TB_DEPT_LST
+        SET DEPT_NM = #{deptNm},
+            DEPT_DESC = #{deptDesc},
+            UPD_DATE = NOW()
+        WHERE DEPT_CD = #{deptCd}
+    </update>
+
+    <!-- 부서 삭제 -->
+    <delete id="deleteDeptLst" parameterType="string">
+        DELETE FROM TB_DEPT_LST
+        WHERE DEPT_CD = #{deptCd}
+    </delete>
+
+</mapper> 

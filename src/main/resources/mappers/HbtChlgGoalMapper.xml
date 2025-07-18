@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.HbtChlgGoalMapper">
+
+    <select id="selectHbtChlgGoalList" parameterType="com.ERI.demo.vo.HbtChlgGoalVO" resultType="com.ERI.demo.vo.HbtChlgGoalVO">
+        SELECT
+            emp_id,
+            seq,
+            goal_nm,
+            goal_achv_unit_cd,
+            goal_achv_qty,
+            goal_achv_cyc_cd,
+            goal_achv_cyc_qty,
+            goal_strt_dt,
+            goal_end_dt,
+            use_yn,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        FROM
+            tb_hbt_chlg_goal
+        <where>
+            <if test="empId != null and empId != ''">
+                AND emp_id = #{empId}
+            </if>
+            <if test="seq != null">
+                AND seq = #{seq}
+            </if>
+            <if test="goalNm != null and goalNm != ''">
+                AND goal_nm LIKE CONCAT('%', #{goalNm}, '%')
+            </if>
+            <if test="useYn != null and useYn != ''">
+                AND use_yn = #{useYn}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectHbtChlgGoal" resultType="com.ERI.demo.vo.HbtChlgGoalVO">
+        SELECT
+            emp_id,
+            seq,
+            goal_nm,
+            goal_achv_unit_cd,
+            goal_achv_qty,
+            goal_achv_cyc_cd,
+            goal_achv_cyc_qty,
+            goal_strt_dt,
+            goal_end_dt,
+            use_yn,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        FROM
+            tb_hbt_chlg_goal
+        WHERE
+            emp_id = #{empId} AND seq = #{seq}
+    </select>
+
+    <insert id="insertHbtChlgGoal" parameterType="com.ERI.demo.vo.HbtChlgGoalVO">
+        INSERT INTO tb_hbt_chlg_goal (
+            emp_id,
+            seq,
+            goal_nm,
+            goal_achv_unit_cd,
+            goal_achv_qty,
+            goal_achv_cyc_cd,
+            goal_achv_cyc_qty,
+            goal_strt_dt,
+            goal_end_dt,
+            use_yn,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        ) VALUES (
+            #{empId},
+            #{seq},
+            #{goalNm},
+            #{goalAchvUnitCd},
+            #{goalAchvQty},
+            #{goalAchvCycCd},
+            #{goalAchvCycQty},
+            #{goalStrtDt},
+            #{goalEndDt},
+            #{useYn},
+            #{rgtrId},
+            NOW(),
+            #{mdfrId},
+            NOW()
+        )
+    </insert>
+
+    <update id="updateHbtChlgGoal" parameterType="com.ERI.demo.vo.HbtChlgGoalVO">
+        UPDATE
+            tb_hbt_chlg_goal
+        <set>
+            <if test="goalNm != null and goalNm != ''">
+                goal_nm = #{goalNm},
+            </if>
+            <if test="goalAchvUnitCd != null and goalAchvUnitCd != ''">
+                goal_achv_unit_cd = #{goalAchvUnitCd},
+            </if>
+            <if test="goalAchvQty != null">
+                goal_achv_qty = #{goalAchvQty},
+            </if>
+            <if test="goalAchvCycCd != null and goalAchvCycCd != ''">
+                goal_achv_cyc_cd = #{goalAchvCycCd},
+            </if>
+            <if test="goalAchvCycQty != null">
+                goal_achv_cyc_qty = #{goalAchvCycQty},
+            </if>
+            <if test="goalStrtDt != null">
+                goal_strt_dt = #{goalStrtDt},
+            </if>
+            <if test="goalEndDt != null">
+                goal_end_dt = #{goalEndDt},
+            </if>
+            <if test="useYn != null and useYn != ''">
+                use_yn = #{useYn},
+            </if>
+            <if test="mdfrId != null and mdfrId != ''">
+                mdfr_id = #{mdfrId},
+            </if>
+            mdfcn_dt = NOW()
+        </set>
+        WHERE
+            emp_id = #{empId} AND seq = #{seq}
+    </update>
+
+    <delete id="deleteHbtChlgGoal">
+        DELETE FROM tb_hbt_chlg_goal
+        WHERE emp_id = #{empId} AND seq = #{seq}
+    </delete>
+
+</mapper> 

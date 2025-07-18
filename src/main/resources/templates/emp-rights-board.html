@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>직원권익게시판</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .board-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .board-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+        .board-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .board-list {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .board-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        .board-item:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        .board-item:last-child {
+            border-bottom: none;
+        }
+        .board-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .board-title:hover {
+            color: #667eea;
+        }
+        .board-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .board-stats {
+            display: flex;
+            gap: 15px;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .category-badge {
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .category-general { background-color: #e3f2fd; color: #1976d2; }
+        .category-complaint { background-color: #ffebee; color: #d32f2f; }
+        .category-suggestion { background-color: #e8f5e8; color: #388e3c; }
+        .category-question { background-color: #fff3e0; color: #f57c00; }
+        .notice-badge {
+            background-color: #ff5722;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-left: 10px;
+        }
+        .secret-badge {
+            background-color: #9c27b0;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-left: 10px;
+        }
+        .pagination-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .btn-write {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-write:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        .comment-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .comment-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .comment-content {
+            color: #333;
+            line-height: 1.6;
+        }
+        .reply-section {
+            margin-left: 30px;
+            margin-top: 10px;
+            padding-left: 15px;
+            border-left: 2px solid #ddd;
+        }
+        .like-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-like {
+            background: #28a745;
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        .btn-dislike {
+            background: #dc3545;
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        .btn-reply {
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn-reply:hover {
+            background: #5a6268;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- 헤더 -->
+        <div class="board-header">
+            <h1><i class="fas fa-bullhorn"></i> 직원권익게시판</h1>
+            <p>직원들의 의견과 건의사항을 자유롭게 나누는 공간입니다</p>
+        </div>
+
+        <!-- 검색 및 필터 -->
+        <div class="search-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <select id="searchType" class="form-select">
+                        <option value="">전체</option>
+                        <option value="title">제목</option>
+                        <option value="content">내용</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" id="searchKeyword" class="form-control" placeholder="검색어를 입력하세요">
+                </div>
+                <div class="col-md-2">
+                    <select id="categoryFilter" class="form-select">
+                        <option value="">전체 카테고리</option>
+                        <option value="GENERAL">일반</option>
+                        <option value="COMPLAINT">불만/민원</option>
+                        <option value="SUGGESTION">건의사항</option>
+                        <option value="QUESTION">질문</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="sortBy" class="form-select">
+                        <option value="regDate">최신순</option>
+                        <option value="viewCnt">조회순</option>
+                        <option value="likeCnt">좋아요순</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-primary" onclick="searchBoards()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 게시글 목록 -->
+        <div class="board-list">
+            <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                <h5 class="mb-0">게시글 목록</h5>
+                <button class="btn btn-write" onclick="showWriteModal()">
+                    <i class="fas fa-pen"></i> 글쓰기
+                </button>
+            </div>
+            <div id="boardList">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> 게시글을 불러오는 중...
+                </div>
+            </div>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div class="pagination-section">
+            <nav aria-label="게시글 페이지네이션">
+                <ul class="pagination justify-content-center" id="pagination">
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- 게시글 작성 모달 -->
+    <div class="modal fade" id="writeModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">게시글 작성</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="boardForm">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">제목</label>
+                            <input type="text" class="form-control" id="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="content" class="form-label">내용</label>
+                            <textarea class="form-control" id="content" rows="10" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="categoryCd" class="form-label">카테고리</label>
+                                <select class="form-select" id="categoryCd" required>
+                                    <option value="">선택하세요</option>
+                                    <option value="GENERAL">일반</option>
+                                    <option value="COMPLAINT">불만/민원</option>
+                                    <option value="SUGGESTION">건의사항</option>
+                                    <option value="QUESTION">질문</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">옵션</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="secretYn" value="Y">
+                                    <label class="form-check-label" for="secretYn">비밀글</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="noticeYn" value="Y">
+                                    <label class="form-check-label" for="noticeYn">공지글</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="submitBoard()">등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 게시글 상세 모달 -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailTitle"></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="boardDetail"></div>
+                    <div class="comment-section">
+                        <h6>댓글</h6>
+                        <div id="commentList"></div>
+                        <div class="mt-3">
+                            <textarea class="form-control" id="commentContent" rows="3" placeholder="댓글을 입력하세요"></textarea>
+                            <div class="mt-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="commentSecretYn" value="Y">
+                                    <label class="form-check-label" for="commentSecretYn">비밀댓글</label>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <button class="btn btn-primary" onclick="submitComment()">댓글 등록</button>
+                                <button class="btn btn-secondary" onclick="cancelReply()" id="cancelReplyBtn" style="display: none;">답글 취소</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentPage = 1;
+        let currentBoardSeq = null;
+        let currentBoard = null;
+        let currentReplyTo = null; // 답글 대상 댓글 번호
+
+        // 페이지 로드 시 게시글 목록 로드
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBoardList();
+        });
+
+        // 게시글 목록 로드
+        async function loadBoardList(page = 1) {
+            try {
+                const searchType = document.getElementById('searchType').value;
+                const searchKeyword = document.getElementById('searchKeyword').value;
+                const categoryFilter = document.getElementById('categoryFilter').value;
+                const sortBy = document.getElementById('sortBy').value;
+
+                const params = new URLSearchParams({
+                    page: page,
+                    size: 10,
+                    searchType: searchType,
+                    searchKeyword: searchKeyword,
+                    categoryCd: categoryFilter,
+                    sortBy: sortBy,
+                    sortDirection: 'DESC'
+                });
+
+                const response = await fetch(`/api/emp-rights-board?${params}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayBoardList(data.content);
+                    displayPagination(data.totalPages, data.currentPage);
+                } else {
+                    showError('게시글 목록을 불러오는데 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('게시글 목록을 불러오는데 실패했습니다.');
+            }
+        }
+
+        // 게시글 목록 표시
+        function displayBoardList(boards) {
+            const boardList = document.getElementById('boardList');
+            
+            if (!boards || boards.length === 0) {
+                boardList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h5>등록된 게시글이 없습니다</h5>
+                        <p>첫 번째 게시글을 작성해보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            boardList.innerHTML = boards.map(board => `
+                <div class="board-item" onclick="showBoardDetail(${board.seq})">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="board-title">
+                                ${board.noticeYn === 'Y' ? '<span class="notice-badge">공지</span>' : ''}
+                                ${board.secretYn === 'Y' ? '<span class="secret-badge">비밀</span>' : ''}
+                                ${board.ttl}
+                            </div>
+                            <div class="board-meta">
+                                <div class="board-stats">
+                                    <span class="stat-item">
+                                        <i class="fas fa-user"></i> ${board.rgstEmpNm || board.rgstEmpId}
+                                    </span>
+                                    <span class="stat-item">
+                                        <i class="fas fa-calendar"></i> ${formatDate(board.regDate)}
+                                    </span>
+                                    <span class="stat-item">
+                                        <i class="fas fa-eye"></i> ${board.viewCnt}
+                                    </span>
+                                    <span class="stat-item">
+                                        <i class="fas fa-thumbs-up"></i> ${board.likeCnt}
+                                    </span>
+                                    <span class="stat-item">
+                                        <i class="fas fa-comment"></i> ${board.commentCount || 0}
+                                    </span>
+                                </div>
+                                <span class="category-badge category-${board.categoryCd.toLowerCase()}">
+                                    ${getCategoryName(board.categoryCd)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 페이지네이션 표시
+        function displayPagination(totalPages, currentPage) {
+            const pagination = document.getElementById('pagination');
+            let html = '';
+
+            // 이전 페이지
+            if (currentPage > 1) {
+                html += `<li class="page-item"><a class="page-link" onclick="loadBoardList(${currentPage - 1})">이전</a></li>`;
+            }
+
+            // 페이지 번호
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    html += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+                } else {
+                    html += `<li class="page-item"><a class="page-link" onclick="loadBoardList(${i})">${i}</a></li>`;
+                }
+            }
+
+            // 다음 페이지
+            if (currentPage < totalPages) {
+                html += `<li class="page-item"><a class="page-link" onclick="loadBoardList(${currentPage + 1})">다음</a></li>`;
+            }
+
+            pagination.innerHTML = html;
+        }
+
+        // 게시글 상세 보기
+        async function showBoardDetail(seq) {
+            try {
+                const response = await fetch(`/api/emp-rights-board/${seq}`);
+                const board = await response.json();
+
+                if (response.ok) {
+                    currentBoardSeq = seq;
+                    currentBoard = board;
+                    
+                    document.getElementById('detailTitle').textContent = board.ttl;
+                    document.getElementById('boardDetail').innerHTML = `
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="category-badge category-${board.categoryCd.toLowerCase()}">
+                                        ${getCategoryName(board.categoryCd)}
+                                    </span>
+                                    ${board.noticeYn === 'Y' ? '<span class="notice-badge">공지</span>' : ''}
+                                    ${board.secretYn === 'Y' ? '<span class="secret-badge">비밀</span>' : ''}
+                                </div>
+                                <div class="text-muted">
+                                    <small>작성자: ${board.rgstEmpNm || board.rgstEmpId} | 작성일: ${formatDate(board.regDate)}</small>
+                                </div>
+                            </div>
+                            <div class="board-stats mb-3">
+                                <span class="stat-item"><i class="fas fa-eye"></i> 조회 ${board.viewCnt}</span>
+                                <span class="stat-item"><i class="fas fa-thumbs-up"></i> 좋아요 ${board.likeCnt}</span>
+                                <span class="stat-item"><i class="fas fa-thumbs-down"></i> 싫어요 ${board.dislikeCnt}</span>
+                            </div>
+                            <div class="border-top pt-3">
+                                <div style="white-space: pre-wrap; line-height: 1.8;">${board.cntn}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    loadComments(seq);
+                    new bootstrap.Modal(document.getElementById('detailModal')).show();
+                } else {
+                    showError('게시글을 불러오는데 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('게시글을 불러오는데 실패했습니다.');
+            }
+        }
+
+        // 댓글 목록 로드
+        async function loadComments(boardSeq) {
+            try {
+                const response = await fetch(`/api/emp-rights-comment/${boardSeq}`);
+                const comments = await response.json();
+
+                if (response.ok) {
+                    displayComments(comments);
+                } else {
+                    document.getElementById('commentList').innerHTML = '<p class="text-muted">댓글을 불러오는데 실패했습니다.</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('commentList').innerHTML = '<p class="text-muted">댓글을 불러오는데 실패했습니다.</p>';
+            }
+        }
+
+        // 댓글 목록 표시
+        function displayComments(comments) {
+            const commentList = document.getElementById('commentList');
+            
+            if (!comments || comments.length === 0) {
+                commentList.innerHTML = '<p class="text-muted">등록된 댓글이 없습니다.</p>';
+                return;
+            }
+
+            commentList.innerHTML = comments.map(comment => `
+                <div class="comment-item" style="margin-left: ${comment.depth * 20}px;">
+                    <div class="comment-meta">
+                        <div>
+                            <strong>${comment.rgstEmpNm || comment.rgstEmpId}</strong>
+                            <small class="text-muted ms-2">${formatDate(comment.regDate)}</small>
+                            ${comment.secretYn === 'Y' ? '<span class="secret-badge">비밀</span>' : ''}
+                        </div>
+                        <div class="like-buttons">
+                            <button class="btn-like" onclick="likeComment(${comment.seq}, 'L')">
+                                <i class="fas fa-thumbs-up"></i> ${comment.likeCnt}
+                            </button>
+                            <button class="btn-dislike" onclick="likeComment(${comment.seq}, 'D')">
+                                <i class="fas fa-thumbs-down"></i> ${comment.dislikeCnt}
+                            </button>
+                            <button class="btn-reply" onclick="showReplyForm(${comment.seq})">
+                                <i class="fas fa-reply"></i> 답글
+                            </button>
+                        </div>
+                    </div>
+                    <div class="comment-content">${comment.cntn}</div>
+                </div>
+            `).join('');
+        }
+
+        // 게시글 작성 모달 표시
+        function showWriteModal() {
+            document.getElementById('boardForm').reset();
+            new bootstrap.Modal(document.getElementById('writeModal')).show();
+        }
+
+        // 게시글 등록
+        async function submitBoard() {
+            try {
+                const formData = {
+                    ttl: document.getElementById('title').value,
+                    cntn: document.getElementById('content').value,
+                    categoryCd: document.getElementById('categoryCd').value,
+                    secretYn: document.getElementById('secretYn').checked ? 'Y' : 'N',
+                    noticeYn: document.getElementById('noticeYn').checked ? 'Y' : 'N'
+                };
+
+                const response = await fetch('/api/emp-rights-board', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('writeModal')).hide();
+                    showSuccess('게시글이 등록되었습니다.');
+                    loadBoardList();
+                } else {
+                    showError('게시글 등록에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('게시글 등록에 실패했습니다.');
+            }
+        }
+
+        // 댓글 등록
+        async function submitComment() {
+            try {
+                const formData = {
+                    boardSeq: currentBoardSeq,
+                    cntn: document.getElementById('commentContent').value,
+                    secretYn: document.getElementById('commentSecretYn').checked ? 'Y' : 'N',
+                    parentSeq: currentReplyTo // 답글인 경우 부모 댓글 번호
+                };
+
+                console.log('댓글 등록 데이터:', formData);
+                console.log('답글 대상:', currentReplyTo);
+
+                const response = await fetch('/api/emp-rights-comment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    document.getElementById('commentContent').value = '';
+                    document.getElementById('commentSecretYn').checked = false;
+                    currentReplyTo = null; // 답글 모드 초기화
+                    document.getElementById('cancelReplyBtn').style.display = 'none';
+                    document.getElementById('commentContent').placeholder = '댓글을 입력하세요';
+                    showSuccess('댓글이 등록되었습니다.');
+                    loadComments(currentBoardSeq);
+                } else {
+                    showError('댓글 등록에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('댓글 등록에 실패했습니다.');
+            }
+        }
+
+        // 답글 폼 표시
+        function showReplyForm(commentSeq) {
+            console.log('답글 버튼 클릭됨:', commentSeq);
+            currentReplyTo = parseInt(commentSeq); // 문자열을 숫자로 변환
+            document.getElementById('commentContent').placeholder = '답글을 입력하세요';
+            document.getElementById('cancelReplyBtn').style.display = 'inline-block';
+            document.getElementById('commentContent').focus();
+            console.log('답글 모드 활성화됨');
+        }
+
+        // 답글 취소
+        function cancelReply() {
+            currentReplyTo = null;
+            document.getElementById('commentContent').value = '';
+            document.getElementById('commentContent').placeholder = '댓글을 입력하세요';
+            document.getElementById('cancelReplyBtn').style.display = 'none';
+        }
+
+        // 검색
+        function searchBoards() {
+            loadBoardList(1);
+        }
+
+        // 유틸리티 함수들
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getCategoryName(categoryCd) {
+            const categories = {
+                'GENERAL': '일반',
+                'COMPLAINT': '불만/민원',
+                'SUGGESTION': '건의사항',
+                'QUESTION': '질문'
+            };
+            return categories[categoryCd] || categoryCd;
+        }
+
+        function showSuccess(message) {
+            // 간단한 성공 메시지 표시
+            alert(message);
+        }
+
+        function showError(message) {
+            // 간단한 에러 메시지 표시
+            alert(message);
+        }
+
+        // 댓글 좋아요/싫어요
+        async function likeComment(commentSeq, likeType) {
+            try {
+                const response = await fetch(`/api/emp-rights-like/comment/${commentSeq}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        likeType: likeType
+                    })
+                });
+
+                if (response.ok) {
+                    loadComments(currentBoardSeq);
+                } else {
+                    showError('좋아요 처리에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('좋아요 처리에 실패했습니다.');
+            }
+        }
+
+        // 게시글 좋아요/싫어요
+        async function likeBoard(boardSeq, likeType) {
+            try {
+                const response = await fetch(`/api/emp-rights-like/board/${boardSeq}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        likeType: likeType
+                    })
+                });
+
+                if (response.ok) {
+                    showBoardDetail(boardSeq);
+                } else {
+                    showError('좋아요 처리에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('좋아요 처리에 실패했습니다.');
+            }
+        }
+    </script>
+</body>
+</html> 

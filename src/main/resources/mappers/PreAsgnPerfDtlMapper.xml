@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.PreAsgnPerfDtlMapper">
+
+    <select id="selectPreAsgnPerfDtlList" parameterType="com.ERI.demo.vo.PreAsgnPerfDtlVO" resultType="com.ERI.demo.vo.PreAsgnPerfDtlVO">
+        SELECT
+            emp_id,
+            pgm_id,
+            pre_asgn_seq,
+            perf_sts_cd,
+            perf_rsn,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        FROM
+            tb_pre_asgn_perf_dtl
+        <where>
+            <if test="empId != null and empId != ''">
+                AND emp_id = #{empId}
+            </if>
+            <if test="pgmId != null and pgmId != ''">
+                AND pgm_id = #{pgmId}
+            </if>
+            <if test="preAsgnSeq != null">
+                AND pre_asgn_seq = #{preAsgnSeq}
+            </if>
+            <if test="perfStsCd != null and perfStsCd != ''">
+                AND perf_sts_cd = #{perfStsCd}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectPreAsgnPerfDtl" resultType="com.ERI.demo.vo.PreAsgnPerfDtlVO">
+        SELECT
+            emp_id,
+            pgm_id,
+            pre_asgn_seq,
+            perf_sts_cd,
+            perf_rsn,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        FROM
+            tb_pre_asgn_perf_dtl
+        WHERE
+            emp_id = #{empId} AND pgm_id = #{pgmId} AND pre_asgn_seq = #{preAsgnSeq}
+    </select>
+
+    <insert id="insertPreAsgnPerfDtl" parameterType="com.ERI.demo.vo.PreAsgnPerfDtlVO">
+        INSERT INTO tb_pre_asgn_perf_dtl (
+            emp_id,
+            pgm_id,
+            pre_asgn_seq,
+            perf_sts_cd,
+            perf_rsn,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        ) VALUES (
+            #{empId},
+            #{pgmId},
+            #{preAsgnSeq},
+            #{perfStsCd},
+            #{perfRsn},
+            #{rgtrId},
+            NOW(),
+            #{mdfrId},
+            NOW()
+        )
+    </insert>
+
+    <update id="updatePreAsgnPerfDtl" parameterType="com.ERI.demo.vo.PreAsgnPerfDtlVO">
+        UPDATE
+            tb_pre_asgn_perf_dtl
+        <set>
+            <if test="perfStsCd != null and perfStsCd != ''">
+                perf_sts_cd = #{perfStsCd},
+            </if>
+            <if test="perfRsn != null and perfRsn != ''">
+                perf_rsn = #{perfRsn},
+            </if>
+            <if test="mdfrId != null and mdfrId != ''">
+                mdfr_id = #{mdfrId},
+            </if>
+            mdfcn_dt = NOW()
+        </set>
+        WHERE
+            emp_id = #{empId} AND pgm_id = #{pgmId} AND pre_asgn_seq = #{preAsgnSeq}
+    </update>
+
+    <delete id="deletePreAsgnPerfDtl">
+        DELETE FROM tb_pre_asgn_perf_dtl
+        WHERE emp_id = #{empId} AND pgm_id = #{pgmId} AND pre_asgn_seq = #{preAsgnSeq}
+    </delete>
+
+</mapper> 

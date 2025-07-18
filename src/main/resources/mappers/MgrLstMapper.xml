@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.MgrLstMapper">
+
+    <!-- 관리자 목록 조회 - 삭제되지 않은 데이터만 -->
+    <select id="selectMgrLstList" parameterType="com.ERI.demo.vo.MgrLstVO" resultType="com.ERI.demo.vo.MgrLstVO">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY REG_DATE DESC) AS rowNum,
+            MGR_EMP_ID,
+            MGR_NM,
+            MGR_DEPT_CD,
+            MGR_POS_CD,
+            MGR_STS_CD,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_MGR_LST
+        WHERE DEL_YN = 'N'
+        <if test="mgrEmpId != null and mgrEmpId != ''">
+            AND MGR_EMP_ID LIKE CONCAT('%', #{mgrEmpId}, '%')
+        </if>
+        <if test="mgrNm != null and mgrNm != ''">
+            AND MGR_NM LIKE CONCAT('%', #{mgrNm}, '%')
+        </if>
+        <if test="mgrDeptCd != null and mgrDeptCd != ''">
+            AND MGR_DEPT_CD = #{mgrDeptCd}
+        </if>
+        <if test="mgrPosCd != null and mgrPosCd != ''">
+            AND MGR_POS_CD = #{mgrPosCd}
+        </if>
+        <if test="mgrStsCd != null and mgrStsCd != ''">
+            AND MGR_STS_CD = #{mgrStsCd}
+        </if>
+        ORDER BY REG_DATE DESC
+        <if test="size != null and offset != null">
+            LIMIT #{size} OFFSET #{offset}
+        </if>
+    </select>
+
+    <!-- 관리자 상세 조회 - 삭제되지 않은 데이터만 -->
+    <select id="selectMgrLst" parameterType="string" resultType="com.ERI.demo.vo.MgrLstVO">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY REG_DATE DESC) AS rowNum,
+            MGR_EMP_ID,
+            MGR_NM,
+            MGR_DEPT_CD,
+            MGR_POS_CD,
+            MGR_STS_CD,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_MGR_LST
+        WHERE MGR_EMP_ID = #{mgrEmpId} AND DEL_YN = 'N'
+    </select>
+
+    <!-- 관리자 등록 -->
+    <insert id="insertMgrLst" parameterType="com.ERI.demo.vo.MgrLstVO">
+        INSERT INTO TB_MGR_LST (
+            MGR_EMP_ID,
+            MGR_NM,
+            MGR_DEPT_CD,
+            MGR_POS_CD,
+            MGR_STS_CD,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID,
+            DEL_YN,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{mgrEmpId},
+            #{mgrNm},
+            #{mgrDeptCd},
+            #{mgrPosCd},
+            #{mgrStsCd},
+            #{rgstDt},
+            #{rgstTm},
+            #{rgstEmpId},
+            #{updtDt},
+            #{updtTm},
+            #{updtEmpId},
+            'N',
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 관리자 수정 -->
+    <update id="updateMgrLst" parameterType="com.ERI.demo.vo.MgrLstVO">
+        UPDATE TB_MGR_LST
+        SET MGR_NM = #{mgrNm},
+            MGR_DEPT_CD = #{mgrDeptCd},
+            MGR_POS_CD = #{mgrPosCd},
+            MGR_STS_CD = #{mgrStsCd},
+            UPDT_DT = #{updtDt},
+            UPDT_TM = #{updtTm},
+            UPDT_EMP_ID = #{updtEmpId},
+            UPD_DATE = NOW()
+        WHERE MGR_EMP_ID = #{mgrEmpId} AND DEL_YN = 'N'
+    </update>
+
+    <!-- 관리자 논리적 삭제 -->
+    <update id="deleteMgrLst" parameterType="string">
+        UPDATE TB_MGR_LST
+        SET DEL_YN = 'Y',
+            DEL_DATE = NOW(),
+            UPD_DATE = NOW()
+        WHERE MGR_EMP_ID = #{mgrEmpId} AND DEL_YN = 'N'
+    </update>
+
+    <!-- 관리자 삭제 복구 -->
+    <update id="restoreMgrLst" parameterType="string">
+        UPDATE TB_MGR_LST
+        SET DEL_YN = 'N',
+            DEL_DATE = NULL,
+            UPD_DATE = NOW()
+        WHERE MGR_EMP_ID = #{mgrEmpId} AND DEL_YN = 'Y'
+    </update>
+
+    <!-- 삭제된 관리자 목록 조회 -->
+    <select id="selectDeletedMgrLstList" parameterType="com.ERI.demo.vo.MgrLstVO" resultType="com.ERI.demo.vo.MgrLstVO">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY DEL_DATE DESC) AS rowNum,
+            MGR_EMP_ID,
+            MGR_NM,
+            MGR_DEPT_CD,
+            MGR_POS_CD,
+            MGR_STS_CD,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_MGR_LST
+        WHERE DEL_YN = 'Y'
+        <if test="mgrEmpId != null and mgrEmpId != ''">
+            AND MGR_EMP_ID LIKE CONCAT('%', #{mgrEmpId}, '%')
+        </if>
+        <if test="mgrNm != null and mgrNm != ''">
+            AND MGR_NM LIKE CONCAT('%', #{mgrNm}, '%')
+        </if>
+        <if test="mgrDeptCd != null and mgrDeptCd != ''">
+            AND MGR_DEPT_CD = #{mgrDeptCd}
+        </if>
+        <if test="mgrPosCd != null and mgrPosCd != ''">
+            AND MGR_POS_CD = #{mgrPosCd}
+        </if>
+        <if test="mgrStsCd != null and mgrStsCd != ''">
+            AND MGR_STS_CD = #{mgrStsCd}
+        </if>
+        ORDER BY DEL_DATE DESC
+        <if test="size != null and offset != null">
+            LIMIT #{size} OFFSET #{offset}
+        </if>
+    </select>
+
+    <!-- 삭제된 관리자 상세 조회 -->
+    <select id="selectDeletedMgrLst" parameterType="string" resultType="com.ERI.demo.vo.MgrLstVO">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY DEL_DATE DESC) AS rowNum,
+            MGR_EMP_ID,
+            MGR_NM,
+            MGR_DEPT_CD,
+            MGR_POS_CD,
+            MGR_STS_CD,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_MGR_LST
+        WHERE MGR_EMP_ID = #{mgrEmpId} AND DEL_YN = 'Y'
+    </select>
+
+</mapper> 

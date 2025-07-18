@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.EmpRightsBoardMapper">
+
+    <!-- 게시글 목록 조회 (페이징) -->
+    <select id="selectBoardList" parameterType="com.ERI.demo.vo.EmpRightsBoardVO" resultType="com.ERI.demo.vo.EmpRightsBoardVO">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY 
+                <choose>
+                    <when test="sortBy != null and sortBy != ''">
+                        <choose>
+                            <when test="sortBy == 'seq'">b.SEQ</when>
+                            <when test="sortBy == 'ttl'">b.TTL</when>
+                            <when test="sortBy == 'regDate'">b.REG_DATE</when>
+                            <when test="sortBy == 'viewCnt'">b.VIEW_CNT</when>
+                            <when test="sortBy == 'likeCnt'">b.LIKE_CNT</when>
+                            <when test="sortBy == 'commentCount'">COMMENT_COUNT</when>
+                            <otherwise>b.REG_DATE</otherwise>
+                        </choose>
+                    </when>
+                    <otherwise>b.REG_DATE</otherwise>
+                </choose>
+                <choose>
+                    <when test="sortDirection != null and sortDirection == 'ASC'">ASC</when>
+                    <otherwise>DESC</otherwise>
+                </choose>
+            ) as rowNum,
+            b.SEQ,
+            b.TTL,
+            b.CNTN,
+            b.STS_CD,
+            b.FILE_ATTACH_YN,
+            b.VIEW_CNT,
+            b.LIKE_CNT,
+            b.DISLIKE_CNT,
+            b.CATEGORY_CD,
+            b.SECRET_YN,
+            b.NOTICE_YN,
+            b.RGST_EMP_ID,
+            b.UPDT_EMP_ID,
+            b.DEL_YN,
+            b.DEL_DATE,
+            b.REG_EMP_ID,
+            b.UPD_EMP_ID,
+            b.REG_DATE,
+            b.UPD_DATE,
+            rgst.EMP_NM as rgstEmpNm,
+            updt.EMP_NM as updtEmpNm
+        FROM TB_EMP_RIGHTS_BOARD b
+        LEFT JOIN TB_EMP_LST rgst ON b.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_LST updt ON b.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        WHERE b.DEL_YN = 'N'
+        <if test="searchKeyword != null and searchKeyword != ''">
+            <choose>
+                <when test="searchType == 'title'">
+                    AND b.TTL LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchType == 'content'">
+                    AND b.CNTN LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <otherwise>
+                    AND (b.TTL LIKE CONCAT('%', #{searchKeyword}, '%') OR b.CNTN LIKE CONCAT('%', #{searchKeyword}, '%'))
+                </otherwise>
+            </choose>
+        </if>
+        <if test="categoryCd != null and categoryCd != ''">
+            AND b.CATEGORY_CD = #{categoryCd}
+        </if>
+        <if test="stsCd != null and stsCd != ''">
+            AND b.STS_CD = #{stsCd}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND DATE(b.REG_DATE) &gt;= DATE(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND DATE(b.REG_DATE) &lt;= DATE(#{endDate})
+        </if>
+        ORDER BY 
+        <choose>
+            <when test="sortBy != null and sortBy != ''">
+                <choose>
+                    <when test="sortBy == 'seq'">b.SEQ</when>
+                    <when test="sortBy == 'ttl'">b.TTL</when>
+                    <when test="sortBy == 'regDate'">b.REG_DATE</when>
+                    <when test="sortBy == 'viewCnt'">b.VIEW_CNT</when>
+                    <when test="sortBy == 'likeCnt'">b.LIKE_CNT</when>
+                    <when test="sortBy == 'commentCount'">COMMENT_COUNT</when>
+                    <otherwise>b.REG_DATE</otherwise>
+                </choose>
+            </when>
+            <otherwise>b.REG_DATE</otherwise>
+        </choose>
+        <choose>
+            <when test="sortDirection != null and sortDirection == 'ASC'">ASC</when>
+            <otherwise>DESC</otherwise>
+        </choose>
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 게시글 총 개수 조회 -->
+    <select id="selectBoardCount" parameterType="com.ERI.demo.vo.EmpRightsBoardVO" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_EMP_RIGHTS_BOARD b
+        WHERE b.DEL_YN = 'N'
+        <if test="searchKeyword != null and searchKeyword != ''">
+            <choose>
+                <when test="searchType == 'title'">
+                    AND b.TTL LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <when test="searchType == 'content'">
+                    AND b.CNTN LIKE CONCAT('%', #{searchKeyword}, '%')
+                </when>
+                <otherwise>
+                    AND (b.TTL LIKE CONCAT('%', #{searchKeyword}, '%') OR b.CNTN LIKE CONCAT('%', #{searchKeyword}, '%'))
+                </otherwise>
+            </choose>
+        </if>
+        <if test="categoryCd != null and categoryCd != ''">
+            AND b.CATEGORY_CD = #{categoryCd}
+        </if>
+        <if test="stsCd != null and stsCd != ''">
+            AND b.STS_CD = #{stsCd}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND DATE(b.REG_DATE) &gt;= DATE(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND DATE(b.REG_DATE) &lt;= DATE(#{endDate})
+        </if>
+    </select>
+
+    <!-- 게시글 상세 조회 -->
+    <select id="selectBoardBySeq" resultType="com.ERI.demo.vo.EmpRightsBoardVO">
+        SELECT 
+            b.SEQ,
+            b.TTL,
+            b.CNTN,
+            b.STS_CD,
+            b.FILE_ATTACH_YN,
+            b.VIEW_CNT,
+            b.LIKE_CNT,
+            b.DISLIKE_CNT,
+            b.CATEGORY_CD,
+            b.SECRET_YN,
+            b.NOTICE_YN,
+            b.RGST_EMP_ID,
+            b.UPDT_EMP_ID,
+            b.DEL_YN,
+            b.DEL_DATE,
+            b.REG_EMP_ID,
+            b.UPD_EMP_ID,
+            b.REG_DATE,
+            b.UPD_DATE,
+            rgst.EMP_NM as rgstEmpNm,
+            updt.EMP_NM as updtEmpNm
+        FROM TB_EMP_RIGHTS_BOARD b
+        LEFT JOIN TB_EMP_LST rgst ON b.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_LST updt ON b.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        WHERE b.SEQ = #{seq}
+        AND b.DEL_YN = 'N'
+    </select>
+
+    <!-- 게시글 등록 -->
+    <insert id="insertBoard" parameterType="com.ERI.demo.vo.EmpRightsBoardVO" useGeneratedKeys="true" keyProperty="seq">
+        INSERT INTO TB_EMP_RIGHTS_BOARD (
+            TTL,
+            CNTN,
+            STS_CD,
+            FILE_ATTACH_YN,
+            VIEW_CNT,
+            LIKE_CNT,
+            DISLIKE_CNT,
+            CATEGORY_CD,
+            SECRET_YN,
+            NOTICE_YN,
+            RGST_EMP_ID,
+            UPDT_EMP_ID,
+            DEL_YN,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{ttl,jdbcType=VARCHAR},
+            #{cntn,jdbcType=LONGVARCHAR},
+            COALESCE(#{stsCd,jdbcType=VARCHAR}, 'ACTIVE'),
+            COALESCE(#{fileAttachYn,jdbcType=CHAR}, 'N'),
+            COALESCE(#{viewCnt,jdbcType=INTEGER}, 0),
+            COALESCE(#{likeCnt,jdbcType=INTEGER}, 0),
+            COALESCE(#{dislikeCnt,jdbcType=INTEGER}, 0),
+            #{categoryCd,jdbcType=VARCHAR},
+            COALESCE(#{secretYn,jdbcType=CHAR}, 'N'),
+            COALESCE(#{noticeYn,jdbcType=CHAR}, 'N'),
+            #{rgstEmpId,jdbcType=VARCHAR},
+            #{updtEmpId,jdbcType=VARCHAR},
+            'N',
+            #{rgstEmpId,jdbcType=VARCHAR},
+            #{updtEmpId,jdbcType=VARCHAR},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 게시글 수정 -->
+    <update id="updateBoard" parameterType="com.ERI.demo.vo.EmpRightsBoardVO">
+        UPDATE TB_EMP_RIGHTS_BOARD
+        SET 
+            <if test="ttl != null">TTL = #{ttl,jdbcType=VARCHAR},</if>
+            <if test="cntn != null">CNTN = #{cntn,jdbcType=LONGVARCHAR},</if>
+            <if test="stsCd != null">STS_CD = #{stsCd,jdbcType=VARCHAR},</if>
+            <if test="fileAttachYn != null and fileAttachYn != ''">FILE_ATTACH_YN = #{fileAttachYn,jdbcType=CHAR},</if>
+            <if test="categoryCd != null">CATEGORY_CD = #{categoryCd,jdbcType=VARCHAR},</if>
+            <if test="secretYn != null">SECRET_YN = #{secretYn,jdbcType=CHAR},</if>
+            <if test="noticeYn != null">NOTICE_YN = #{noticeYn,jdbcType=CHAR},</if>
+            <if test="updtEmpId != null">UPDT_EMP_ID = #{updtEmpId,jdbcType=VARCHAR},</if>
+            UPD_EMP_ID = COALESCE(#{updtEmpId,jdbcType=VARCHAR}, #{rgstEmpId,jdbcType=VARCHAR}),
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 게시글 삭제 (논리 삭제) -->
+    <update id="deleteBoard">
+        UPDATE TB_EMP_RIGHTS_BOARD
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 조회수 증가 -->
+    <update id="incrementViewCount">
+        UPDATE TB_EMP_RIGHTS_BOARD
+        SET VIEW_CNT = VIEW_CNT + 1
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 좋아요 수 증가 -->
+    <update id="incrementLikeCount">
+        UPDATE TB_EMP_RIGHTS_BOARD
+        SET LIKE_CNT = LIKE_CNT + 1
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 좋아요 수 감소 -->
+    <update id="decrementLikeCount">
+        UPDATE TB_EMP_RIGHTS_BOARD
+        SET LIKE_CNT = GREATEST(LIKE_CNT - 1, 0)
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 싫어요 수 증가 -->
+    <update id="incrementDislikeCount">
+        UPDATE TB_EMP_RIGHTS_BOARD
+        SET DISLIKE_CNT = DISLIKE_CNT + 1
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 싫어요 수 감소 -->
+    <update id="decrementDislikeCount">
+        UPDATE TB_EMP_RIGHTS_BOARD
+        SET DISLIKE_CNT = GREATEST(DISLIKE_CNT - 1, 0)
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 공지글 목록 조회 -->
+    <select id="selectNoticeList" resultType="com.ERI.demo.vo.EmpRightsBoardVO">
+        SELECT 
+            b.SEQ,
+            b.TTL,
+            b.CNTN,
+            b.STS_CD,
+            b.FILE_ATTACH_YN,
+            b.VIEW_CNT,
+            b.LIKE_CNT,
+            b.DISLIKE_CNT,
+            b.CATEGORY_CD,
+            b.SECRET_YN,
+            b.NOTICE_YN,
+            b.RGST_EMP_ID,
+            b.UPDT_EMP_ID,
+            b.DEL_YN,
+            b.DEL_DATE,
+            b.REG_EMP_ID,
+            b.UPD_EMP_ID,
+            b.REG_DATE,
+            b.UPD_DATE,
+            rgst.EMP_NM as rgstEmpNm,
+            updt.EMP_NM as updtEmpNm
+        FROM TB_EMP_RIGHTS_BOARD b
+        LEFT JOIN TB_EMP_LST rgst ON b.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_LST updt ON b.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        WHERE b.DEL_YN = 'N'
+        AND b.NOTICE_YN = 'Y'
+        AND b.STS_CD = 'ACTIVE'
+        ORDER BY b.REG_DATE DESC
+    </select>
+
+    <!-- 내가 작성한 게시글 목록 조회 -->
+    <select id="selectMyBoardList" resultType="com.ERI.demo.vo.EmpRightsBoardVO">
+        SELECT 
+            b.SEQ,
+            b.TTL,
+            b.CNTN,
+            b.STS_CD,
+            b.FILE_ATTACH_YN,
+            b.VIEW_CNT,
+            b.LIKE_CNT,
+            b.DISLIKE_CNT,
+            b.CATEGORY_CD,
+            b.SECRET_YN,
+            b.NOTICE_YN,
+            b.RGST_EMP_ID,
+            b.UPDT_EMP_ID,
+            b.DEL_YN,
+            b.DEL_DATE,
+            b.REG_EMP_ID,
+            b.UPD_EMP_ID,
+            b.REG_DATE,
+            b.UPD_DATE,
+            rgst.EMP_NM as rgstEmpNm,
+            updt.EMP_NM as updtEmpNm
+        FROM TB_EMP_RIGHTS_BOARD b
+        LEFT JOIN TB_EMP_LST rgst ON b.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_LST updt ON b.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        WHERE b.DEL_YN = 'N'
+        AND b.RGST_EMP_ID = #{empId,jdbcType=VARCHAR}
+        ORDER BY b.REG_DATE DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 내가 작성한 게시글 총 개수 조회 -->
+    <select id="selectMyBoardCount" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_EMP_RIGHTS_BOARD b
+        WHERE b.DEL_YN = 'N'
+        AND b.RGST_EMP_ID = #{empId,jdbcType=VARCHAR}
+    </select>
+
+</mapper> 

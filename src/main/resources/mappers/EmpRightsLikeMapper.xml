@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.EmpRightsLikeMapper">
+
+    <!-- 좋아요 조회 -->
+    <select id="selectLike" resultType="com.ERI.demo.vo.EmpRightsLikeVO">
+        SELECT 
+            SEQ,
+            BOARD_SEQ,
+            COMMENT_SEQ,
+            LIKE_TYPE,
+            RGST_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_EMP_RIGHTS_LIKE
+        WHERE DEL_YN = 'N'
+        AND RGST_EMP_ID = #{empId,jdbcType=VARCHAR}
+        <if test="boardSeq != null">
+            AND BOARD_SEQ = #{boardSeq,jdbcType=BIGINT}
+            AND COMMENT_SEQ IS NULL
+        </if>
+        <if test="commentSeq != null">
+            AND COMMENT_SEQ = #{commentSeq,jdbcType=BIGINT}
+            AND BOARD_SEQ IS NULL
+        </if>
+    </select>
+
+    <!-- 좋아요 등록 -->
+    <insert id="insertLike" parameterType="com.ERI.demo.vo.EmpRightsLikeVO" useGeneratedKeys="true" keyProperty="seq">
+        INSERT INTO TB_EMP_RIGHTS_LIKE (
+            BOARD_SEQ,
+            COMMENT_SEQ,
+            LIKE_TYPE,
+            RGST_EMP_ID,
+            DEL_YN,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{boardSeq,jdbcType=BIGINT},
+            #{commentSeq,jdbcType=BIGINT},
+            #{likeType,jdbcType=CHAR},
+            #{rgstEmpId,jdbcType=VARCHAR},
+            'N',
+            #{rgstEmpId,jdbcType=VARCHAR},
+            #{rgstEmpId,jdbcType=VARCHAR},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 좋아요 수정 -->
+    <update id="updateLike" parameterType="com.ERI.demo.vo.EmpRightsLikeVO">
+        UPDATE TB_EMP_RIGHTS_LIKE
+        SET 
+            LIKE_TYPE = #{likeType,jdbcType=CHAR},
+            UPD_EMP_ID = #{rgstEmpId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 좋아요 삭제 -->
+    <update id="deleteLike">
+        UPDATE TB_EMP_RIGHTS_LIKE
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+</mapper> 

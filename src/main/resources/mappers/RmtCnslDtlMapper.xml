@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.RmtCnslDtlMapper">
+
+    <!-- 비대면 상담 명세 목록 조회 -->
+    <select id="selectRmtCnslDtlList" parameterType="com.ERI.demo.vo.RmtCnslDtlVO" resultType="com.ERI.demo.vo.RmtCnslDtlVO">
+        SELECT 
+            APP_DT,
+            CNSL_APP_SEQ,
+            CMT_SEQ,
+            DTL_SEQ,
+            CMT_DTL_CNTN,
+            CMT_DTL_RCMD,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID
+        FROM TB_RMT_CNSL_DTL
+        <where>
+            <if test="appDt != null">
+                AND APP_DT = #{appDt}
+            </if>
+            <if test="cnslAppSeq != null">
+                AND CNSL_APP_SEQ = #{cnslAppSeq}
+            </if>
+            <if test="cmtSeq != null">
+                AND CMT_SEQ = #{cmtSeq}
+            </if>
+            <if test="dtlSeq != null">
+                AND DTL_SEQ = #{dtlSeq}
+            </if>
+            <if test="cmtDtlCntn != null and cmtDtlCntn != ''">
+                AND CMT_DTL_CNTN LIKE CONCAT('%', #{cmtDtlCntn}, '%')
+            </if>
+            <if test="rgstEmpId != null and rgstEmpId != ''">
+                AND RGST_EMP_ID = #{rgstEmpId}
+            </if>
+        </where>
+        ORDER BY APP_DT DESC, CNSL_APP_SEQ DESC, CMT_SEQ DESC, DTL_SEQ
+    </select>
+
+    <!-- 비대면 상담 명세 상세 조회 -->
+    <select id="selectRmtCnslDtl" resultType="com.ERI.demo.vo.RmtCnslDtlVO">
+        SELECT 
+            APP_DT,
+            CNSL_APP_SEQ,
+            CMT_SEQ,
+            DTL_SEQ,
+            CMT_DTL_CNTN,
+            CMT_DTL_RCMD,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID
+        FROM TB_RMT_CNSL_DTL
+        WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CMT_SEQ = #{cmtSeq} AND DTL_SEQ = #{dtlSeq}
+    </select>
+
+    <!-- 비대면 상담 명세 등록 -->
+    <insert id="insertRmtCnslDtl" parameterType="com.ERI.demo.vo.RmtCnslDtlVO">
+        INSERT INTO TB_RMT_CNSL_DTL (
+            APP_DT,
+            CNSL_APP_SEQ,
+            CMT_SEQ,
+            DTL_SEQ,
+            CMT_DTL_CNTN,
+            CMT_DTL_RCMD,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID
+        ) VALUES (
+            #{appDt},
+            #{cnslAppSeq},
+            #{cmtSeq},
+            #{dtlSeq},
+            #{cmtDtlCntn},
+            #{cmtDtlRcmd},
+            #{rgstDt},
+            #{rgstTm},
+            #{rgstEmpId}
+        )
+    </insert>
+
+    <!-- 비대면 상담 명세 수정 -->
+    <update id="updateRmtCnslDtl" parameterType="com.ERI.demo.vo.RmtCnslDtlVO">
+        UPDATE TB_RMT_CNSL_DTL
+        SET 
+            CMT_DTL_CNTN = #{cmtDtlCntn},
+            CMT_DTL_RCMD = #{cmtDtlRcmd},
+            UPDT_DT = #{updtDt},
+            UPDT_TM = #{updtTm},
+            UPDT_EMP_ID = #{updtEmpId}
+        WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CMT_SEQ = #{cmtSeq} AND DTL_SEQ = #{dtlSeq}
+    </update>
+
+    <!-- 비대면 상담 명세 삭제 -->
+    <delete id="deleteRmtCnslDtl">
+        DELETE FROM TB_RMT_CNSL_DTL
+        WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CMT_SEQ = #{cmtSeq} AND DTL_SEQ = #{dtlSeq}
+    </delete>
+
+</mapper> 

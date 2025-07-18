@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.ChlgGoalAchvDtlMapper">
+
+    <select id="selectChlgGoalAchvDtlList" parameterType="com.ERI.demo.vo.ChlgGoalAchvDtlVO" resultType="com.ERI.demo.vo.ChlgGoalAchvDtlVO">
+        SELECT
+            emp_id,
+            seq,
+            base_dt,
+            achv_qty,
+            achv_yn,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        FROM
+            tb_chlg_goal_achv_dtl
+        <where>
+            <if test="empId != null and empId != ''">
+                AND emp_id = #{empId}
+            </if>
+            <if test="seq != null">
+                AND seq = #{seq}
+            </if>
+            <if test="baseDt != null">
+                AND base_dt = #{baseDt}
+            </if>
+            <if test="achvYn != null and achvYn != ''">
+                AND achv_yn = #{achvYn}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectChlgGoalAchvDtl" resultType="com.ERI.demo.vo.ChlgGoalAchvDtlVO">
+        SELECT
+            emp_id,
+            seq,
+            base_dt,
+            achv_qty,
+            achv_yn,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        FROM
+            tb_chlg_goal_achv_dtl
+        WHERE
+            emp_id = #{empId} AND seq = #{seq} AND base_dt = #{baseDt}
+    </select>
+
+    <insert id="insertChlgGoalAchvDtl" parameterType="com.ERI.demo.vo.ChlgGoalAchvDtlVO">
+        INSERT INTO tb_chlg_goal_achv_dtl (
+            emp_id,
+            seq,
+            base_dt,
+            achv_qty,
+            achv_yn,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        ) VALUES (
+            #{empId},
+            #{seq},
+            #{baseDt},
+            #{achvQty},
+            #{achvYn},
+            #{rgtrId},
+            NOW(),
+            #{mdfrId},
+            NOW()
+        )
+    </insert>
+
+    <update id="updateChlgGoalAchvDtl" parameterType="com.ERI.demo.vo.ChlgGoalAchvDtlVO">
+        UPDATE
+            tb_chlg_goal_achv_dtl
+        <set>
+            <if test="achvQty != null">
+                achv_qty = #{achvQty},
+            </if>
+            <if test="achvYn != null and achvYn != ''">
+                achv_yn = #{achvYn},
+            </if>
+            <if test="mdfrId != null and mdfrId != ''">
+                mdfr_id = #{mdfrId},
+            </if>
+            mdfcn_dt = NOW()
+        </set>
+        WHERE
+            emp_id = #{empId} AND seq = #{seq} AND base_dt = #{baseDt}
+    </update>
+
+    <delete id="deleteChlgGoalAchvDtl">
+        DELETE FROM tb_chlg_goal_achv_dtl
+        WHERE emp_id = #{empId} AND seq = #{seq} AND base_dt = #{baseDt}
+    </delete>
+
+</mapper> 

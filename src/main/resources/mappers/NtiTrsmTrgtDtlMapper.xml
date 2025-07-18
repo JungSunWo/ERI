@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.NtiTrsmTrgtDtlMapper">
+
+    <!-- 공지사항 발송대상자 명세 목록 조회 -->
+    <select id="selectNtiTrsmTrgtDtlList" parameterType="com.ERI.demo.vo.NtiTrsmTrgtDtlVO" resultType="com.ERI.demo.vo.NtiTrsmTrgtDtlVO">
+        SELECT 
+            RGST_DT,
+            SEQ,
+            EMP_ID,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID
+        FROM TB_NTI_TRSM_TRGT_DTL
+        <where>
+            <if test="rgstDt != null">
+                AND RGST_DT = #{rgstDt}
+            </if>
+            <if test="seq != null">
+                AND SEQ = #{seq}
+            </if>
+            <if test="empId != null and empId != ''">
+                AND EMP_ID = #{empId}
+            </if>
+            <if test="rgstEmpId != null and rgstEmpId != ''">
+                AND RGST_EMP_ID = #{rgstEmpId}
+            </if>
+        </where>
+        ORDER BY RGST_DT DESC, SEQ DESC, EMP_ID
+    </select>
+
+    <!-- 공지사항 발송대상자 명세 상세 조회 -->
+    <select id="selectNtiTrsmTrgtDtl" resultType="com.ERI.demo.vo.NtiTrsmTrgtDtlVO">
+        SELECT 
+            RGST_DT,
+            SEQ,
+            EMP_ID,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID
+        FROM TB_NTI_TRSM_TRGT_DTL
+        WHERE RGST_DT = #{rgstDt} AND SEQ = #{seq} AND EMP_ID = #{empId}
+    </select>
+
+    <!-- 공지사항 발송대상자 명세 등록 -->
+    <insert id="insertNtiTrsmTrgtDtl" parameterType="com.ERI.demo.vo.NtiTrsmTrgtDtlVO">
+        INSERT INTO TB_NTI_TRSM_TRGT_DTL (
+            RGST_DT,
+            SEQ,
+            EMP_ID,
+            RGST_TM,
+            RGST_EMP_ID
+        ) VALUES (
+            #{rgstDt},
+            #{seq},
+            #{empId},
+            #{rgstTm},
+            #{rgstEmpId}
+        )
+    </insert>
+
+    <!-- 공지사항 발송대상자 명세 수정 -->
+    <update id="updateNtiTrsmTrgtDtl" parameterType="com.ERI.demo.vo.NtiTrsmTrgtDtlVO">
+        UPDATE TB_NTI_TRSM_TRGT_DTL
+        SET 
+            UPDT_DT = #{updtDt},
+            UPDT_TM = #{updtTm},
+            UPDT_EMP_ID = #{updtEmpId}
+        WHERE RGST_DT = #{rgstDt} AND SEQ = #{seq} AND EMP_ID = #{empId}
+    </update>
+
+    <!-- 공지사항 발송대상자 명세 삭제 -->
+    <delete id="deleteNtiTrsmTrgtDtl">
+        DELETE FROM TB_NTI_TRSM_TRGT_DTL
+        WHERE RGST_DT = #{rgstDt} AND SEQ = #{seq} AND EMP_ID = #{empId}
+    </delete>
+
+</mapper> 

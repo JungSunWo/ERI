@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.CntnTrsmTrgtDtlMapper">
+
+    <!-- 콘텐츠 전송 대상 상세 목록 조회 -->
+    <select id="selectCntnTrsmTrgtDtlList" parameterType="com.ERI.demo.vo.CntnTrsmTrgtDtlVO" resultType="com.ERI.demo.vo.CntnTrsmTrgtDtlVO">
+        SELECT 
+            PGM_ID,
+            CNTN_SEQ,
+            EMP_ID,
+            TRSM_STS_CD,
+            TRSM_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_CNTN_TRSM_TRGT_DTL
+        <where>
+            <if test="pgmId != null and pgmId != ''">
+                AND PGM_ID = #{pgmId}
+            </if>
+            <if test="cntnSeq != null">
+                AND CNTN_SEQ = #{cntnSeq}
+            </if>
+            <if test="empId != null and empId != ''">
+                AND EMP_ID = #{empId}
+            </if>
+            <if test="trsmStsCd != null and trsmStsCd != ''">
+                AND TRSM_STS_CD = #{trsmStsCd}
+            </if>
+        </where>
+        ORDER BY REG_DATE DESC
+    </select>
+
+    <!-- 콘텐츠 전송 대상 상세 조회 -->
+    <select id="selectCntnTrsmTrgtDtl" resultType="com.ERI.demo.vo.CntnTrsmTrgtDtlVO">
+        SELECT 
+            PGM_ID,
+            CNTN_SEQ,
+            EMP_ID,
+            TRSM_STS_CD,
+            TRSM_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_CNTN_TRSM_TRGT_DTL
+        WHERE PGM_ID = #{pgmId}
+          AND CNTN_SEQ = #{cntnSeq}
+          AND EMP_ID = #{empId}
+    </select>
+
+    <!-- 콘텐츠 전송 대상 상세 등록 -->
+    <insert id="insertCntnTrsmTrgtDtl" parameterType="com.ERI.demo.vo.CntnTrsmTrgtDtlVO">
+        INSERT INTO TB_CNTN_TRSM_TRGT_DTL (
+            PGM_ID,
+            CNTN_SEQ,
+            EMP_ID,
+            TRSM_STS_CD,
+            TRSM_DATE,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{pgmId},
+            #{cntnSeq},
+            #{empId},
+            #{trsmStsCd},
+            #{trsmDate},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 콘텐츠 전송 대상 상세 수정 -->
+    <update id="updateCntnTrsmTrgtDtl" parameterType="com.ERI.demo.vo.CntnTrsmTrgtDtlVO">
+        UPDATE TB_CNTN_TRSM_TRGT_DTL
+        SET TRSM_STS_CD = #{trsmStsCd},
+            TRSM_DATE = #{trsmDate},
+            UPD_DATE = NOW()
+        WHERE PGM_ID = #{pgmId}
+          AND CNTN_SEQ = #{cntnSeq}
+          AND EMP_ID = #{empId}
+    </update>
+
+    <!-- 콘텐츠 전송 대상 상세 삭제 -->
+    <delete id="deleteCntnTrsmTrgtDtl">
+        DELETE FROM TB_CNTN_TRSM_TRGT_DTL
+        WHERE PGM_ID = #{pgmId}
+          AND CNTN_SEQ = #{cntnSeq}
+          AND EMP_ID = #{empId}
+    </delete>
+
+</mapper> 

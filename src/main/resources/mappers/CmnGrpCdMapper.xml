@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.CmnGrpCdMapper">
+
+    <!-- 결과 매핑 -->
+    <resultMap id="CmnGrpCdResultMap" type="com.ERI.demo.vo.CmnGrpCdVO">
+        <id column="GRP_CD" property="grpCd" />
+        <result column="GRP_CD_NM" property="grpCdNm" />
+        <result column="GRP_CD_DESC" property="grpCdDesc" />
+        <result column="USE_YN" property="useYn" />
+        <result column="REG_EMP_ID" property="rgstEmpId" />
+        <result column="REG_DATE" property="regDate" />
+        <result column="UPD_EMP_ID" property="modEmpId" />
+        <result column="UPD_DATE" property="modDate" />
+    </resultMap>
+
+    <!-- 전체 공통 그룹 코드 조회 (페이징) -->
+    <select id="selectAllWithPaging" resultMap="CmnGrpCdResultMap">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY GRP_CD) AS rowNum,
+            GRP_CD,
+            GRP_CD_NM,
+            GRP_CD_DESC,
+            USE_YN,
+            REG_EMP_ID,
+            REG_DATE,
+            UPD_EMP_ID,
+            UPD_DATE
+        FROM TB_CMN_GRP_CD
+        <where>
+            <if test="pageRequest.keyword != null and pageRequest.keyword != ''">
+                <choose>
+                    <when test="pageRequest.searchField == 'grpCd'">
+                        AND GRP_CD LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                    </when>
+                    <when test="pageRequest.searchField == 'grpCdNm'">
+                        AND GRP_CD_NM LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                    </when>
+                    <when test="pageRequest.searchField == 'grpCdDesc'">
+                        AND GRP_CD_DESC LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                    </when>
+                    <otherwise>
+                        AND (GRP_CD LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                        OR GRP_CD_NM LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                        OR GRP_CD_DESC LIKE CONCAT('%', #{pageRequest.keyword}, '%'))
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+        <choose>
+            <when test="pageRequest.sortBy == 'grpCd'">
+                ORDER BY GRP_CD ${pageRequest.sortDirection}
+            </when>
+            <when test="pageRequest.sortBy == 'grpCdNm'">
+                ORDER BY GRP_CD_NM ${pageRequest.sortDirection}
+            </when>
+            <when test="pageRequest.sortBy == 'grpCdDesc'">
+                ORDER BY GRP_CD_DESC ${pageRequest.sortDirection}
+            </when>
+            <when test="pageRequest.sortBy == 'useYn'">
+                ORDER BY USE_YN ${pageRequest.sortDirection}
+            </when>
+            <when test="pageRequest.sortBy == 'regDate'">
+                ORDER BY REG_DATE ${pageRequest.sortDirection}
+            </when>
+            <otherwise>
+                ORDER BY GRP_CD
+            </otherwise>
+        </choose>
+        LIMIT #{pageRequest.size} OFFSET #{pageRequest.offset}
+    </select>
+
+    <!-- 전체 공통 그룹 코드 수 조회 -->
+    <select id="selectAllCount" resultType="long">
+        SELECT COUNT(*)
+        FROM TB_CMN_GRP_CD
+        <where>
+            <if test="pageRequest.keyword != null and pageRequest.keyword != ''">
+                <choose>
+                    <when test="pageRequest.searchField == 'grpCd'">
+                        AND GRP_CD LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                    </when>
+                    <when test="pageRequest.searchField == 'grpCdNm'">
+                        AND GRP_CD_NM LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                    </when>
+                    <when test="pageRequest.searchField == 'grpCdDesc'">
+                        AND GRP_CD_DESC LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                    </when>
+                    <otherwise>
+                        AND (GRP_CD LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                        OR GRP_CD_NM LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                        OR GRP_CD_DESC LIKE CONCAT('%', #{pageRequest.keyword}, '%'))
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+    </select>
+
+    <!-- 전체 공통 그룹 코드 조회 (페이징 없음) -->
+    <select id="selectAll" resultMap="CmnGrpCdResultMap">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY GRP_CD) AS rowNum,
+            GRP_CD,
+            GRP_CD_NM,
+            GRP_CD_DESC,
+            USE_YN,
+            REG_EMP_ID,
+            REG_DATE,
+            UPD_EMP_ID,
+            UPD_DATE
+        FROM TB_CMN_GRP_CD
+        ORDER BY GRP_CD
+    </select>
+
+    <!-- 그룹 코드로 공통 그룹 코드 조회 -->
+    <select id="selectByGrpCd" parameterType="string" resultMap="CmnGrpCdResultMap">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY GRP_CD) AS rowNum,
+            GRP_CD,
+            GRP_CD_NM,
+            GRP_CD_DESC,
+            USE_YN,
+            REG_EMP_ID,
+            REG_DATE,
+            UPD_EMP_ID,
+            UPD_DATE
+        FROM TB_CMN_GRP_CD
+        WHERE GRP_CD = #{grpCd}
+    </select>
+
+    <!-- 공통 그룹 코드 등록 -->
+    <insert id="insert" parameterType="com.ERI.demo.vo.CmnGrpCdVO">
+        INSERT INTO TB_CMN_GRP_CD (
+            GRP_CD,
+            GRP_CD_NM,
+            GRP_CD_DESC,
+            USE_YN
+        ) VALUES (
+            #{grpCd},
+            #{grpCdNm},
+            #{grpCdDesc},
+            #{useYn}
+        )
+    </insert>
+
+    <!-- 공통 그룹 코드 수정 -->
+    <update id="update" parameterType="com.ERI.demo.vo.CmnGrpCdVO">
+        UPDATE TB_CMN_GRP_CD
+        SET 
+            GRP_CD_NM = #{grpCdNm},
+            GRP_CD_DESC = #{grpCdDesc},
+            USE_YN = #{useYn}
+        WHERE GRP_CD = #{grpCd}
+    </update>
+
+    <!-- 공통 그룹 코드 삭제 -->
+    <delete id="deleteByGrpCd" parameterType="string">
+        DELETE FROM TB_CMN_GRP_CD
+        WHERE GRP_CD = #{grpCd}
+    </delete>
+
+    <!-- 사용여부로 공통 그룹 코드 조회 (페이징) -->
+    <select id="selectByUseYnWithPaging" resultMap="CmnGrpCdResultMap">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY GRP_CD) AS rowNum,
+            GRP_CD,
+            GRP_CD_NM,
+            GRP_CD_DESC,
+            USE_YN,
+            REG_EMP_ID,
+            REG_DATE,
+            UPD_EMP_ID,
+            UPD_DATE
+        FROM TB_CMN_GRP_CD
+        WHERE USE_YN = #{useYn}
+        <if test="pageRequest.keyword != null and pageRequest.keyword != ''">
+            <choose>
+                <when test="pageRequest.searchField == 'grpCd'">
+                    AND GRP_CD LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                </when>
+                <when test="pageRequest.searchField == 'grpCdNm'">
+                    AND GRP_CD_NM LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                </when>
+                <when test="pageRequest.searchField == 'grpCdDesc'">
+                    AND GRP_CD_DESC LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                </when>
+                <otherwise>
+                    AND (GRP_CD LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                    OR GRP_CD_NM LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                    OR GRP_CD_DESC LIKE CONCAT('%', #{pageRequest.keyword}, '%'))
+                </otherwise>
+            </choose>
+        </if>
+        <choose>
+            <when test="pageRequest.sortBy == 'grpCd'">
+                ORDER BY GRP_CD ${pageRequest.sortDirection}
+            </when>
+            <when test="pageRequest.sortBy == 'grpCdNm'">
+                ORDER BY GRP_CD_NM ${pageRequest.sortDirection}
+            </when>
+            <when test="pageRequest.sortBy == 'grpCdDesc'">
+                ORDER BY GRP_CD_DESC ${pageRequest.sortDirection}
+            </when>
+            <when test="pageRequest.sortBy == 'useYn'">
+                ORDER BY USE_YN ${pageRequest.sortDirection}
+            </when>
+            <when test="pageRequest.sortBy == 'regDate'">
+                ORDER BY REG_DATE ${pageRequest.sortDirection}
+            </when>
+            <otherwise>
+                ORDER BY GRP_CD
+            </otherwise>
+        </choose>
+        LIMIT #{pageRequest.size} OFFSET #{pageRequest.offset}
+    </select>
+
+    <!-- 사용여부로 공통 그룹 코드 수 조회 -->
+    <select id="selectByUseYnCount" resultType="long">
+        SELECT COUNT(*)
+        FROM TB_CMN_GRP_CD
+        WHERE USE_YN = #{useYn}
+        <if test="pageRequest.keyword != null and pageRequest.keyword != ''">
+            <choose>
+                <when test="pageRequest.searchField == 'grpCd'">
+                    AND GRP_CD LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                </when>
+                <when test="pageRequest.searchField == 'grpCdNm'">
+                    AND GRP_CD_NM LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                </when>
+                <when test="pageRequest.searchField == 'grpCdDesc'">
+                    AND GRP_CD_DESC LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                </when>
+                <otherwise>
+                    AND (GRP_CD LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                    OR GRP_CD_NM LIKE CONCAT('%', #{pageRequest.keyword}, '%')
+                    OR GRP_CD_DESC LIKE CONCAT('%', #{pageRequest.keyword}, '%'))
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+
+    <!-- 사용여부로 공통 그룹 코드 조회 (페이징 없음) -->
+    <select id="selectByUseYn" parameterType="string" resultMap="CmnGrpCdResultMap">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY GRP_CD) AS rowNum,
+            GRP_CD,
+            GRP_CD_NM,
+            GRP_CD_DESC,
+            USE_YN,
+            REG_EMP_ID,
+            REG_DATE,
+            UPD_EMP_ID,
+            UPD_DATE
+        FROM TB_CMN_GRP_CD
+        WHERE USE_YN = #{useYn}
+        ORDER BY GRP_CD
+    </select>
+
+</mapper> 

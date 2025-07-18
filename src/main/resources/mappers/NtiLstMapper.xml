@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.NtiLstMapper">
+
+    <!-- 공지사항 목록 조회 (페이징) -->
+    <select id="selectNoticeList" resultType="com.ERI.demo.vo.NtiLstVO">
+        SELECT 
+            SEQ,
+            TTL,
+            CNTN,
+            STS_CD,
+            FILE_ATTACH_YN,
+            RGST_EMP_ID,
+            UPDT_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_NTI_LST
+        WHERE DEL_YN = 'N'
+        <if test="title != null and title != ''">
+            AND TTL LIKE CONCAT('%', #{title}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            AND STS_CD = #{status}
+        </if>
+        ORDER BY REG_DATE DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 공지사항 전체 개수 조회 -->
+    <select id="selectNoticeCount" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_NTI_LST
+        WHERE DEL_YN = 'N'
+        <if test="title != null and title != ''">
+            AND TTL LIKE CONCAT('%', #{title}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            AND STS_CD = #{status}
+        </if>
+    </select>
+
+    <!-- 공지사항 상세 조회 -->
+    <select id="selectNoticeBySeq" resultType="com.ERI.demo.vo.NtiLstVO">
+        SELECT 
+            SEQ,
+            TTL,
+            CNTN,
+            STS_CD,
+            FILE_ATTACH_YN,
+            RGST_EMP_ID,
+            UPDT_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_NTI_LST
+        WHERE SEQ = #{seq}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 공지사항 등록 -->
+    <insert id="insertNotice" parameterType="com.ERI.demo.vo.NtiLstVO" useGeneratedKeys="true" keyProperty="seq">
+        INSERT INTO TB_NTI_LST (
+            TTL,
+            CNTN,
+            STS_CD,
+            FILE_ATTACH_YN,
+            RGST_EMP_ID,
+            UPDT_EMP_ID,
+            DEL_YN,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{ttl,jdbcType=VARCHAR},
+            #{cntn,jdbcType=VARCHAR},
+            #{stsCd,jdbcType=VARCHAR},
+            COALESCE(#{fileAttachYn,jdbcType=VARCHAR}, 'N'),
+            #{rgstEmpId,jdbcType=VARCHAR},
+            #{updtEmpId,jdbcType=VARCHAR},
+            'N',
+            #{rgstEmpId,jdbcType=VARCHAR},
+            #{updtEmpId,jdbcType=VARCHAR},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 공지사항 수정 -->
+    <update id="updateNotice" parameterType="com.ERI.demo.vo.NtiLstVO">
+        UPDATE TB_NTI_LST
+        SET 
+            <if test="ttl != null">TTL = #{ttl,jdbcType=VARCHAR},</if>
+            <if test="cntn != null">CNTN = #{cntn,jdbcType=VARCHAR},</if>
+            <if test="stsCd != null">STS_CD = #{stsCd,jdbcType=VARCHAR},</if>
+            <if test="fileAttachYn != null and fileAttachYn != ''">FILE_ATTACH_YN = #{fileAttachYn,jdbcType=VARCHAR},</if>
+            <if test="updtEmpId != null">UPDT_EMP_ID = #{updtEmpId,jdbcType=VARCHAR},</if>
+            UPD_EMP_ID = COALESCE(#{updtEmpId,jdbcType=VARCHAR}, #{rgstEmpId,jdbcType=VARCHAR}),
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 공지사항 삭제 (논리 삭제) -->
+    <update id="deleteNotice">
+        UPDATE TB_NTI_LST
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 공지사항 목록 조회 (전체) -->
+    <select id="selectAllNotices" resultType="com.ERI.demo.vo.NtiLstVO">
+        SELECT 
+            SEQ,
+            TTL,
+            CNTN,
+            STS_CD,
+            FILE_ATTACH_YN,
+            RGST_EMP_ID,
+            UPDT_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_NTI_LST
+        WHERE DEL_YN = 'N'
+        ORDER BY REG_DATE DESC
+    </select>
+
+    <!-- 활성 공지사항 목록 조회 -->
+    <select id="selectActiveNotices" resultType="com.ERI.demo.vo.NtiLstVO">
+        SELECT 
+            SEQ,
+            TTL,
+            CNTN,
+            STS_CD,
+            FILE_ATTACH_YN,
+            RGST_EMP_ID,
+            UPDT_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_NTI_LST
+        WHERE DEL_YN = 'N'
+        AND STS_CD = 'STS001'
+        ORDER BY REG_DATE DESC
+    </select>
+
+    <!-- NtiLstService에서 호출하는 메서드들 -->
+    
+    <!-- 공지사항 목록 조회 (검색 조건 포함) -->
+    <select id="selectNtiLstList" parameterType="com.ERI.demo.vo.NtiLstVO" resultType="com.ERI.demo.vo.NtiLstVO">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY REG_DATE DESC) as rowNum,
+            SEQ,
+            TTL,
+            CNTN,
+            STS_CD,
+            FILE_ATTACH_YN,
+            RGST_EMP_ID,
+            UPDT_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_NTI_LST
+        WHERE DEL_YN = 'N'
+        <if test="ttl != null and ttl != ''">
+            AND TTL LIKE CONCAT('%', #{ttl,jdbcType=VARCHAR}, '%')
+        </if>
+        <if test="stsCd != null and stsCd != ''">
+            AND STS_CD = #{stsCd,jdbcType=VARCHAR}
+        </if>
+        <if test="rgstEmpId != null and rgstEmpId != ''">
+            AND RGST_EMP_ID = #{rgstEmpId,jdbcType=VARCHAR}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND DATE(REG_DATE) &gt;= DATE(#{startDate,jdbcType=VARCHAR})
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND DATE(REG_DATE) &lt;= DATE(#{endDate,jdbcType=VARCHAR})
+        </if>
+        ORDER BY 
+        <choose>
+            <when test="sortBy != null and sortBy != ''">
+                <choose>
+                    <when test="sortBy == 'seq'">SEQ</when>
+                    <when test="sortBy == 'ttl'">TTL</when>
+                    <when test="sortBy == 'regDate'">REG_DATE</when>
+                    <when test="sortBy == 'stsCd'">STS_CD</when>
+                    <otherwise>REG_DATE</otherwise>
+                </choose>
+            </when>
+            <otherwise>REG_DATE</otherwise>
+        </choose>
+        <choose>
+            <when test="sortDirection != null and sortDirection == 'ASC'">ASC</when>
+            <otherwise>DESC</otherwise>
+        </choose>
+    </select>
+
+    <!-- 공지사항 상세 조회 -->
+    <select id="selectNtiLst" resultType="com.ERI.demo.vo.NtiLstVO">
+        SELECT 
+            SEQ,
+            TTL,
+            CNTN,
+            STS_CD,
+            FILE_ATTACH_YN,
+            RGST_EMP_ID,
+            UPDT_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_NTI_LST
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 공지사항 등록 -->
+    <insert id="insertNtiLst" parameterType="com.ERI.demo.vo.NtiLstVO" useGeneratedKeys="true" keyProperty="seq">
+        INSERT INTO TB_NTI_LST (
+            TTL,
+            CNTN,
+            STS_CD,
+            FILE_ATTACH_YN,
+            RGST_EMP_ID,
+            UPDT_EMP_ID,
+            DEL_YN,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{ttl,jdbcType=VARCHAR},
+            #{cntn,jdbcType=VARCHAR},
+            COALESCE(#{stsCd,jdbcType=VARCHAR}, 'STS001'),
+            COALESCE(#{fileAttachYn,jdbcType=VARCHAR}, 'N'),
+            #{rgstEmpId,jdbcType=VARCHAR},
+            #{updtEmpId,jdbcType=VARCHAR},
+            'N',
+            #{rgstEmpId,jdbcType=VARCHAR},
+            #{updtEmpId,jdbcType=VARCHAR},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 공지사항 수정 -->
+    <update id="updateNtiLst" parameterType="com.ERI.demo.vo.NtiLstVO">
+        UPDATE TB_NTI_LST
+        SET 
+            <if test="ttl != null">TTL = #{ttl,jdbcType=VARCHAR},</if>
+            <if test="cntn != null">CNTN = #{cntn,jdbcType=VARCHAR},</if>
+            <if test="stsCd != null">STS_CD = #{stsCd,jdbcType=VARCHAR},</if>
+            <if test="fileAttachYn != null and fileAttachYn != ''">FILE_ATTACH_YN = #{fileAttachYn,jdbcType=VARCHAR},</if>
+            <if test="updtEmpId != null">UPDT_EMP_ID = #{updtEmpId,jdbcType=VARCHAR},</if>
+            UPD_EMP_ID = COALESCE(#{updtEmpId,jdbcType=VARCHAR}, #{rgstEmpId,jdbcType=VARCHAR}),
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 공지사항 삭제 -->
+    <update id="deleteNtiLst">
+        UPDATE TB_NTI_LST
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 공지사항 페이징 목록 조회 -->
+    <select id="selectNtiLstListWithPaging" parameterType="com.ERI.demo.vo.NtiLstVO" resultType="com.ERI.demo.vo.NtiLstVO">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY 
+                <choose>
+                    <when test="sortBy != null and sortBy != ''">
+                        <choose>
+                            <when test="sortBy == 'seq'">SEQ</when>
+                            <when test="sortBy == 'ttl'">TTL</when>
+                            <when test="sortBy == 'regDate'">REG_DATE</when>
+                            <when test="sortBy == 'stsCd'">STS_CD</when>
+                            <otherwise>REG_DATE</otherwise>
+                        </choose>
+                    </when>
+                    <otherwise>REG_DATE</otherwise>
+                </choose>
+                <choose>
+                    <when test="sortDirection != null and sortDirection == 'ASC'">ASC</when>
+                    <otherwise>DESC</otherwise>
+                </choose>
+            ) as rowNum,
+            SEQ,
+            TTL,
+            CNTN,
+            STS_CD,
+            FILE_ATTACH_YN,
+            RGST_EMP_ID,
+            UPDT_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_NTI_LST
+        WHERE DEL_YN = 'N'
+        <if test="ttl != null and ttl != ''">
+            AND TTL LIKE CONCAT('%', #{ttl}, '%')
+        </if>
+        <if test="stsCd != null and stsCd != ''">
+            AND STS_CD = #{stsCd}
+        </if>
+        <if test="rgstEmpId != null and rgstEmpId != ''">
+            AND RGST_EMP_ID = #{rgstEmpId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND DATE(REG_DATE) &gt;= DATE(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND DATE(REG_DATE) &lt;= DATE(#{endDate})
+        </if>
+        ORDER BY 
+        <choose>
+            <when test="sortBy != null and sortBy != ''">
+                <choose>
+                    <when test="sortBy == 'seq'">SEQ</when>
+                    <when test="sortBy == 'ttl'">TTL</when>
+                    <when test="sortBy == 'regDate'">REG_DATE</when>
+                    <when test="sortBy == 'stsCd'">STS_CD</when>
+                    <otherwise>REG_DATE</otherwise>
+                </choose>
+            </when>
+            <otherwise>REG_DATE</otherwise>
+        </choose>
+        <choose>
+            <when test="sortDirection != null and sortDirection == 'ASC'">ASC</when>
+            <otherwise>DESC</otherwise>
+        </choose>
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 공지사항 총 개수 조회 -->
+    <select id="selectNtiLstCount" parameterType="com.ERI.demo.vo.NtiLstVO" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_NTI_LST
+        WHERE DEL_YN = 'N'
+        <if test="ttl != null and ttl != ''">
+            AND TTL LIKE CONCAT('%', #{ttl}, '%')
+        </if>
+        <if test="stsCd != null and stsCd != ''">
+            AND STS_CD = #{stsCd}
+        </if>
+        <if test="rgstEmpId != null and rgstEmpId != ''">
+            AND RGST_EMP_ID = #{rgstEmpId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND DATE(REG_DATE) &gt;= DATE(#{startDate})
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND DATE(REG_DATE) &lt;= DATE(#{endDate})
+        </if>
+    </select>
+
+</mapper> 

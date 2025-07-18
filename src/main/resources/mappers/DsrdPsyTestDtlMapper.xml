@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.DsrdPsyTestDtlMapper">
+
+    <!-- 희망 심리검사 명세 목록 조회 -->
+    <select id="selectDsrdPsyTestDtlList" parameterType="com.ERI.demo.vo.DsrdPsyTestDtlVO" resultType="com.ERI.demo.vo.DsrdPsyTestDtlVO">
+        SELECT 
+            APP_DT,
+            CNSL_APP_SEQ,
+            CNSL_SEQ,
+            PSY_TEST_CD,
+            PSY_TEST_NM,
+            PSY_TEST_DESC,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID
+        FROM TB_DSRD_PSY_TEST_DTL
+        <where>
+            <if test="appDt != null">
+                AND APP_DT = #{appDt}
+            </if>
+            <if test="cnslAppSeq != null">
+                AND CNSL_APP_SEQ = #{cnslAppSeq}
+            </if>
+            <if test="cnslSeq != null">
+                AND CNSL_SEQ = #{cnslSeq}
+            </if>
+            <if test="psyTestCd != null and psyTestCd != ''">
+                AND PSY_TEST_CD = #{psyTestCd}
+            </if>
+            <if test="psyTestNm != null and psyTestNm != ''">
+                AND PSY_TEST_NM LIKE CONCAT('%', #{psyTestNm}, '%')
+            </if>
+            <if test="rgstEmpId != null and rgstEmpId != ''">
+                AND RGST_EMP_ID = #{rgstEmpId}
+            </if>
+        </where>
+        ORDER BY APP_DT DESC, CNSL_APP_SEQ DESC, CNSL_SEQ DESC, PSY_TEST_CD
+    </select>
+
+    <!-- 희망 심리검사 명세 상세 조회 -->
+    <select id="selectDsrdPsyTestDtl" resultType="com.ERI.demo.vo.DsrdPsyTestDtlVO">
+        SELECT 
+            APP_DT,
+            CNSL_APP_SEQ,
+            CNSL_SEQ,
+            PSY_TEST_CD,
+            PSY_TEST_NM,
+            PSY_TEST_DESC,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID
+        FROM TB_DSRD_PSY_TEST_DTL
+        WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CNSL_SEQ = #{cnslSeq} AND PSY_TEST_CD = #{psyTestCd}
+    </select>
+
+    <!-- 희망 심리검사 명세 등록 -->
+    <insert id="insertDsrdPsyTestDtl" parameterType="com.ERI.demo.vo.DsrdPsyTestDtlVO">
+        INSERT INTO TB_DSRD_PSY_TEST_DTL (
+            APP_DT,
+            CNSL_APP_SEQ,
+            CNSL_SEQ,
+            PSY_TEST_CD,
+            PSY_TEST_NM,
+            PSY_TEST_DESC,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID
+        ) VALUES (
+            #{appDt},
+            #{cnslAppSeq},
+            #{cnslSeq},
+            #{psyTestCd},
+            #{psyTestNm},
+            #{psyTestDesc},
+            #{rgstDt},
+            #{rgstTm},
+            #{rgstEmpId}
+        )
+    </insert>
+
+    <!-- 희망 심리검사 명세 수정 -->
+    <update id="updateDsrdPsyTestDtl" parameterType="com.ERI.demo.vo.DsrdPsyTestDtlVO">
+        UPDATE TB_DSRD_PSY_TEST_DTL
+        SET 
+            PSY_TEST_NM = #{psyTestNm},
+            PSY_TEST_DESC = #{psyTestDesc},
+            UPDT_DT = #{updtDt},
+            UPDT_TM = #{updtTm},
+            UPDT_EMP_ID = #{updtEmpId}
+        WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CNSL_SEQ = #{cnslSeq} AND PSY_TEST_CD = #{psyTestCd}
+    </update>
+
+    <!-- 희망 심리검사 명세 삭제 -->
+    <delete id="deleteDsrdPsyTestDtl">
+        DELETE FROM TB_DSRD_PSY_TEST_DTL
+        WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CNSL_SEQ = #{cnslSeq} AND PSY_TEST_CD = #{psyTestCd}
+    </delete>
+
+</mapper> 

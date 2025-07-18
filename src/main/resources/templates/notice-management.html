@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공지사항 관리</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"], input[type="file"], select, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .btn-success {
+            background-color: #28a745;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .search-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: end;
+        }
+        .search-form .form-group {
+            margin-bottom: 0;
+            flex: 1;
+        }
+        .search-form button {
+            margin-right: 0;
+        }
+        .notice-list {
+            margin-top: 20px;
+        }
+        .notice-item {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+        }
+        .notice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .notice-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .notice-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .notice-meta {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .notice-content {
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .notice-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .file-attach-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        .file-list {
+            margin-top: 10px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .file-info {
+            flex: 1;
+        }
+        .file-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .file-size {
+            color: #666;
+            font-size: 12px;
+        }
+        .file-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .drag-area {
+            border: 2px dashed #007bff;
+            border-radius: 4px;
+            padding: 20px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        .drag-area.dragover {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #000;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        .pagination button {
+            padding: 8px 12px;
+            margin: 0;
+        }
+        .pagination button.active {
+            background-color: #007bff;
+        }
+        .pagination button:not(.active) {
+            background-color: #6c757d;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>공지사항 관리</h1>
+    
+    <!-- 검색 및 등록 버튼 -->
+    <div class="container">
+        <div class="search-form">
+            <div class="form-group">
+                <label for="searchTitle">제목 검색:</label>
+                <input type="text" id="searchTitle" placeholder="제목을 입력하세요">
+            </div>
+            <div class="form-group">
+                <label for="searchStatus">상태:</label>
+                <select id="searchStatus">
+                    <option value="">전체</option>
+                    <option value="STS001">활성</option>
+                    <option value="STS002">비활성</option>
+                </select>
+            </div>
+            <button onclick="searchNotices()">검색</button>
+            <button class="btn-success" onclick="showNoticeModal()">공지사항 등록</button>
+        </div>
+        
+        <div id="searchResult" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- 공지사항 목록 -->
+    <div class="container">
+        <h2>공지사항 목록</h2>
+        <div id="noticeList" class="notice-list">
+            <!-- 공지사항 목록이 여기에 동적으로 로드됩니다 -->
+        </div>
+        <div id="pagination" class="pagination">
+            <!-- 페이지네이션이 여기에 동적으로 로드됩니다 -->
+        </div>
+    </div>
+
+    <!-- 공지사항 등록/수정 모달 -->
+    <div id="noticeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNoticeModal()">&times;</span>
+            <h2 id="modalTitle">공지사항 등록</h2>
+            
+            <form id="noticeForm">
+                <input type="hidden" id="noticeSeq" value="">
+                
+                <div class="form-group">
+                    <label for="noticeTitle">제목 *</label>
+                    <input type="text" id="noticeTitle" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="noticeContent">내용 *</label>
+                    <textarea id="noticeContent" rows="8" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="noticeStatus">상태</label>
+                    <select id="noticeStatus">
+                        <option value="STS001">활성</option>
+                        <option value="STS002">비활성</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="empId">등록자 ID</label>
+                    <input type="text" id="empId" value="ADMIN001" required>
+                </div>
+                
+                <!-- 첨부파일 섹션 -->
+                <div class="file-attach-section">
+                    <h3>첨부파일</h3>
+                    <div class="drag-area" id="dragArea">
+                        <p>파일을 드래그하여 놓거나 클릭하여 선택하세요</p>
+                        <input type="file" id="files" multiple style="display: none;">
+                    </div>
+                    <div id="fileListPreview" class="file-list" style="display: none;"></div>
+                    <div id="existingFileList" class="file-list" style="display: none;"></div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn-success">저장</button>
+                    <button type="button" class="btn-secondary" onclick="closeNoticeModal()">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let selectedFiles = [];
+        let currentPage = 1;
+        let totalPages = 1;
+        let pageSize = 10;
+
+        // 페이지 로드 시 공지사항 목록 조회
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNoticeList();
+            setupDragAndDrop();
+        });
+
+        // 드래그 앤 드롭 설정
+        function setupDragAndDrop() {
+            const dragArea = document.getElementById('dragArea');
+            const fileInput = document.getElementById('files');
+
+            dragArea.addEventListener('click', () => fileInput.click());
+
+            dragArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dragArea.classList.add('dragover');
+            });
+
+            dragArea.addEventListener('dragleave', () => {
+                dragArea.classList.remove('dragover');
+            });
+
+            dragArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dragArea.classList.remove('dragover');
+                const files = Array.from(e.dataTransfer.files);
+                handleFileSelection(files);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                handleFileSelection(files);
+            });
+        }
+
+        function handleFileSelection(files) {
+            selectedFiles = files;
+            displayFilePreview();
+        }
+
+        function displayFilePreview() {
+            const previewDiv = document.getElementById('fileListPreview');
+            
+            if (selectedFiles.length === 0) {
+                previewDiv.style.display = 'none';
+                return;
+            }
+
+            let html = '<h4>선택된 파일 목록:</h4>';
+            
+            selectedFiles.forEach((file, index) => {
+                const size = formatFileSize(file.size);
+                html += `
+                    <div class="file-item">
+                        <div class="file-info">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${size}</div>
+                        </div>
+                        <div class="file-actions">
+                            <button type="button" class="btn-danger btn-sm" onclick="removeFile(${index})">삭제</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            previewDiv.innerHTML = html;
+            previewDiv.style.display = 'block';
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            displayFilePreview();
+            
+            const dt = new DataTransfer();
+            selectedFiles.forEach(file => dt.items.add(file));
+            document.getElementById('files').files = dt.files;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 공지사항 목록 조회
+        async function loadNoticeList(page = 1) {
+            try {
+                const searchTitle = document.getElementById('searchTitle').value;
+                const searchStatus = document.getElementById('searchStatus').value;
+                
+                let url = `${API_BASE}/notice/list?page=${page}&size=${pageSize}`;
+                if (searchTitle) url += `&title=${encodeURIComponent(searchTitle)}`;
+                if (searchStatus) url += `&status=${searchStatus}`;
+                
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayNoticeList(result.data.content);
+                    displayPagination(result.data.totalPages, page);
+                    currentPage = page;
+                    totalPages = result.data.totalPages;
+                } else {
+                    displayResult('searchResult', { success: false, message: result.message });
+                }
+            } catch (error) {
+                displayResult('searchResult', { success: false, message: '공지사항 목록 조회 실패: ' + error.message });
+            }
+        }
+
+        // 공지사항 목록 표시
+        function displayNoticeList(notices) {
+            const noticeListDiv = document.getElementById('noticeList');
+            
+            if (notices.length === 0) {
+                noticeListDiv.innerHTML = '<p>등록된 공지사항이 없습니다.</p>';
+                return;
+            }
+
+            let html = '';
+            
+            notices.forEach(notice => {
+                const statusClass = notice.stsCd === 'STS001' ? 'status-active' : 'status-inactive';
+                const statusText = notice.stsCd === 'STS001' ? '활성' : '비활성';
+                const hasFiles = notice.fileAttachYn === 'Y';
+                
+                html += `
+                    <div class="notice-item">
+                        <div class="notice-header">
+                            <div class="notice-title">${notice.ttl}</div>
+                            <span class="notice-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="notice-meta">
+                            등록일: ${new Date(notice.regDate).toLocaleString()} | 
+                            등록자: ${notice.rgstEmpId || '시스템'} |
+                            첨부파일: ${hasFiles ? '있음' : '없음'}
+                        </div>
+                        <div class="notice-content">
+                            ${notice.cntn ? (notice.cntn.length > 200 ? notice.cntn.substring(0, 200) + '...' : notice.cntn) : ''}
+                        </div>
+                        <div class="notice-actions">
+                            <button class="btn-warning btn-sm" onclick="editNotice(${notice.seq})">수정</button>
+                            <button class="btn-danger btn-sm" onclick="deleteNotice(${notice.seq})">삭제</button>
+                            ${hasFiles ? `<button class="btn-sm" onclick="viewFiles('NTI', '${notice.seq}')">첨부파일</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            noticeListDiv.innerHTML = html;
+        }
+
+        // 페이지네이션 표시
+        function displayPagination(totalPages, currentPage) {
+            const paginationDiv = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                paginationDiv.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            
+            // 이전 페이지 버튼
+            if (currentPage > 1) {
+                html += `<button onclick="loadNoticeList(${currentPage - 1})">이전</button>`;
+            }
+            
+            // 페이지 번호 버튼
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const activeClass = i === currentPage ? 'active' : '';
+                html += `<button class="${activeClass}" onclick="loadNoticeList(${i})">${i}</button>`;
+            }
+            
+            // 다음 페이지 버튼
+            if (currentPage < totalPages) {
+                html += `<button onclick="loadNoticeList(${currentPage + 1})">다음</button>`;
+            }
+            
+            paginationDiv.innerHTML = html;
+        }
+
+        // 검색
+        function searchNotices() {
+            loadNoticeList(1);
+        }
+
+        // 공지사항 등록 모달 표시
+        function showNoticeModal() {
+            document.getElementById('modalTitle').textContent = '공지사항 등록';
+            document.getElementById('noticeForm').reset();
+            document.getElementById('noticeSeq').value = '';
+            selectedFiles = [];
+            displayFilePreview();
+            document.getElementById('existingFileList').style.display = 'none';
+            document.getElementById('noticeModal').style.display = 'block';
+        }
+
+        // 공지사항 수정 모달 표시
+        async function editNotice(seq) {
+            try {
+                const response = await fetch(`${API_BASE}/notice/${seq}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const notice = result.data;
+                    document.getElementById('modalTitle').textContent = '공지사항 수정';
+                    document.getElementById('noticeSeq').value = notice.seq;
+                    document.getElementById('noticeTitle').value = notice.ttl;
+                    document.getElementById('noticeContent').value = notice.cntn;
+                    document.getElementById('noticeStatus').value = notice.stsCd;
+                    document.getElementById('empId').value = notice.rgstEmpId || 'ADMIN001';
+                    
+                    // 기존 첨부파일 목록 표시
+                    if (notice.fileAttachYn === 'Y') {
+                        await loadExistingFiles('NTI', seq);
+                    } else {
+                        document.getElementById('existingFileList').style.display = 'none';
+                    }
+                    
+                    selectedFiles = [];
+                    displayFilePreview();
+                    document.getElementById('noticeModal').style.display = 'block';
+                } else {
+                    alert('공지사항 조회 실패: ' + result.message);
+                }
+            } catch (error) {
+                alert('공지사항 조회 실패: ' + error.message);
+            }
+        }
+
+        // 기존 첨부파일 목록 로드
+        async function loadExistingFiles(refTblCd, refPkVal) {
+            try {
+                const response = await fetch(`/api/file/list?refTblCd=${refTblCd}&refPkVal=${refPkVal}`);
+                const result = await response.json();
+                
+                const existingFileListDiv = document.getElementById('existingFileList');
+                
+                if (result.success && result.data.length > 0) {
+                    let html = '<h4>기존 첨부파일:</h4>';
+                    
+                    result.data.forEach(file => {
+                        html += `
+                            <div class="file-item">
+                                <div class="file-info">
+                                    <div class="file-name">${file.fileNm}</div>
+                                    <div class="file-size">${file.fileSizeDisplay}</div>
+                                </div>
+                                <div class="file-actions">
+                                    <button type="button" class="btn-sm" onclick="downloadFile(${file.fileSeq})">다운로드</button>
+                                    <button type="button" class="btn-danger btn-sm" onclick="deleteFile(${file.fileSeq})">삭제</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    existingFileListDiv.innerHTML = html;
+                    existingFileListDiv.style.display = 'block';
+                } else {
+                    existingFileListDiv.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('기존 첨부파일 로드 실패:', error);
+            }
+        }
+
+        // 첨부파일 다운로드
+        async function downloadFile(fileSeq) {
+            try {
+                window.open(`/api/file/download/${fileSeq}`, '_blank');
+            } catch (error) {
+                alert('다운로드 실패: ' + error.message);
+            }
+        }
+
+        // 첨부파일 삭제
+        async function deleteFile(fileSeq) {
+            if (!confirm('정말로 이 파일을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/file/${fileSeq}`, {
+                    method: 'DELETE',
+                    credentials: 'include' // 세션 쿠키 포함
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('파일이 삭제되었습니다.');
+                    // 기존 파일 목록 새로고침
+                    const noticeSeq = document.getElementById('noticeSeq').value;
+                    if (noticeSeq) {
+                        await loadExistingFiles('NTI', noticeSeq);
+                    }
+                } else {
+                    if (response.status === 401) {
+                        alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
+                        window.location.href = '/login';
+                    } else {
+                        alert('파일 삭제 실패: ' + result.message);
+                    }
+                }
+            } catch (error) {
+                alert('파일 삭제 실패: ' + error.message);
+            }
+        }
+
+        // 첨부파일 목록 보기
+        async function viewFiles(refTblCd, refPkVal) {
+            try {
+                const response = await fetch(`/api/file/list?refTblCd=${refTblCd}&refPkVal=${refPkVal}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    let message = '첨부파일 목록:\n\n';
+                    result.data.forEach(file => {
+                        message += `- ${file.fileNm} (${file.fileSizeDisplay})\n`;
+                    });
+                    alert(message);
+                } else {
+                    alert('첨부파일 목록 조회 실패: ' + result.message);
+                }
+            } catch (error) {
+                alert('첨부파일 목록 조회 실패: ' + error.message);
+            }
+        }
+
+        // 모달 닫기
+        function closeNoticeModal() {
+            document.getElementById('noticeModal').style.display = 'none';
+        }
+
+        // 공지사항 삭제
+        async function deleteNotice(seq) {
+            if (!confirm('정말로 이 공지사항을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/notice/${seq}`, {
+                    method: 'DELETE',
+                    credentials: 'include' // 세션 쿠키 포함
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('공지사항이 삭제되었습니다.');
+                    loadNoticeList(currentPage);
+                } else {
+                    if (response.status === 401) {
+                        alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
+                        window.location.href = '/login';
+                    } else {
+                        alert('공지사항 삭제 실패: ' + result.message);
+                    }
+                }
+            } catch (error) {
+                alert('공지사항 삭제 실패: ' + error.message);
+            }
+        }
+
+        // 결과 표시
+        function displayResult(elementId, result) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = 'result ' + (result.success ? 'success' : 'error');
+            element.textContent = JSON.stringify(result, null, 2);
+        }
+
+        // 폼 제출 처리
+        document.getElementById('noticeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const noticeSeq = document.getElementById('noticeSeq').value;
+            const isEdit = noticeSeq !== '';
+            
+            const formData = new FormData();
+            formData.append('title', document.getElementById('noticeTitle').value);
+            formData.append('content', document.getElementById('noticeContent').value);
+            formData.append('status', document.getElementById('noticeStatus').value);
+            formData.append('empId', document.getElementById('empId').value);
+            
+            // 첨부파일 추가
+            selectedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+            
+            try {
+                const url = isEdit ? `${API_BASE}/notice/${noticeSeq}` : `${API_BASE}/notice`;
+                const method = isEdit ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(isEdit ? '공지사항이 수정되었습니다.' : '공지사항이 등록되었습니다.');
+                    closeNoticeModal();
+                    loadNoticeList(currentPage);
+                } else {
+                    alert((isEdit ? '공지사항 수정' : '공지사항 등록') + ' 실패: ' + result.message);
+                }
+            } catch (error) {
+                alert((isEdit ? '공지사항 수정' : '공지사항 등록') + ' 실패: ' + error.message);
+            }
+        });
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('noticeModal');
+            if (event.target === modal) {
+                closeNoticeModal();
+            }
+        }
+    </script>
+</body>
+</html> 

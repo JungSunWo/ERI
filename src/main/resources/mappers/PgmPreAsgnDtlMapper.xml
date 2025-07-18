@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.PgmPreAsgnDtlMapper">
+
+    <!-- 프로그램 사전과제 명세 목록 조회 -->
+    <select id="selectPgmPreAsgnDtlList" parameterType="com.ERI.demo.vo.PgmPreAsgnDtlVO" resultType="com.ERI.demo.vo.PgmPreAsgnDtlVO">
+        SELECT 
+            PGM_ID,
+            PRE_ASGN_SEQ,
+            PRE_ASGN_TTL,
+            PRE_ASGN_CNTN,
+            PRE_ASGN_DUE_DT,
+            PRE_ASGN_DUE_TM,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID
+        FROM TB_PGM_PRE_ASGN_DTL
+        <where>
+            <if test="pgmId != null and pgmId != ''">
+                AND PGM_ID = #{pgmId}
+            </if>
+            <if test="preAsgnSeq != null">
+                AND PRE_ASGN_SEQ = #{preAsgnSeq}
+            </if>
+            <if test="preAsgnTtl != null and preAsgnTtl != ''">
+                AND PRE_ASGN_TTL LIKE CONCAT('%', #{preAsgnTtl}, '%')
+            </if>
+            <if test="preAsgnDueDt != null">
+                AND PRE_ASGN_DUE_DT = #{preAsgnDueDt}
+            </if>
+            <if test="rgstEmpId != null and rgstEmpId != ''">
+                AND RGST_EMP_ID = #{rgstEmpId}
+            </if>
+        </where>
+        ORDER BY PGM_ID, PRE_ASGN_SEQ
+    </select>
+
+    <!-- 프로그램 사전과제 명세 상세 조회 -->
+    <select id="selectPgmPreAsgnDtl" resultType="com.ERI.demo.vo.PgmPreAsgnDtlVO">
+        SELECT 
+            PGM_ID,
+            PRE_ASGN_SEQ,
+            PRE_ASGN_TTL,
+            PRE_ASGN_CNTN,
+            PRE_ASGN_DUE_DT,
+            PRE_ASGN_DUE_TM,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID,
+            UPDT_DT,
+            UPDT_TM,
+            UPDT_EMP_ID
+        FROM TB_PGM_PRE_ASGN_DTL
+        WHERE PGM_ID = #{pgmId} AND PRE_ASGN_SEQ = #{preAsgnSeq}
+    </select>
+
+    <!-- 프로그램 사전과제 명세 등록 -->
+    <insert id="insertPgmPreAsgnDtl" parameterType="com.ERI.demo.vo.PgmPreAsgnDtlVO">
+        INSERT INTO TB_PGM_PRE_ASGN_DTL (
+            PGM_ID,
+            PRE_ASGN_SEQ,
+            PRE_ASGN_TTL,
+            PRE_ASGN_CNTN,
+            PRE_ASGN_DUE_DT,
+            PRE_ASGN_DUE_TM,
+            RGST_DT,
+            RGST_TM,
+            RGST_EMP_ID
+        ) VALUES (
+            #{pgmId},
+            #{preAsgnSeq},
+            #{preAsgnTtl},
+            #{preAsgnCntn},
+            #{preAsgnDueDt},
+            #{preAsgnDueTm},
+            #{rgstDt},
+            #{rgstTm},
+            #{rgstEmpId}
+        )
+    </insert>
+
+    <!-- 프로그램 사전과제 명세 수정 -->
+    <update id="updatePgmPreAsgnDtl" parameterType="com.ERI.demo.vo.PgmPreAsgnDtlVO">
+        UPDATE TB_PGM_PRE_ASGN_DTL
+        SET 
+            PRE_ASGN_TTL = #{preAsgnTtl},
+            PRE_ASGN_CNTN = #{preAsgnCntn},
+            PRE_ASGN_DUE_DT = #{preAsgnDueDt},
+            PRE_ASGN_DUE_TM = #{preAsgnDueTm},
+            UPDT_DT = #{updtDt},
+            UPDT_TM = #{updtTm},
+            UPDT_EMP_ID = #{updtEmpId}
+        WHERE PGM_ID = #{pgmId} AND PRE_ASGN_SEQ = #{preAsgnSeq}
+    </update>
+
+    <!-- 프로그램 사전과제 명세 삭제 -->
+    <delete id="deletePgmPreAsgnDtl">
+        DELETE FROM TB_PGM_PRE_ASGN_DTL
+        WHERE PGM_ID = #{pgmId} AND PRE_ASGN_SEQ = #{preAsgnSeq}
+    </delete>
+
+</mapper> 

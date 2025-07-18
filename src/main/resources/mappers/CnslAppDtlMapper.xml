@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.CnslAppDtlMapper">
+
+    <select id="selectCnslAppDtlList" parameterType="com.ERI.demo.vo.CnslAppDtlVO" resultType="com.ERI.demo.vo.CnslAppDtlVO">
+        SELECT
+            app_dt,
+            seq,
+            emp_id,
+            cnsl_app_sts_cd,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        FROM
+            tb_cnsl_app_dtl
+        <where>
+            <if test="appDt != null">
+                AND app_dt = #{appDt}
+            </if>
+            <if test="seq != null">
+                AND seq = #{seq}
+            </if>
+            <if test="empId != null and empId != ''">
+                AND emp_id = #{empId}
+            </if>
+            <if test="cnslAppStsCd != null and cnslAppStsCd != ''">
+                AND cnsl_app_sts_cd = #{cnslAppStsCd}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectCnslAppDtl" resultType="com.ERI.demo.vo.CnslAppDtlVO">
+        SELECT
+            app_dt,
+            seq,
+            emp_id,
+            cnsl_app_sts_cd,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        FROM
+            tb_cnsl_app_dtl
+        WHERE
+            app_dt = #{appDt} AND seq = #{seq} AND emp_id = #{empId}
+    </select>
+
+    <insert id="insertCnslAppDtl" parameterType="com.ERI.demo.vo.CnslAppDtlVO">
+        INSERT INTO tb_cnsl_app_dtl (
+            app_dt,
+            seq,
+            emp_id,
+            cnsl_app_sts_cd,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        ) VALUES (
+            #{appDt},
+            #{seq},
+            #{empId},
+            #{cnslAppStsCd},
+            #{rgtrId},
+            NOW(),
+            #{mdfrId},
+            NOW()
+        )
+    </insert>
+
+    <update id="updateCnslAppDtl" parameterType="com.ERI.demo.vo.CnslAppDtlVO">
+        UPDATE
+            tb_cnsl_app_dtl
+        <set>
+            <if test="cnslAppStsCd != null and cnslAppStsCd != ''">
+                cnsl_app_sts_cd = #{cnslAppStsCd},
+            </if>
+            <if test="mdfrId != null and mdfrId != ''">
+                mdfr_id = #{mdfrId},
+            </if>
+            mdfcn_dt = NOW()
+        </set>
+        WHERE
+            app_dt = #{appDt} AND seq = #{seq} AND emp_id = #{empId}
+    </update>
+
+    <delete id="deleteCnslAppDtl">
+        DELETE FROM tb_cnsl_app_dtl
+        WHERE app_dt = #{appDt} AND seq = #{seq} AND emp_id = #{empId}
+    </delete>
+
+</mapper> 

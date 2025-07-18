@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERI 공통코드 관리</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .btn-success {
+            background-color: #28a745;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .status-active {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .status-inactive {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .loading {
+            display: none;
+            color: #007bff;
+            font-style: italic;
+            margin-top: 10px;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .result.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .result.info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        .pagination button {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background-color: white;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .pagination button:hover {
+            background-color: #f8f9fa;
+        }
+        .pagination button.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .pagination button:disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: end;
+        }
+        .search-box .form-group {
+            margin-bottom: 0;
+        }
+        .search-box input {
+            width: 200px;
+        }
+        .search-box select {
+            width: 150px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #000;
+        }
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        .tab-button.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .action-buttons .btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ERI 공통코드 관리</h1>
+        
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showTab('group')">그룹코드 관리</button>
+                <button class="tab-button" onclick="showTab('detail')">상세코드 관리</button>
+            </div>
+            
+            <!-- 그룹코드 관리 탭 -->
+            <div id="group-tab" class="tab-content active">
+                <div class="section">
+                    <div class="section-title">그룹코드 관리</div>
+                    
+                    <!-- 검색 영역 -->
+                    <div class="search-box">
+                        <div class="form-group">
+                            <label>검색어:</label>
+                            <input type="text" id="groupSearchKeyword" class="form-control" placeholder="그룹코드명 또는 설명">
+                        </div>
+                        <div class="form-group">
+                            <label>사용여부:</label>
+                            <select id="groupUseYn" class="form-control">
+                                <option value="">전체</option>
+                                <option value="Y">사용</option>
+                                <option value="N">미사용</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="searchGroupCodes()">검색</button>
+                        <button class="btn btn-secondary" onclick="resetGroupSearch()">초기화</button>
+                    </div>
+                    
+                    <!-- 버튼 영역 -->
+                    <div>
+                        <button class="btn btn-success" onclick="showGroupModal()">새 그룹코드 등록</button>
+                        <button class="btn" onclick="loadGroupCodes()">새로고침</button>
+                    </div>
+                    
+                    <!-- 테이블 영역 -->
+                    <div class="table-container">
+                        <table id="groupTable">
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>그룹코드</th>
+                                    <th>그룹코드명</th>
+                                    <th>설명</th>
+                                    <th>사용여부</th>
+                                    <th>등록자</th>
+                                    <th>등록일시</th>
+                                    <th>수정자</th>
+                                    <th>수정일시</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="groupTableBody">
+                                <!-- 데이터가 여기에 로드됩니다 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 페이지네이션 -->
+                    <div class="pagination" id="groupPagination">
+                        <!-- 페이지네이션이 여기에 생성됩니다 -->
+                    </div>
+                    
+                    <div class="loading" id="groupLoading">데이터 로딩 중...</div>
+                    <div class="result" id="groupResult"></div>
+                </div>
+            </div>
+            
+            <!-- 상세코드 관리 탭 -->
+            <div id="detail-tab" class="tab-content">
+                <div class="section">
+                    <div class="section-title">상세코드 관리</div>
+                    
+                    <!-- 검색 영역 -->
+                    <div class="search-box">
+                        <div class="form-group">
+                            <label>그룹코드:</label>
+                            <select id="detailGroupCd" class="form-control">
+                                <option value="">전체</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>검색어:</label>
+                            <input type="text" id="detailSearchKeyword" class="form-control" placeholder="상세코드명 또는 설명">
+                        </div>
+                        <div class="form-group">
+                            <label>사용여부:</label>
+                            <select id="detailUseYn" class="form-control">
+                                <option value="">전체</option>
+                                <option value="Y">사용</option>
+                                <option value="N">미사용</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="searchDetailCodes()">검색</button>
+                        <button class="btn btn-secondary" onclick="resetDetailSearch()">초기화</button>
+                    </div>
+                    
+                    <!-- 버튼 영역 -->
+                    <div>
+                        <button class="btn btn-success" onclick="showDetailModal()">새 상세코드 등록</button>
+                        <button class="btn" onclick="loadDetailCodes()">새로고침</button>
+                    </div>
+                    
+                    <!-- 테이블 영역 -->
+                    <div class="table-container">
+                        <table id="detailTable">
+                            <thead>
+                                <tr>
+                                    <th>번호</th>
+                                    <th>그룹코드</th>
+                                    <th>상세코드</th>
+                                    <th>상세코드명</th>
+                                    <th>설명</th>
+                                    <th>정렬순서</th>
+                                    <th>사용여부</th>
+                                    <th>등록자</th>
+                                    <th>등록일시</th>
+                                    <th>수정자</th>
+                                    <th>수정일시</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailTableBody">
+                                <!-- 데이터가 여기에 로드됩니다 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 페이지네이션 -->
+                    <div class="pagination" id="detailPagination">
+                        <!-- 페이지네이션이 여기에 생성됩니다 -->
+                    </div>
+                    
+                    <div class="loading" id="detailLoading">데이터 로딩 중...</div>
+                    <div class="result" id="detailResult"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 그룹코드 모달 -->
+    <div id="groupModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeGroupModal()">&times;</span>
+            <h2 id="groupModalTitle">그룹코드 등록</h2>
+            <form id="groupForm">
+                <input type="hidden" id="groupSeq" name="seq">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="groupCd">그룹코드 *</label>
+                        <input type="text" id="groupCd" name="grpCd" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="groupCdNm">그룹코드명 *</label>
+                        <input type="text" id="groupCdNm" name="grpCdNm" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="groupDesc">설명</label>
+                    <textarea id="groupDesc" name="desc" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="groupUseYn">사용여부 *</label>
+                    <select id="groupUseYnModal" name="useYn" class="form-control" required>
+                        <option value="Y">사용</option>
+                        <option value="N">미사용</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">저장</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeGroupModal()">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 상세코드 모달 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDetailModal()">&times;</span>
+            <h2 id="detailModalTitle">상세코드 등록</h2>
+            <form id="detailForm">
+                <input type="hidden" id="detailSeq" name="seq">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="detailGroupCdModal">그룹코드 *</label>
+                        <select id="detailGroupCdModal" name="grpCd" class="form-control" required>
+                            <option value="">그룹코드를 선택하세요</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailCd">상세코드 *</label>
+                        <input type="text" id="detailCd" name="dtlCd" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="detailCdNm">상세코드명 *</label>
+                        <input type="text" id="detailCdNm" name="dtlCdNm" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="detailSortOrder">정렬순서</label>
+                        <input type="number" id="detailSortOrder" name="sortOrder" class="form-control" value="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="detailDesc">설명</label>
+                    <textarea id="detailDesc" name="desc" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="detailUseYnModal">사용여부 *</label>
+                    <select id="detailUseYnModal" name="useYn" class="form-control" required>
+                        <option value="Y">사용</option>
+                        <option value="N">미사용</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">저장</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeDetailModal()">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let currentGroupPage = 1;
+        let currentDetailPage = 1;
+        let groupTotalPages = 1;
+        let detailTotalPages = 1;
+        let isGroupEditMode = false;
+        let isDetailEditMode = false;
+        
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGroupCodes();
+            loadDetailCodes();
+            loadGroupCodeOptions();
+        });
+        
+        // 탭 전환
+        function showTab(tabName) {
+            // 모든 탭 버튼 비활성화
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 모든 탭 콘텐츠 숨기기
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 선택된 탭 활성화
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+        
+        // 그룹코드 관련 함수들
+        function loadGroupCodes(page = 1) {
+            const loading = document.getElementById('groupLoading');
+            const result = document.getElementById('groupResult');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            const params = new URLSearchParams({
+                page: page,
+                size: 10,
+                sortKey: 'grpCd',
+                sortOrder: 'desc'
+            });
+            
+            fetch(`/api/common-code/groups?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (data.success) {
+                        displayGroupCodes(data.data.content);
+                        currentGroupPage = page;
+                        groupTotalPages = data.data.totalPages;
+                        createGroupPagination();
+                    } else {
+                        showGroupResult('error', '그룹코드 목록을 불러오는데 실패했습니다: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    loading.style.display = 'none';
+                    showGroupResult('error', '그룹코드 목록을 불러오는데 실패했습니다: ' + error.message);
+                });
+        }
+        
+        function displayGroupCodes(codes) {
+            const tbody = document.getElementById('groupTableBody');
+            tbody.innerHTML = '';
+            
+            codes.forEach(code => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${code.rowNum}</td>
+                    <td>${code.grpCd}</td>
+                    <td>${code.grpCdNm}</td>
+                    <td>${code.desc || ''}</td>
+                    <td><span class="${code.useYn === 'Y' ? 'status-active' : 'status-inactive'}">${code.useYn === 'Y' ? '사용' : '미사용'}</span></td>
+                    <td>${code.rgstEmpId || ''}</td>
+                    <td>${code.regDate || ''}</td>
+                    <td>${code.modEmpId || ''}</td>
+                    <td>${code.modDate || ''}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-warning" onclick="editGroupCode('${code.grpCd}')">수정</button>
+                        <button class="btn btn-danger" onclick="deleteGroupCode('${code.grpCd}')">삭제</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function createGroupPagination() {
+            const pagination = document.getElementById('groupPagination');
+            pagination.innerHTML = '';
+            
+            // 이전 페이지 버튼
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '이전';
+            prevBtn.disabled = currentGroupPage === 1;
+            prevBtn.onclick = () => loadGroupCodes(currentGroupPage - 1);
+            pagination.appendChild(prevBtn);
+            
+            // 페이지 번호 버튼들
+            const startPage = Math.max(1, currentGroupPage - 2);
+            const endPage = Math.min(groupTotalPages, currentGroupPage + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                pageBtn.className = i === currentGroupPage ? 'active' : '';
+                pageBtn.onclick = () => loadGroupCodes(i);
+                pagination.appendChild(pageBtn);
+            }
+            
+            // 다음 페이지 버튼
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '다음';
+            nextBtn.disabled = currentGroupPage === groupTotalPages;
+            nextBtn.onclick = () => loadGroupCodes(currentGroupPage + 1);
+            pagination.appendChild(nextBtn);
+        }
+        
+        function searchGroupCodes() {
+            const keyword = document.getElementById('groupSearchKeyword').value;
+            const useYn = document.getElementById('groupUseYn').value;
+            
+            const loading = document.getElementById('groupLoading');
+            const result = document.getElementById('groupResult');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            const params = new URLSearchParams({
+                page: 1,
+                size: 10,
+                sortKey: 'grpCd',
+                sortOrder: 'desc'
+            });
+            
+            if (keyword) params.append('keyword', keyword);
+            if (useYn) params.append('useYn', useYn);
+            
+            fetch(`/api/common-code/groups/search?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (data.success) {
+                        displayGroupCodes(data.data.content);
+                        currentGroupPage = 1;
+                        groupTotalPages = data.data.totalPages;
+                        createGroupPagination();
+                    } else {
+                        showGroupResult('error', '검색에 실패했습니다: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    loading.style.display = 'none';
+                    showGroupResult('error', '검색에 실패했습니다: ' + error.message);
+                });
+        }
+        
+        function resetGroupSearch() {
+            document.getElementById('groupSearchKeyword').value = '';
+            document.getElementById('groupUseYn').value = '';
+            loadGroupCodes(1);
+        }
+        
+        function showGroupModal() {
+            isGroupEditMode = false;
+            document.getElementById('groupModalTitle').textContent = '그룹코드 등록';
+            document.getElementById('groupForm').reset();
+            document.getElementById('groupSeq').value = '';
+            document.getElementById('groupModal').style.display = 'block';
+        }
+        
+        function closeGroupModal() {
+            document.getElementById('groupModal').style.display = 'none';
+        }
+        
+        function editGroupCode(grpCd) {
+            isGroupEditMode = true;
+            document.getElementById('groupModalTitle').textContent = '그룹코드 수정';
+            
+            fetch(`/api/common-code/groups/${grpCd}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const code = data.data;
+                        document.getElementById('groupSeq').value = code.grpCd;
+                        document.getElementById('groupCd').value = code.grpCd;
+                        document.getElementById('groupCdNm').value = code.grpCdNm;
+                        document.getElementById('groupDesc').value = code.grpCdDesc || '';
+                        document.getElementById('groupUseYnModal').value = code.useYn;
+                        document.getElementById('groupModal').style.display = 'block';
+                    } else {
+                        showGroupResult('error', '그룹코드 정보를 불러오는데 실패했습니다: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    showGroupResult('error', '그룹코드 정보를 불러오는데 실패했습니다: ' + error.message);
+                });
+        }
+        
+        function deleteGroupCode(grpCd) {
+            if (confirm('정말로 이 그룹코드를 삭제하시겠습니까?')) {
+                fetch(`/api/common-code/groups/${grpCd}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showGroupResult('success', '그룹코드가 삭제되었습니다.');
+                        loadGroupCodes(currentGroupPage);
+                    } else {
+                        showGroupResult('error', '삭제에 실패했습니다: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    showGroupResult('error', '삭제에 실패했습니다: ' + error.message);
+                });
+            }
+        }
+        
+        // 그룹코드 폼 제출
+        document.getElementById('groupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            const url = isGroupEditMode 
+                ? `/api/common-code/groups/${data.grpCd}`
+                : '/api/common-code/groups';
+            
+            const method = isGroupEditMode ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showGroupResult('success', isGroupEditMode ? '그룹코드가 수정되었습니다.' : '그룹코드가 등록되었습니다.');
+                    closeGroupModal();
+                    loadGroupCodes(currentGroupPage);
+                } else {
+                    showGroupResult('error', '저장에 실패했습니다: ' + result.message);
+                }
+            })
+            .catch(error => {
+                showGroupResult('error', '저장에 실패했습니다: ' + error.message);
+            });
+        });
+        
+        function showGroupResult(type, message) {
+            const result = document.getElementById('groupResult');
+            result.className = `result ${type}`;
+            result.textContent = message;
+            result.style.display = 'block';
+            
+            setTimeout(() => {
+                result.style.display = 'none';
+            }, 5000);
+        }
+        
+        // 상세코드 관련 함수들
+        function loadDetailCodes(page = 1) {
+            const loading = document.getElementById('detailLoading');
+            const result = document.getElementById('detailResult');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            const params = new URLSearchParams({
+                page: page,
+                size: 10,
+                sortKey: 'grpCd',
+                sortOrder: 'desc'
+            });
+            
+            fetch(`/api/common-code/details?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (data.success) {
+                        displayDetailCodes(data.data.content);
+                        currentDetailPage = page;
+                        detailTotalPages = data.data.totalPages;
+                        createDetailPagination();
+                    } else {
+                        showDetailResult('error', '상세코드 목록을 불러오는데 실패했습니다: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    loading.style.display = 'none';
+                    showDetailResult('error', '상세코드 목록을 불러오는데 실패했습니다: ' + error.message);
+                });
+        }
+        
+        function displayDetailCodes(codes) {
+            const tbody = document.getElementById('detailTableBody');
+            tbody.innerHTML = '';
+            
+            codes.forEach(code => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${code.rowNum}</td>
+                    <td>${code.grpCd}</td>
+                    <td>${code.dtlCd}</td>
+                    <td>${code.dtlCdNm}</td>
+                    <td>${code.desc || ''}</td>
+                    <td>${code.sortOrder || ''}</td>
+                    <td><span class="${code.useYn === 'Y' ? 'status-active' : 'status-inactive'}">${code.useYn === 'Y' ? '사용' : '미사용'}</span></td>
+                    <td>${code.rgstEmpId || ''}</td>
+                    <td>${code.regDate || ''}</td>
+                    <td>${code.modEmpId || ''}</td>
+                    <td>${code.modDate || ''}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-warning" onclick="editDetailCode('${code.grpCd}', '${code.dtlCd}')">수정</button>
+                        <button class="btn btn-danger" onclick="deleteDetailCode('${code.grpCd}', '${code.dtlCd}')">삭제</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function createDetailPagination() {
+            const pagination = document.getElementById('detailPagination');
+            pagination.innerHTML = '';
+            
+            // 이전 페이지 버튼
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '이전';
+            prevBtn.disabled = currentDetailPage === 1;
+            prevBtn.onclick = () => loadDetailCodes(currentDetailPage - 1);
+            pagination.appendChild(prevBtn);
+            
+            // 페이지 번호 버튼들
+            const startPage = Math.max(1, currentDetailPage - 2);
+            const endPage = Math.min(detailTotalPages, currentDetailPage + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                pageBtn.className = i === currentDetailPage ? 'active' : '';
+                pageBtn.onclick = () => loadDetailCodes(i);
+                pagination.appendChild(pageBtn);
+            }
+            
+            // 다음 페이지 버튼
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '다음';
+            nextBtn.disabled = currentDetailPage === detailTotalPages;
+            nextBtn.onclick = () => loadDetailCodes(currentDetailPage + 1);
+            pagination.appendChild(nextBtn);
+        }
+        
+        function searchDetailCodes() {
+            const groupCd = document.getElementById('detailGroupCd').value;
+            const keyword = document.getElementById('detailSearchKeyword').value;
+            const useYn = document.getElementById('detailUseYn').value;
+            
+            const loading = document.getElementById('detailLoading');
+            const result = document.getElementById('detailResult');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            const params = new URLSearchParams({
+                page: 1,
+                size: 10,
+                sortKey: 'grpCd',
+                sortOrder: 'desc'
+            });
+            
+            if (groupCd) params.append('grpCd', groupCd);
+            if (keyword) params.append('keyword', keyword);
+            if (useYn) params.append('useYn', useYn);
+            
+            fetch(`/api/common-code/details/search?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (data.success) {
+                        displayDetailCodes(data.data.content);
+                        currentDetailPage = 1;
+                        detailTotalPages = data.data.totalPages;
+                        createDetailPagination();
+                    } else {
+                        showDetailResult('error', '검색에 실패했습니다: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    loading.style.display = 'none';
+                    showDetailResult('error', '검색에 실패했습니다: ' + error.message);
+                });
+        }
+        
+        function resetDetailSearch() {
+            document.getElementById('detailGroupCd').value = '';
+            document.getElementById('detailSearchKeyword').value = '';
+            document.getElementById('detailUseYn').value = '';
+            loadDetailCodes(1);
+        }
+        
+        function loadGroupCodeOptions() {
+            fetch('/api/common-code/groups?page=1&size=1000&useYn=Y')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const groupSelects = [
+                            document.getElementById('detailGroupCd'),
+                            document.getElementById('detailGroupCdModal')
+                        ];
+                        
+                        groupSelects.forEach(select => {
+                            select.innerHTML = '<option value="">그룹코드를 선택하세요</option>';
+                            data.data.content.forEach(group => {
+                                const option = document.createElement('option');
+                                option.value = group.grpCd;
+                                option.textContent = `${group.grpCd} - ${group.grpCdNm}`;
+                                select.appendChild(option);
+                            });
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('그룹코드 옵션 로드 실패:', error);
+                });
+        }
+        
+        function showDetailModal() {
+            isDetailEditMode = false;
+            document.getElementById('detailModalTitle').textContent = '상세코드 등록';
+            document.getElementById('detailForm').reset();
+            document.getElementById('detailSeq').value = '';
+            document.getElementById('detailModal').style.display = 'block';
+        }
+        
+        function closeDetailModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+        
+        function editDetailCode(grpCd, dtlCd) {
+            isDetailEditMode = true;
+            document.getElementById('detailModalTitle').textContent = '상세코드 수정';
+            
+            fetch(`/api/common-code/details/${grpCd}/${dtlCd}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const code = data.data;
+                        document.getElementById('detailSeq').value = code.grpCd + '_' + code.dtlCd;
+                        document.getElementById('detailGroupCdModal').value = code.grpCd;
+                        document.getElementById('detailCd').value = code.dtlCd;
+                        document.getElementById('detailCdNm').value = code.dtlCdNm;
+                        document.getElementById('detailDesc').value = code.dtlCdDesc || '';
+                        document.getElementById('detailSortOrder').value = code.sortOrd || 1;
+                        document.getElementById('detailUseYnModal').value = code.useYn;
+                        document.getElementById('detailModal').style.display = 'block';
+                    } else {
+                        showDetailResult('error', '상세코드 정보를 불러오는데 실패했습니다: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    showDetailResult('error', '상세코드 정보를 불러오는데 실패했습니다: ' + error.message);
+                });
+        }
+        
+        function deleteDetailCode(grpCd, dtlCd) {
+            if (confirm('정말로 이 상세코드를 삭제하시겠습니까?')) {
+                fetch(`/api/common-code/details/${grpCd}/${dtlCd}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showDetailResult('success', '상세코드가 삭제되었습니다.');
+                        loadDetailCodes(currentDetailPage);
+                    } else {
+                        showDetailResult('error', '삭제에 실패했습니다: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    showDetailResult('error', '삭제에 실패했습니다: ' + error.message);
+                });
+            }
+        }
+        
+        // 상세코드 폼 제출
+        document.getElementById('detailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            const url = isDetailEditMode 
+                ? `/api/common-code/details/${data.grpCd}/${data.dtlCd}`
+                : '/api/common-code/details';
+            
+            const method = isDetailEditMode ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showDetailResult('success', isDetailEditMode ? '상세코드가 수정되었습니다.' : '상세코드가 등록되었습니다.');
+                    closeDetailModal();
+                    loadDetailCodes(currentDetailPage);
+                } else {
+                    showDetailResult('error', '저장에 실패했습니다: ' + result.message);
+                }
+            })
+            .catch(error => {
+                showDetailResult('error', '저장에 실패했습니다: ' + error.message);
+            });
+        });
+        
+        function showDetailResult(type, message) {
+            const result = document.getElementById('detailResult');
+            result.className = `result ${type}`;
+            result.textContent = message;
+            result.style.display = 'block';
+            
+            setTimeout(() => {
+                result.style.display = 'none';
+            }, 5000);
+        }
+        
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const groupModal = document.getElementById('groupModal');
+            const detailModal = document.getElementById('detailModal');
+            
+            if (event.target === groupModal) {
+                closeGroupModal();
+            }
+            if (event.target === detailModal) {
+                closeDetailModal();
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERI 스케줄링 배치 테스트</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .scheduler-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .scheduler-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        .scheduler-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .cron-info {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .btn.danger {
+            background-color: #dc3545;
+        }
+        .btn.danger:hover {
+            background-color: #c82333;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .result.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .result.info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .loading {
+            display: none;
+            color: #007bff;
+            font-style: italic;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .status-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .status-item h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+        .status-item p {
+            margin: 5px 0;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ERI 스케줄링 배치 테스트</h1>
+        
+        <!-- 스케줄링 상태 확인 -->
+        <div class="scheduler-section">
+            <div class="scheduler-title">1. 스케줄링 상태 확인</div>
+            <div class="scheduler-description">
+                현재 등록된 스케줄링 작업들의 상태와 실행 시간을 확인합니다.
+            </div>
+            <button class="btn" onclick="getSchedulerStatus()">상태 확인</button>
+            <div class="loading" id="statusLoading">상태 확인 중...</div>
+            <div class="result" id="statusResult"></div>
+        </div>
+
+        <!-- 데이터베이스 연결 테스트 -->
+        <div class="scheduler-section">
+            <div class="scheduler-title">2. 암호화 데이터베이스 연결 테스트</div>
+            <div class="scheduler-description">
+                eri_enc_db 데이터베이스 연결 상태와 TB_EMP_ENCRYPT 테이블 접근을 테스트합니다.
+                <br>
+                - 데이터베이스: eri_enc_db (PostgreSQL)
+                <br>
+                - 테이블: TB_EMP_ENCRYPT
+                <br>
+                - 연결 풀: HikariCP
+            </div>
+            <button class="btn" onclick="testDatabaseConnection()">데이터베이스 연결 테스트</button>
+            <div class="loading" id="dbLoading">연결 테스트 중...</div>
+            <div class="result" id="dbResult"></div>
+        </div>
+
+        <!-- 수동 배치 실행 -->
+        <div class="scheduler-section">
+            <div class="scheduler-title">3. 직원 정보 암호화 배치 수동 실행</div>
+            <div class="scheduler-description">
+                empInfo.txt 파일을 읽어서 직원번호, 직원명, 직원이메일을 처리하는 배치를 수동으로 실행합니다.
+                <br>
+                - 파일 위치: src/main/resources/templates/empInfo.txt
+                <br>
+                - 처리 방식: 직원번호 SHA256 해시, 직원명 랜덤 변형, 이메일 원본 저장
+                <br>
+                - 처리 과정: 원본 데이터 → 해시/변형 → TB_EMP_ENCRYPT 테이블 저장
+            </div>
+            <div class="cron-info">
+                <strong>정기 실행 스케줄:</strong> 매일 오전 2시 (0 0 2 * * ?)
+            </div>
+            <button class="btn" onclick="runManualBatch()">수동 배치 실행</button>
+            <div class="loading" id="batchLoading">배치 실행 중...</div>
+            <div class="result" id="batchResult"></div>
+        </div>
+
+        <!-- 스케줄링 정보 -->
+        <div class="scheduler-section">
+            <div class="scheduler-title">3. 스케줄링 정보</div>
+            <div class="scheduler-description">
+                등록된 모든 스케줄링 작업들의 정보입니다.
+            </div>
+            <div class="status-grid">
+                <div class="status-item">
+                    <h4>📅 일일 배치</h4>
+                    <p><strong>작업명:</strong> 직원 정보 해시 처리</p>
+                    <p><strong>실행 시간:</strong> 매일 오전 2시</p>
+                    <p><strong>Cron 표현식:</strong> 0 0 2 * * ?</p>
+                    <p><strong>설명:</strong> empInfo.txt 파일 읽어서 직원 정보 SHA256 해시 및 이메일 처리</p>
+                </div>
+                <div class="status-item">
+                    <h4>🗑️ 주간 정리</h4>
+                    <p><strong>작업명:</strong> 오래된 데이터 정리</p>
+                    <p><strong>실행 시간:</strong> 매주 일요일 오전 3시</p>
+                    <p><strong>Cron 표현식:</strong> 0 0 3 ? * SUN</p>
+                    <p><strong>설명:</strong> 30일 이상 된 삭제된 레코드 정리</p>
+                </div>
+                <div class="status-item">
+                    <h4>📊 월간 통계</h4>
+                    <p><strong>작업명:</strong> 암호화 통계 생성</p>
+                    <p><strong>실행 시간:</strong> 매월 1일 오전 4시</p>
+                    <p><strong>Cron 표현식:</strong> 0 0 4 1 * ?</p>
+                    <p><strong>설명:</strong> 전체 및 월간 암호화 통계 조회</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 동적 스케줄러 관리 -->
+        <div class="scheduler-section">
+            <div class="scheduler-title">4. 동적 스케줄러 관리</div>
+            <div class="scheduler-description">
+                scheduler_empInfo.txt 파일을 읽어서 동적으로 스케줄을 관리합니다.
+            </div>
+            <div class="button-group">
+                <button class="btn" onclick="reloadScheduleConfig()">설정 재로드</button>
+                <button class="btn" onclick="executeSpecificMethod()">특정 메소드 실행</button>
+            </div>
+            <div class="form-group" style="margin-top: 15px;">
+                <label for="methodSelect">실행할 메소드:</label>
+                <select id="methodSelect" class="form-control" style="width: 200px; padding: 5px; margin-left: 10px;">
+                    <option value="dailyEmpEncryptBatch">dailyEmpEncryptBatch</option>
+                    <option value="weeklyCleanupBatch">weeklyCleanupBatch</option>
+                    <option value="monthlyStatisticsBatch">monthlyStatisticsBatch</option>
+                    <option value="manualEmpEncryptBatch">manualEmpEncryptBatch</option>
+                </select>
+            </div>
+            <div class="loading" id="dynamicLoading">처리 중...</div>
+            <div class="result" id="dynamicResult"></div>
+        </div>
+
+        <!-- Cron 표현식 설명 -->
+        <div class="scheduler-section">
+            <div class="scheduler-title">5. Cron 표현식 설명</div>
+            <div class="scheduler-description">
+                Cron 표현식은 6개 또는 7개의 필드로 구성됩니다.
+            </div>
+            <div class="cron-info">
+                <strong>형식:</strong> 초 분 시 일 월 요일 [년도]
+                <br><strong>예시:</strong> 0 0 2 * * ? (매일 오전 2시)
+                <br><strong>필드:</strong> 초(0-59) 분(0-59) 시(0-23) 일(1-31) 월(1-12) 요일(1-7 또는 SUN-SAT)
+                <br><strong>특수문자:</strong> * (모든 값) ? (값 없음) / (증분) - (범위) , (여러 값)
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testDatabaseConnection() {
+            const button = event.target;
+            const loading = document.getElementById('dbLoading');
+            const result = document.getElementById('dbResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('/api/scheduler/test-db-connection', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ 데이터베이스 연결 테스트 완료!</strong>\n\n`;
+                    html += `메시지: ${data.message}\n`;
+                    html += `테스트 시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    let html = `❌ 데이터베이스 연결 테스트 실패!\n\n`;
+                    html += `오류: ${data.message}\n`;
+                    html += `오류 타입: ${data.error || 'Unknown'}\n`;
+                    html += `시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    result.innerHTML = html;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function getSchedulerStatus() {
+            const button = event.target;
+            const loading = document.getElementById('statusLoading');
+            const result = document.getElementById('statusResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('/api/scheduler/status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ 스케줄링 상태 조회 완료!</strong>\n\n`;
+                    
+                    if (data.status) {
+                        html += `<strong>스케줄링 정보:</strong>\n`;
+                        for (const [key, value] of Object.entries(data.status)) {
+                            html += `${key}: ${value}\n`;
+                        }
+                    }
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `❌ 상태 조회 실패!\n\n오류: ${data.message}\n\n시간: ${new Date(data.timestamp).toLocaleString()}`;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function runManualBatch() {
+            const button = event.target;
+            const loading = document.getElementById('batchLoading');
+            const result = document.getElementById('batchResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('/api/scheduler/manual-emp-encrypt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ 배치 실행 완료!</strong>\n\n`;
+                    html += `메시지: ${data.message}\n`;
+                    html += `처리 시간: ${data.processingTime}\n`;
+                    html += `실행 시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    if (data.details) {
+                        html += `\n상세 정보: ${data.details}\n`;
+                    }
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    let html = `❌ 배치 실행 실패!\n\n`;
+                    html += `오류: ${data.message}\n`;
+                    html += `오류 타입: ${data.error || 'Unknown'}\n`;
+                    html += `시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    if (data.details) {
+                        html += `\n상세 정보: ${data.details}\n`;
+                    }
+                    
+                    result.innerHTML = html;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function reloadScheduleConfig() {
+            const button = event.target;
+            const loading = document.getElementById('dynamicLoading');
+            const result = document.getElementById('dynamicResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('/api/scheduler/reload-config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ 스케줄 설정 재로드 완료!</strong>\n\n`;
+                    
+                    if (data.scheduleConfig) {
+                        html += `<strong>스케줄 설정:</strong>\n`;
+                        for (const [method, cron] of Object.entries(data.scheduleConfig)) {
+                            html += `${method} = ${cron}\n`;
+                        }
+                    }
+                    
+                    if (data.validationResults) {
+                        html += `\n<strong>유효성 검증 결과:</strong>\n`;
+                        for (const [method, isValid] of Object.entries(data.validationResults)) {
+                            const status = isValid ? '✅ 유효' : '❌ 무효';
+                            html += `${method}: ${status}\n`;
+                        }
+                    }
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `❌ 설정 재로드 실패!\n\n오류: ${data.message}\n\n시간: ${new Date(data.timestamp).toLocaleString()}`;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function executeSpecificMethod() {
+            const methodName = document.getElementById('methodSelect').value;
+            const button = event.target;
+            const loading = document.getElementById('dynamicLoading');
+            const result = document.getElementById('dynamicResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append('methodName', methodName);
+            
+            fetch('/api/scheduler/execute-method', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ 메소드 실행 완료!</strong>\n\n`;
+                    html += `메소드: ${data.methodName}\n`;
+                    html += `메시지: ${data.message}\n`;
+                    html += `처리 시간: ${data.processingTime}\n`;
+                    html += `실행 시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `❌ 메소드 실행 실패!\n\n메소드: ${data.methodName}\n오류: ${data.message}\n\n시간: ${new Date(data.timestamp).toLocaleString()}`;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html> 

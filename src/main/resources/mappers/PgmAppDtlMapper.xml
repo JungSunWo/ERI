@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.PgmAppDtlMapper">
+
+    <select id="selectPgmAppDtlList" parameterType="com.ERI.demo.vo.PgmAppDtlVO" resultType="com.ERI.demo.vo.PgmAppDtlVO">
+        SELECT
+            emp_id,
+            pgm_id,
+            app_dt,
+            pgm_app_ty_cd,
+            pgm_app_sts_cd,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        FROM
+            tb_pgm_app_dtl
+        <where>
+            <if test="empId != null and empId != ''">
+                AND emp_id = #{empId}
+            </if>
+            <if test="pgmId != null and pgmId != ''">
+                AND pgm_id = #{pgmId}
+            </if>
+            <if test="appDt != null">
+                AND app_dt = #{appDt}
+            </if>
+            <if test="pgmAppTyCd != null and pgmAppTyCd != ''">
+                AND pgm_app_ty_cd = #{pgmAppTyCd}
+            </if>
+            <if test="pgmAppStsCd != null and pgmAppStsCd != ''">
+                AND pgm_app_sts_cd = #{pgmAppStsCd}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectPgmAppDtl" resultType="com.ERI.demo.vo.PgmAppDtlVO">
+        SELECT
+            emp_id,
+            pgm_id,
+            app_dt,
+            pgm_app_ty_cd,
+            pgm_app_sts_cd,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        FROM
+            tb_pgm_app_dtl
+        WHERE
+            emp_id = #{empId} AND pgm_id = #{pgmId} AND app_dt = #{appDt}
+    </select>
+
+    <insert id="insertPgmAppDtl" parameterType="com.ERI.demo.vo.PgmAppDtlVO">
+        INSERT INTO tb_pgm_app_dtl (
+            emp_id,
+            pgm_id,
+            app_dt,
+            pgm_app_ty_cd,
+            pgm_app_sts_cd,
+            rgtr_id,
+            reg_dt,
+            mdfr_id,
+            mdfcn_dt
+        ) VALUES (
+            #{empId},
+            #{pgmId},
+            #{appDt},
+            #{pgmAppTyCd},
+            #{pgmAppStsCd},
+            #{rgtrId},
+            NOW(),
+            #{mdfrId},
+            NOW()
+        )
+    </insert>
+
+    <update id="updatePgmAppDtl" parameterType="com.ERI.demo.vo.PgmAppDtlVO">
+        UPDATE
+            tb_pgm_app_dtl
+        <set>
+            <if test="pgmAppTyCd != null and pgmAppTyCd != ''">
+                pgm_app_ty_cd = #{pgmAppTyCd},
+            </if>
+            <if test="pgmAppStsCd != null and pgmAppStsCd != ''">
+                pgm_app_sts_cd = #{pgmAppStsCd},
+            </if>
+            <if test="mdfrId != null and mdfrId != ''">
+                mdfr_id = #{mdfrId},
+            </if>
+            mdfcn_dt = NOW()
+        </set>
+        WHERE
+            emp_id = #{empId} AND pgm_id = #{pgmId} AND app_dt = #{appDt}
+    </update>
+
+    <delete id="deletePgmAppDtl">
+        DELETE FROM tb_pgm_app_dtl
+        WHERE emp_id = #{empId} AND pgm_id = #{pgmId} AND app_dt = #{appDt}
+    </delete>
+
+</mapper> 
