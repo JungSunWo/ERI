@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.util.Set;
@@ -23,8 +24,7 @@ import java.util.Set;
 @Configuration
 @MapperScan(
     basePackages = "com.ERI.demo.mappers",
-    sqlSessionFactoryRef = "mainSqlSessionFactory",
-    sqlSessionTemplateRef = "mainSqlSessionTemplate"
+    sqlSessionFactoryRef = "mainSqlSessionFactory"
 )
 public class MyBatisConfig {
 
@@ -106,5 +106,14 @@ public class MyBatisConfig {
     public SqlSessionTemplate mainSqlSessionTemplate(
             @Qualifier("mainSqlSessionFactory") SqlSessionFactory sqlSessionFactory) {
         return new SqlSessionTemplate(sqlSessionFactory);
+    }
+
+    /**
+     * 메인 데이터베이스 JdbcTemplate
+     */
+    @Bean(name = "mainJdbcTemplate")
+    @Primary
+    public JdbcTemplate mainJdbcTemplate(@Qualifier("mainDataSource") DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
     }
 } 

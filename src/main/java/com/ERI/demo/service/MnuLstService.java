@@ -29,8 +29,8 @@ public class MnuLstService {
     /**
      * 전체 메뉴 목록 조회 (계층 구조)
      */
-    public List<MnuLstVO> getAllMenus(boolean isAdmin) {
-        List<MnuLstVO> menuList = mnuLstMapper.selectAllMenus(isAdmin);
+    public List<MnuLstVO> getAllMenus(boolean isAdmin, boolean isCounselor) {
+        List<MnuLstVO> menuList = mnuLstMapper.selectAllMenus(isAdmin, isCounselor);
         return formatMenuList(menuList);
     }
 
@@ -86,19 +86,46 @@ public class MnuLstService {
         try {
             // 메뉴 코드 중복 확인
             if (mnuLstMapper.checkMenuCdExists(mnuLstVO.getMnuCd()) > 0) {
-                throw new IllegalArgumentException("이미 존재하는 메뉴 코드입니다: " + mnuLstVO.getMnuCd());
+                throw new IllegalArgumentException("메뉴 코드 '" + mnuLstVO.getMnuCd() + "'는 이미 사용 중입니다. 다른 메뉴 코드를 입력해주세요.");
             }
 
             // 필수 필드 설정
-            mnuLstVO.setRgstEmpId(empId);
-            mnuLstVO.setUpdtEmpId(empId);
             mnuLstVO.setRegEmpId(empId);
             mnuLstVO.setUpdEmpId(empId);
 
-            // 메뉴 레벨이 2인 경우 상위 메뉴 코드 필수
-            if (mnuLstVO.getMnuLvl() == 2 && (mnuLstVO.getPMnuCd() == null || mnuLstVO.getPMnuCd().trim().isEmpty())) {
-                throw new IllegalArgumentException("하위 메뉴는 상위 메뉴 코드가 필요합니다.");
+            // 메뉴 레벨에 따른 상위 메뉴 코드 처리
+            log.info("메뉴 등록 처리 - 원본 데이터: mnuLvl={}, pMnuCd={}", 
+                    mnuLstVO.getMnuLvl(), mnuLstVO.getPMnuCd());
+            
+            // 메뉴 레벨을 정수로 변환
+            Integer mnuLvl = null;
+            if (mnuLstVO.getMnuLvl() != null) {
+                try {
+                    mnuLvl = Integer.valueOf(mnuLstVO.getMnuLvl().toString());
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("메뉴 레벨은 숫자여야 합니다.");
+                }
             }
+            
+            if (mnuLvl != null && mnuLvl == 1) {
+                // 대메뉴인 경우 상위 메뉴 코드를 null로 설정
+                log.info("대메뉴 처리: pMnuCd를 null로 설정");
+                mnuLstVO.setPMnuCd(null);
+            } else if (mnuLvl != null && mnuLvl > 1) {
+                // 하위 메뉴인 경우 상위 메뉴 코드 필수
+                log.info("하위메뉴 처리 (레벨 {}): pMnuCd 검증 시작", mnuLvl);
+                if (mnuLstVO.getPMnuCd() == null || mnuLstVO.getPMnuCd().trim().isEmpty()) {
+                    log.error("하위 메뉴 상위 메뉴 코드 누락: mnuLvl={}, pMnuCd={}", mnuLvl, mnuLstVO.getPMnuCd());
+                    throw new IllegalArgumentException("하위 메뉴는 상위 메뉴 코드가 필요합니다.");
+                }
+                log.info("하위메뉴 처리: pMnuCd 검증 통과 - {}", mnuLstVO.getPMnuCd());
+            } else {
+                log.warn("알 수 없는 메뉴 레벨: {}", mnuLvl);
+                throw new IllegalArgumentException("유효하지 않은 메뉴 레벨입니다: " + mnuLvl);
+            }
+
+            log.info("최종 처리된 데이터: mnuLvl={}, pMnuCd={}", 
+                    mnuLstVO.getMnuLvl(), mnuLstVO.getPMnuCd());
 
             int result = mnuLstMapper.insertMenu(mnuLstVO);
             return result > 0;
@@ -114,15 +141,42 @@ public class MnuLstService {
     @Transactional
     public boolean updateMenu(MnuLstVO mnuLstVO, String empId) {
         try {
+            // 디버깅 로그 추가
+            log.info("메뉴 수정 요청 데이터: mnuCd={}, mnuLvl={}, pMnuCd={}", 
+                    mnuLstVO.getMnuCd(), mnuLstVO.getMnuLvl(), mnuLstVO.getPMnuCd());
+            
             // 기존 메뉴 확인
             MnuLstVO existingMenu = mnuLstMapper.selectMenuByCd(mnuLstVO.getMnuCd());
             if (existingMenu == null) {
                 throw new IllegalArgumentException("존재하지 않는 메뉴입니다: " + mnuLstVO.getMnuCd());
             }
 
-            // 메뉴 레벨이 2인 경우 상위 메뉴 코드 필수
-            if (mnuLstVO.getMnuLvl() == 2 && (mnuLstVO.getPMnuCd() == null || mnuLstVO.getPMnuCd().trim().isEmpty())) {
-                throw new IllegalArgumentException("하위 메뉴는 상위 메뉴 코드가 필요합니다.");
+            // 메뉴 레벨을 정수로 변환
+            Integer mnuLvl = null;
+            if (mnuLstVO.getMnuLvl() != null) {
+                try {
+                    mnuLvl = Integer.valueOf(mnuLstVO.getMnuLvl().toString());
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("메뉴 레벨은 숫자여야 합니다.");
+                }
+            }
+            
+            // 메뉴 레벨에 따른 상위 메뉴 코드 처리
+            if (mnuLvl != null && mnuLvl == 1) {
+                // 대메뉴인 경우 상위 메뉴 코드를 null로 설정
+                log.info("대메뉴 처리: pMnuCd를 null로 설정");
+                mnuLstVO.setPMnuCd(null);
+            } else if (mnuLvl != null && mnuLvl > 1) {
+                // 하위 메뉴인 경우 상위 메뉴 코드 필수
+                log.info("하위메뉴 처리 (레벨 {}): pMnuCd 검증 시작", mnuLvl);
+                if (mnuLstVO.getPMnuCd() == null || mnuLstVO.getPMnuCd().trim().isEmpty()) {
+                    log.error("하위 메뉴 상위 메뉴 코드 누락: mnuLvl={}, pMnuCd={}", mnuLvl, mnuLstVO.getPMnuCd());
+                    throw new IllegalArgumentException("하위 메뉴는 상위 메뉴 코드가 필요합니다.");
+                }
+                log.info("하위메뉴 처리: pMnuCd 검증 통과 - {}", mnuLstVO.getPMnuCd());
+            } else {
+                log.warn("알 수 없는 메뉴 레벨: {}", mnuLvl);
+                throw new IllegalArgumentException("유효하지 않은 메뉴 레벨입니다: " + mnuLvl);
             }
 
             // 자기 자신을 상위 메뉴로 설정하는 것 방지
@@ -130,8 +184,10 @@ public class MnuLstService {
                 throw new IllegalArgumentException("자기 자신을 상위 메뉴로 설정할 수 없습니다.");
             }
 
-            mnuLstVO.setUpdtEmpId(empId);
             mnuLstVO.setUpdEmpId(empId);
+
+            log.info("최종 처리된 데이터: mnuLvl={}, pMnuCd={}", 
+                    mnuLstVO.getMnuLvl(), mnuLstVO.getPMnuCd());
 
             int result = mnuLstMapper.updateMenu(mnuLstVO);
             return result > 0;

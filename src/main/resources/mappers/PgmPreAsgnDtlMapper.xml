@@ -13,10 +13,10 @@
             PRE_ASGN_DUE_TM,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             UPDT_DT,
             UPDT_TM,
-            UPDT_EMP_ID
+            UPD_EMP_ID
         FROM TB_PGM_PRE_ASGN_DTL
         <where>
             <if test="pgmId != null and pgmId != ''">
@@ -31,8 +31,8 @@
             <if test="preAsgnDueDt != null">
                 AND PRE_ASGN_DUE_DT = #{preAsgnDueDt}
             </if>
-            <if test="rgstEmpId != null and rgstEmpId != ''">
-                AND RGST_EMP_ID = #{rgstEmpId}
+            <if test="regEmpId != null and regEmpId != ''">
+                AND REG_EMP_ID = #{regEmpId}
             </if>
         </where>
         ORDER BY PGM_ID, PRE_ASGN_SEQ
@@ -49,10 +49,10 @@
             PRE_ASGN_DUE_TM,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             UPDT_DT,
             UPDT_TM,
-            UPDT_EMP_ID
+            UPD_EMP_ID
         FROM TB_PGM_PRE_ASGN_DTL
         WHERE PGM_ID = #{pgmId} AND PRE_ASGN_SEQ = #{preAsgnSeq}
     </select>
@@ -68,7 +68,7 @@
             PRE_ASGN_DUE_TM,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID
+            REG_EMP_ID
         ) VALUES (
             #{pgmId},
             #{preAsgnSeq},
@@ -78,7 +78,7 @@
             #{preAsgnDueTm},
             #{rgstDt},
             #{rgstTm},
-            #{rgstEmpId}
+            #{regEmpId}
         )
     </insert>
 
@@ -92,7 +92,7 @@
             PRE_ASGN_DUE_TM = #{preAsgnDueTm},
             UPDT_DT = #{updtDt},
             UPDT_TM = #{updtTm},
-            UPDT_EMP_ID = #{updtEmpId}
+            UPD_EMP_ID = #{updEmpId}
         WHERE PGM_ID = #{pgmId} AND PRE_ASGN_SEQ = #{preAsgnSeq}
     </update>
 

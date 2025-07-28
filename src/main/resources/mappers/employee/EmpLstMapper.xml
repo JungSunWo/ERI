@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.employee.EmpLstMapper">
+
+    <!-- 결과 매핑 -->
+    <resultMap id="EmpLstResultMap" type="EmployeeEmpLstVO">
+        <id column="EMP_ID" property="empId" />
+        <result column="ERI_EMP_ID" property="eriEmpId" />
+        <result column="EMP_NM" property="empNm" />
+        <result column="GNDR_DCD" property="gndrDcd" />
+        <result column="HLOF_YN" property="hlofYn" />
+        <result column="ETBN_YMD" property="etbnYmd" />
+        <result column="BLNG_BRCD" property="blngBrcd" />
+        <result column="BETEAM_CD" property="beteamCd" />
+        <result column="EXIG_BLNG_YMD" property="exigBlngYmd" />
+        <result column="TRTH_WORK_BRCD" property="trthWorkBrcd" />
+        <result column="RSWR_BRCD" property="rswrBrcd" />
+        <result column="JBTT_CD" property="jbttCd" />
+        <result column="JBTT_YMD" property="jbttYmd" />
+        <result column="NAME_NM" property="nameNm" />
+        <result column="JBCL_CD" property="jbclCd" />
+        <result column="TRTH_BIRT_YMD" property="trthBirtYmd" />
+        <result column="SLCN_UNCG_BIRT_YMD" property="slcnUncgBirtYmd" />
+        <result column="INSL_DCD" property="inslDcd" />
+        <result column="EMP_CPN" property="empCpn" />
+        <result column="EMP_EXTI_NO" property="empExtiNo" />
+        <result column="EAD" property="ead" />
+        <result column="DEL_YN" property="delYn" />
+        <result column="DEL_DATE" property="delDate" />
+        <result column="REG_DATE" property="regDate" />
+        <result column="UPD_DATE" property="updDate" />
+    </resultMap>
+
+    <!-- 전체 직원 목록 조회 -->
+    <select id="selectAllEmployees" resultMap="EmpLstResultMap">
+        SELECT 
+            EMP_ID,
+            ERI_EMP_ID,
+            EMP_NM,
+            GNDR_DCD,
+            HLOF_YN,
+            ETBN_YMD,
+            BLNG_BRCD,
+            BETEAM_CD,
+            EXIG_BLNG_YMD,
+            TRTH_WORK_BRCD,
+            RSWR_BRCD,
+            JBTT_CD,
+            JBTT_YMD,
+            NAME_NM,
+            JBCL_CD,
+            TRTH_BIRT_YMD,
+            SLCN_UNCG_BIRT_YMD,
+            INSL_DCD,
+            EMP_CPN,
+            EMP_EXTI_NO,
+            EAD,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_EMP_LST
+        WHERE DEL_YN = 'N'
+        ORDER BY EMP_NM
+    </select>
+
+    <!-- ERI_EMP_ID로 직원 정보 조회 -->
+    <select id="selectEmployeeByEriId" parameterType="string" resultMap="EmpLstResultMap">
+        SELECT 
+            EMP_ID,
+            ERI_EMP_ID,
+            EMP_NM,
+            GNDR_DCD,
+            HLOF_YN,
+            ETBN_YMD,
+            BLNG_BRCD,
+            BETEAM_CD,
+            EXIG_BLNG_YMD,
+            TRTH_WORK_BRCD,
+            RSWR_BRCD,
+            JBTT_CD,
+            JBTT_YMD,
+            NAME_NM,
+            JBCL_CD,
+            TRTH_BIRT_YMD,
+            SLCN_UNCG_BIRT_YMD,
+            INSL_DCD,
+            EMP_CPN,
+            EMP_EXTI_NO,
+            EAD,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_EMP_LST
+        WHERE ERI_EMP_ID = #{eriEmpId}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- EMP_ID로 직원 정보 조회 -->
+    <select id="selectEmployeeByEmpId" parameterType="string" resultMap="EmpLstResultMap">
+        SELECT 
+            EMP_ID,
+            ERI_EMP_ID,
+            EMP_NM,
+            GNDR_DCD,
+            HLOF_YN,
+            ETBN_YMD,
+            BLNG_BRCD,
+            BETEAM_CD,
+            EXIG_BLNG_YMD,
+            TRTH_WORK_BRCD,
+            RSWR_BRCD,
+            JBTT_CD,
+            JBTT_YMD,
+            NAME_NM,
+            JBCL_CD,
+            TRTH_BIRT_YMD,
+            SLCN_UNCG_BIRT_YMD,
+            INSL_DCD,
+            EMP_CPN,
+            EMP_EXTI_NO,
+            EAD,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_EMP_LST
+        WHERE EMP_ID = #{empId}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 부점별 직원 목록 조회 -->
+    <select id="selectEmployeesByBranch" parameterType="string" resultMap="EmpLstResultMap">
+        SELECT 
+            EMP_ID,
+            ERI_EMP_ID,
+            EMP_NM,
+            GNDR_DCD,
+            HLOF_YN,
+            ETBN_YMD,
+            BLNG_BRCD,
+            BETEAM_CD,
+            EXIG_BLNG_YMD,
+            TRTH_WORK_BRCD,
+            RSWR_BRCD,
+            JBTT_CD,
+            JBTT_YMD,
+            NAME_NM,
+            JBCL_CD,
+            TRTH_BIRT_YMD,
+            SLCN_UNCG_BIRT_YMD,
+            INSL_DCD,
+            EMP_CPN,
+            EMP_EXTI_NO,
+            EAD,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_EMP_LST
+        WHERE BLNG_BRCD = #{branchCd}
+        AND DEL_YN = 'N'
+        ORDER BY JBCL_CD, JBTT_CD, EMP_NM
+    </select>
+
+    <!-- 직원 정보 등록 -->
+    <insert id="insertEmployee" parameterType="EmployeeEmpLstVO">
+        INSERT INTO TB_EMP_LST (
+            EMP_ID,
+            ERI_EMP_ID,
+            EMP_NM,
+            GNDR_DCD,
+            HLOF_YN,
+            ETBN_YMD,
+            BLNG_BRCD,
+            BETEAM_CD,
+            EXIG_BLNG_YMD,
+            TRTH_WORK_BRCD,
+            RSWR_BRCD,
+            JBTT_CD,
+            JBTT_YMD,
+            NAME_NM,
+            JBCL_CD,
+            TRTH_BIRT_YMD,
+            SLCN_UNCG_BIRT_YMD,
+            INSL_DCD,
+            EMP_CPN,
+            EMP_EXTI_NO,
+            EAD,
+            DEL_YN
+        ) VALUES (
+            #{empId},
+            #{eriEmpId},
+            #{empNm},
+            #{gndrDcd},
+            #{hlofYn},
+            #{etbnYmd},
+            #{blngBrcd},
+            #{beteamCd},
+            #{exigBlngYmd},
+            #{trthWorkBrcd},
+            #{rswrBrcd},
+            #{jbttCd},
+            #{jbttYmd},
+            #{nameNm},
+            #{jbclCd},
+            #{trthBirtYmd},
+            #{slcnUncgBirtYmd},
+            #{inslDcd},
+            #{empCpn},
+            #{empExtiNo},
+            #{ead},
+            #{delYn}
+        )
+    </insert>
+
+    <!-- 직원 정보 수정 -->
+    <update id="updateEmployee" parameterType="EmployeeEmpLstVO">
+        UPDATE TB_EMP_LST SET
+            EMP_NM = #{empNm},
+            GNDR_DCD = #{gndrDcd},
+            HLOF_YN = #{hlofYn},
+            ETBN_YMD = #{etbnYmd},
+            BLNG_BRCD = #{blngBrcd},
+            BETEAM_CD = #{beteamCd},
+            EXIG_BLNG_YMD = #{exigBlngYmd},
+            TRTH_WORK_BRCD = #{trthWorkBrcd},
+            RSWR_BRCD = #{rswrBrcd},
+            JBTT_CD = #{jbttCd},
+            JBTT_YMD = #{jbttYmd},
+            NAME_NM = #{nameNm},
+            JBCL_CD = #{jbclCd},
+            TRTH_BIRT_YMD = #{trthBirtYmd},
+            SLCN_UNCG_BIRT_YMD = #{slcnUncgBirtYmd},
+            INSL_DCD = #{inslDcd},
+            EMP_CPN = #{empCpn},
+            EMP_EXTI_NO = #{empExtiNo},
+            EAD = #{ead},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE EMP_ID = #{empId}
+    </update>
+
+    <!-- 직원 정보 삭제 (논리 삭제) -->
+    <update id="deleteEmployee" parameterType="string">
+        UPDATE TB_EMP_LST SET
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP,
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE ERI_EMP_ID = #{eriEmpId}
+    </update>
+
+    <!-- 전체 직원 수 조회 -->
+    <select id="countAllEmployees" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_EMP_LST
+        WHERE DEL_YN = 'N'
+    </select>
+
+    <!-- 조건별 직원 검색 -->
+    <select id="searchEmployees" resultMap="EmpLstResultMap">
+        SELECT 
+            EMP_ID,
+            ERI_EMP_ID,
+            EMP_NM,
+            GNDR_DCD,
+            HLOF_YN,
+            ETBN_YMD,
+            BLNG_BRCD,
+            BETEAM_CD,
+            EXIG_BLNG_YMD,
+            TRTH_WORK_BRCD,
+            RSWR_BRCD,
+            JBTT_CD,
+            JBTT_YMD,
+            NAME_NM,
+            JBCL_CD,
+            TRTH_BIRT_YMD,
+            SLCN_UNCG_BIRT_YMD,
+            INSL_DCD,
+            EMP_CPN,
+            EMP_EXTI_NO,
+            EAD,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_EMP_LST
+        WHERE DEL_YN = 'N'
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (
+                EMP_NM LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR EMP_ID LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR ERI_EMP_ID LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR EAD LIKE CONCAT('%', #{searchKeyword}, '%')
+            )
+        </if>
+        <if test="branchCd != null and branchCd != ''">
+            AND BLNG_BRCD = #{branchCd}
+        </if>
+        <if test="jbclCd != null and jbclCd != ''">
+            AND JBCL_CD = #{jbclCd}
+        </if>
+        <if test="jbttCd != null and jbttCd != ''">
+            AND JBTT_CD = #{jbttCd}
+        </if>
+        <if test="hlofYn != null and hlofYn != ''">
+            AND HLOF_YN = #{hlofYn}
+        </if>
+        ORDER BY BLNG_BRCD, JBCL_CD, JBTT_CD, EMP_NM
+    </select>
+
+    <!-- 페이징된 직원 목록 조회 (관리자 등록용) -->
+    <select id="selectEmployeesWithPaging" resultMap="EmpLstResultMap">
+        SELECT 
+            EMP_ID,
+            ERI_EMP_ID,
+            EMP_NM,
+            GNDR_DCD,
+            HLOF_YN,
+            ETBN_YMD,
+            BLNG_BRCD,
+            BETEAM_CD,
+            EXIG_BLNG_YMD,
+            TRTH_WORK_BRCD,
+            RSWR_BRCD,
+            JBTT_CD,
+            JBTT_YMD,
+            NAME_NM,
+            JBCL_CD,
+            TRTH_BIRT_YMD,
+            SLCN_UNCG_BIRT_YMD,
+            INSL_DCD,
+            EMP_CPN,
+            EMP_EXTI_NO,
+            EAD,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_EMP_LST
+        WHERE DEL_YN = 'N'
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (
+                EMP_NM LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR EMP_ID LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR ERI_EMP_ID LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR EAD LIKE CONCAT('%', #{searchKeyword}, '%')
+            )
+        </if>
+        <choose>
+            <when test="sort != null and sort != ''">
+                <choose>
+                    <when test="sort == 'eriEmpId,asc'">ORDER BY ERI_EMP_ID ASC</when>
+                    <when test="sort == 'eriEmpId,desc'">ORDER BY ERI_EMP_ID DESC</when>
+                    <when test="sort == 'empId,asc'">ORDER BY EMP_ID ASC</when>
+                    <when test="sort == 'empId,desc'">ORDER BY EMP_ID DESC</when>
+                    <when test="sort == 'empNm,asc'">ORDER BY EMP_NM ASC</when>
+                    <when test="sort == 'empNm,desc'">ORDER BY EMP_NM DESC</when>
+                    <when test="sort == 'blngBrcd,asc'">ORDER BY BLNG_BRCD ASC</when>
+                    <when test="sort == 'blngBrcd,desc'">ORDER BY BLNG_BRCD DESC</when>
+                    <otherwise>ORDER BY BLNG_BRCD, JBCL_CD, JBTT_CD, EMP_NM</otherwise>
+                </choose>
+            </when>
+            <otherwise>ORDER BY BLNG_BRCD, JBCL_CD, JBTT_CD, EMP_NM</otherwise>
+        </choose>
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 검색 조건별 직원 수 조회 (관리자 등록용) -->
+    <select id="countEmployees" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_EMP_LST
+        WHERE DEL_YN = 'N'
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (
+                EMP_NM LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR EMP_ID LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR ERI_EMP_ID LIKE CONCAT('%', #{searchKeyword}, '%')
+                OR EAD LIKE CONCAT('%', #{searchKeyword}, '%')
+            )
+        </if>
+    </select>
+
+    <!-- 직원 ID로 직원 정보 조회 (관리자 등록용) -->
+    <select id="selectEmployeeById" parameterType="string" resultMap="EmpLstResultMap">
+        SELECT 
+            EMP_ID,
+            ERI_EMP_ID,
+            EMP_NM,
+            GNDR_DCD,
+            HLOF_YN,
+            ETBN_YMD,
+            BLNG_BRCD,
+            BETEAM_CD,
+            EXIG_BLNG_YMD,
+            TRTH_WORK_BRCD,
+            RSWR_BRCD,
+            JBTT_CD,
+            JBTT_YMD,
+            NAME_NM,
+            JBCL_CD,
+            TRTH_BIRT_YMD,
+            SLCN_UNCG_BIRT_YMD,
+            INSL_DCD,
+            EMP_CPN,
+            EMP_EXTI_NO,
+            EAD,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_EMP_LST
+        WHERE EMP_ID = #{empId}
+          AND DEL_YN = 'N'
+    </select>
+
+</mapper> 

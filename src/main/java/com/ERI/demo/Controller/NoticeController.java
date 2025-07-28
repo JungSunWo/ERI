@@ -1,8 +1,8 @@
 package com.ERI.demo.Controller;
 
-import com.ERI.demo.dto.UserAuthDto;
 import com.ERI.demo.service.NoticeService;
 import com.ERI.demo.vo.NtiLstVO;
+import com.ERI.demo.vo.employee.EmpLstVO;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,11 +88,11 @@ public class NoticeController {
      * 세션에서 사용자 정보를 가져오는 헬퍼 메서드
      */
     private String getCurrentUserId(HttpSession session) {
-        UserAuthDto userAuth = (UserAuthDto) session.getAttribute("USER_AUTH");
-        if (userAuth == null) {
+        com.ERI.demo.vo.employee.EmpLstVO empInfo = (com.ERI.demo.vo.employee.EmpLstVO) session.getAttribute("EMP_INFO");
+        if (empInfo == null) {
             throw new IllegalArgumentException("로그인이 필요합니다.");
         }
-        return userAuth.getUserId();
+        return empInfo.getEriEmpId();
     }
 
     /**
@@ -117,7 +117,7 @@ public class NoticeController {
             notice.setTtl(title);
             notice.setCntn(content);
             notice.setStsCd(status);
-            notice.setRgstEmpId(currentEmpId);
+            notice.setRegEmpId(currentEmpId);
             
             NtiLstVO createdNotice = noticeService.createNotice(notice, files, currentEmpId);
             
@@ -169,7 +169,7 @@ public class NoticeController {
             notice.setTtl(title);
             notice.setCntn(content);
             notice.setStsCd(status);
-            notice.setUpdtEmpId(currentEmpId);
+            notice.setUpdEmpId(currentEmpId);
             
             NtiLstVO updatedNotice = noticeService.updateNotice(notice, files, currentEmpId);
             

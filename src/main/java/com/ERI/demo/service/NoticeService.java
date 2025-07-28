@@ -44,7 +44,7 @@ public class NoticeService {
             }
         }
         
-        return new PageResponseDto<>(notices, totalCount, pageRequest.getPage(), pageRequest.getSize());
+        return new PageResponseDto<NtiLstVO>(notices, totalCount, pageRequest.getPage(), pageRequest.getSize());
     }
 
     /**
@@ -107,7 +107,7 @@ public class NoticeService {
         // 첨부파일이 있는 경우 처리
         if (files != null && files.length > 0) {
             try {
-                fileAttachService.uploadMultipleFiles(files, "NTI", String.valueOf(notice.getSeq()), null, empId);
+                fileAttachService.uploadMultipleFilesForNotice(files, "NTI", String.valueOf(notice.getSeq()), null, empId);
                 notice.setFileAttachYn("Y");
                 ntiLstMapper.updateNotice(notice);
             } catch (Exception e) {
@@ -138,9 +138,15 @@ public class NoticeService {
         
         // 첨부파일 처리
         if (files != null && files.length > 0) {
-            // 새 파일이 업로드된 경우
+            // 새 파일이 업로드된 경우 - 기존 파일 삭제 후 새 파일 업로드
             try {
-                fileAttachService.uploadMultipleFiles(files, "NTI", String.valueOf(notice.getSeq()), null, empId);
+                // 기존 파일 삭제
+                if ("Y".equals(existingNotice.getFileAttachYn())) {
+                    fileAttachService.deleteFilesByRef("NTI", String.valueOf(notice.getSeq()), empId);
+                }
+                
+                // 새 파일 업로드
+                fileAttachService.uploadMultipleFilesForNotice(files, "NTI", String.valueOf(notice.getSeq()), null, empId);
                 notice.setFileAttachYn("Y");
                 ntiLstMapper.updateNotice(notice);
             } catch (Exception e) {
@@ -148,16 +154,65 @@ public class NoticeService {
                 throw new Exception("첨부파일 업로드에 실패했습니다: " + e.getMessage());
             }
         } else {
-            // 파일이 없는 경우, 기존에 파일이 있었으면 삭제하고 파일첨부여부를 'N'으로 변경
+            // 파일이 업로드되지 않은 경우 - 기존 파일 유지
+            // 기존에 파일이 있었으면 파일첨부여부를 'Y'로 유지
             if ("Y".equals(existingNotice.getFileAttachYn())) {
-                try {
-                    fileAttachService.deleteFilesByRef("NTI", String.valueOf(notice.getSeq()), empId);
-                    notice.setFileAttachYn("N");
-                    ntiLstMapper.updateNotice(notice);
-                } catch (Exception e) {
-                    log.error("기존 첨부파일 삭제 실패", e);
-                }
+                notice.setFileAttachYn("Y");
+                ntiLstMapper.updateNotice(notice);
             }
+        }
+        
+        return notice;
+    }
+
+    /**
+     * 공지사항 수정 (파일 삭제 옵션 포함)
+     */
+    @Transactional
+    public NtiLstVO updateNoticeWithFileOption(NtiLstVO notice, MultipartFile[] files, boolean deleteExistingFiles, String empId) throws Exception {
+        // 기존 공지사항 조회
+        NtiLstVO existingNotice = ntiLstMapper.selectNoticeBySeq(notice.getSeq());
+        if (existingNotice == null) {
+            return null;
+        }
+        
+        // 유효성 검사
+        validateNotice(notice);
+        
+        // 공지사항 수정 (파일첨부여부는 별도 처리)
+        ntiLstMapper.updateNotice(notice);
+        
+        // 기존 파일 삭제 요청이 있는 경우
+        if (deleteExistingFiles && "Y".equals(existingNotice.getFileAttachYn())) {
+            try {
+                fileAttachService.deleteFilesByRef("NTI", String.valueOf(notice.getSeq()), empId);
+                notice.setFileAttachYn("N");
+                ntiLstMapper.updateNotice(notice);
+            } catch (Exception e) {
+                log.error("기존 첨부파일 삭제 실패", e);
+                throw new Exception("기존 첨부파일 삭제에 실패했습니다: " + e.getMessage());
+            }
+        }
+        
+        // 새 파일 업로드
+        if (files != null && files.length > 0) {
+            try {
+                // 기존 파일이 있고 삭제하지 않았다면 기존 파일 삭제 후 새 파일 업로드
+                if ("Y".equals(existingNotice.getFileAttachYn()) && !deleteExistingFiles) {
+                    fileAttachService.deleteFilesByRef("NTI", String.valueOf(notice.getSeq()), empId);
+                }
+                
+                fileAttachService.uploadMultipleFilesForNotice(files, "NTI", String.valueOf(notice.getSeq()), null, empId);
+                notice.setFileAttachYn("Y");
+                ntiLstMapper.updateNotice(notice);
+            } catch (Exception e) {
+                log.error("첨부파일 업로드 실패", e);
+                throw new Exception("첨부파일 업로드에 실패했습니다: " + e.getMessage());
+            }
+        } else if (!deleteExistingFiles && "Y".equals(existingNotice.getFileAttachYn())) {
+            // 새 파일이 없고 기존 파일을 삭제하지 않았다면 기존 파일 유지
+            notice.setFileAttachYn("Y");
+            ntiLstMapper.updateNotice(notice);
         }
         
         return notice;

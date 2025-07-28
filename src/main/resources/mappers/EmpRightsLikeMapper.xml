@@ -9,16 +9,14 @@
             BOARD_SEQ,
             COMMENT_SEQ,
             LIKE_TYPE,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             DEL_YN,
             DEL_DATE,
-            REG_EMP_ID,
-            UPD_EMP_ID,
             REG_DATE,
             UPD_DATE
         FROM TB_EMP_RIGHTS_LIKE
         WHERE DEL_YN = 'N'
-        AND RGST_EMP_ID = #{empId,jdbcType=VARCHAR}
+        AND REG_EMP_ID = #{empId,jdbcType=VARCHAR}
         <if test="boardSeq != null">
             AND BOARD_SEQ = #{boardSeq,jdbcType=BIGINT}
             AND COMMENT_SEQ IS NULL
@@ -35,20 +33,16 @@
             BOARD_SEQ,
             COMMENT_SEQ,
             LIKE_TYPE,
-            RGST_EMP_ID,
-            DEL_YN,
             REG_EMP_ID,
-            UPD_EMP_ID,
+            DEL_YN,
             REG_DATE,
             UPD_DATE
         ) VALUES (
             #{boardSeq,jdbcType=BIGINT},
             #{commentSeq,jdbcType=BIGINT},
             #{likeType,jdbcType=CHAR},
-            #{rgstEmpId,jdbcType=VARCHAR},
+            #{regEmpId,jdbcType=VARCHAR},
             'N',
-            #{rgstEmpId,jdbcType=VARCHAR},
-            #{rgstEmpId,jdbcType=VARCHAR},
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
         )
@@ -59,7 +53,7 @@
         UPDATE TB_EMP_RIGHTS_LIKE
         SET 
             LIKE_TYPE = #{likeType,jdbcType=CHAR},
-            UPD_EMP_ID = #{rgstEmpId,jdbcType=VARCHAR},
+            UPD_EMP_ID = #{regEmpId,jdbcType=VARCHAR},
             UPD_DATE = CURRENT_TIMESTAMP
         WHERE SEQ = #{seq,jdbcType=BIGINT}
         AND DEL_YN = 'N'

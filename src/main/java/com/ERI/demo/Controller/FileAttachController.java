@@ -37,7 +37,7 @@ public class FileAttachController {
     private String uploadPath;
 
     /**
-     * 첨부파일 목록 조회
+     * 첨부파일 목록 조회 (함수 대체)
      */
     @GetMapping("/list")
     public ResponseEntity<Map<String, Object>> getFileList(
@@ -80,12 +80,14 @@ public class FileAttachController {
         Map<String, Object> response = new HashMap<>();
         
         // 세션에서 사용자 정보 확인
-        String sessionEmpId = (String) session.getAttribute("encryptEmpNo");
-        if (sessionEmpId == null) {
+        com.ERI.demo.vo.employee.EmpLstVO empInfo = (com.ERI.demo.vo.employee.EmpLstVO) session.getAttribute("EMP_INFO");
+        if (empInfo == null) {
             response.put("success", false);
             response.put("message", "로그인이 필요합니다.");
             return ResponseEntity.status(401).body(response);
         }
+        
+        String sessionEmpId = empInfo.getEmpId();
         
         try {
             List<FileAttachVO> uploadedFiles = fileAttachService.uploadMultipleFiles(
@@ -137,24 +139,29 @@ public class FileAttachController {
     @GetMapping("/download/{fileSeq}")
     public ResponseEntity<Resource> downloadFile(@PathVariable Long fileSeq) {
         try {
-            FileAttachVO fileInfo = fileAttachService.getFileAttachBySeq(fileSeq);
+            FileAttachVO fileInfo = fileAttachService.getFileAttach(fileSeq);
             if (fileInfo == null) {
                 return ResponseEntity.notFound().build();
             }
             
-            // 파일 경로 생성
-            Path filePath = Paths.get(uploadPath + fileInfo.getFilePath() + fileInfo.getFileSaveNm());
+            // 파일 경로 생성 (TB_FILE_ATTACH 또는 TB_BOARD_FILE_ATTACH에 따라)
+            String fileName = fileInfo.getFileSaveNm() != null ? fileInfo.getFileSaveNm() : fileInfo.getStoredFileName();
+            Path filePath = Paths.get(uploadPath + fileInfo.getFilePath() + fileName);
             Resource resource = new UrlResource(filePath.toUri());
             
             if (!resource.exists()) {
                 return ResponseEntity.notFound().build();
             }
             
-            // 다운로드 횟수 증가
-            fileAttachService.incrementDownloadCount(fileSeq);
+            // 다운로드 횟수 증가 (함수 대체)
+            Integer newCount = fileAttachService.incrementDownloadCount(fileSeq);
+            log.info("파일 다운로드 횟수 증가: fileSeq={}, newCount={}", fileSeq, newCount);
+            
+            // 원본 파일명 결정 (TB_FILE_ATTACH 또는 TB_BOARD_FILE_ATTACH에 따라)
+            String originalFileName = fileInfo.getFileNm() != null ? fileInfo.getFileNm() : fileInfo.getOriginalFileName();
             
             // 원본 파일명 URL 인코딩 (한글, 특수문자 처리)
-            String encodedFileName = URLEncoder.encode(fileInfo.getFileNm(), StandardCharsets.UTF_8.toString())
+            String encodedFileName = URLEncoder.encode(originalFileName, StandardCharsets.UTF_8.toString())
                     .replaceAll("\\+", "%20");
             
             // 파일 확장자에 따른 Content-Type 설정
@@ -164,7 +171,7 @@ public class FileAttachController {
             return ResponseEntity.ok()
                     .contentType(contentType)
                     .header(HttpHeaders.CONTENT_DISPOSITION, 
-                            "attachment; filename=\"" + fileInfo.getFileNm() + "\"; filename*=UTF-8''" + encodedFileName)
+                            "attachment; filename=\"" + originalFileName + "\"; filename*=UTF-8''" + encodedFileName)
                     .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileInfo.getFileSize()))
                     .body(resource);
                     
@@ -183,7 +190,7 @@ public class FileAttachController {
     @GetMapping("/preview/{fileSeq}")
     public ResponseEntity<Resource> previewFile(@PathVariable Long fileSeq) {
         try {
-            FileAttachVO fileInfo = fileAttachService.getFileAttachBySeq(fileSeq);
+            FileAttachVO fileInfo = fileAttachService.getFileAttach(fileSeq);
             if (fileInfo == null) {
                 return ResponseEntity.notFound().build();
             }
@@ -194,8 +201,9 @@ public class FileAttachController {
                 return ResponseEntity.badRequest().build();
             }
             
-            // 파일 경로 생성
-            Path filePath = Paths.get(uploadPath + fileInfo.getFilePath() + fileInfo.getFileSaveNm());
+            // 파일 경로 생성 (TB_FILE_ATTACH 또는 TB_BOARD_FILE_ATTACH에 따라)
+            String fileName = fileInfo.getFileSaveNm() != null ? fileInfo.getFileSaveNm() : fileInfo.getStoredFileName();
+            Path filePath = Paths.get(uploadPath + fileInfo.getFilePath() + fileName);
             Resource resource = new UrlResource(filePath.toUri());
             
             if (!resource.exists()) {
@@ -227,12 +235,14 @@ public class FileAttachController {
         Map<String, Object> response = new HashMap<>();
         
         // 세션에서 사용자 정보 확인
-        String sessionEmpId = (String) session.getAttribute("encryptEmpNo");
-        if (sessionEmpId == null) {
+        com.ERI.demo.vo.employee.EmpLstVO empInfo = (com.ERI.demo.vo.employee.EmpLstVO) session.getAttribute("EMP_INFO");
+        if (empInfo == null) {
             response.put("success", false);
             response.put("message", "로그인이 필요합니다.");
             return ResponseEntity.status(401).body(response);
         }
+        
+        String sessionEmpId = empInfo.getEmpId();
         
         try {
             boolean deleted = fileAttachService.deleteFile(fileSeq, sessionEmpId);
@@ -270,12 +280,14 @@ public class FileAttachController {
         Map<String, Object> response = new HashMap<>();
         
         // 세션에서 사용자 정보 확인
-        String sessionEmpId = (String) session.getAttribute("encryptEmpNo");
-        if (sessionEmpId == null) {
+        com.ERI.demo.vo.employee.EmpLstVO empInfo = (com.ERI.demo.vo.employee.EmpLstVO) session.getAttribute("EMP_INFO");
+        if (empInfo == null) {
             response.put("success", false);
             response.put("message", "로그인이 필요합니다.");
             return ResponseEntity.status(401).body(response);
         }
+        
+        String sessionEmpId = empInfo.getEmpId();
         
         try {
             boolean deleted = fileAttachService.deleteFilesByRef(refTblCd, refPkVal, sessionEmpId);

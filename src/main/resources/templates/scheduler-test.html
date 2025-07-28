@@ -138,37 +138,77 @@
             <div class="result" id="statusResult"></div>
         </div>
 
-        <!-- 데이터베이스 연결 테스트 -->
+        <!-- 메인 데이터베이스 연결 테스트 -->
         <div class="scheduler-section">
-            <div class="scheduler-title">2. 암호화 데이터베이스 연결 테스트</div>
+            <div class="scheduler-title">2. 메인 데이터베이스 연결 테스트</div>
             <div class="scheduler-description">
-                eri_enc_db 데이터베이스 연결 상태와 TB_EMP_ENCRYPT 테이블 접근을 테스트합니다.
+                메인 데이터베이스(eri_db) 연결 상태를 테스트합니다.
                 <br>
-                - 데이터베이스: eri_enc_db (PostgreSQL)
-                <br>
-                - 테이블: TB_EMP_ENCRYPT
+                - 데이터베이스: eri_db (PostgreSQL)
                 <br>
                 - 연결 풀: HikariCP
+                <br>
+                - 용도: ERI 애플리케이션 메인 데이터
             </div>
-            <button class="btn" onclick="testDatabaseConnection()">데이터베이스 연결 테스트</button>
-            <div class="loading" id="dbLoading">연결 테스트 중...</div>
-            <div class="result" id="dbResult"></div>
+            <button class="btn" onclick="testMainDatabaseConnection()">메인 DB 연결 테스트</button>
+            <div class="loading" id="mainDbLoading">연결 테스트 중...</div>
+            <div class="result" id="mainDbResult"></div>
+        </div>
+
+        <!-- 직원 데이터베이스 연결 테스트 -->
+        <div class="scheduler-section">
+            <div class="scheduler-title">3. 직원 데이터베이스 연결 테스트</div>
+            <div class="scheduler-description">
+                직원 데이터베이스(eri_employee_db) 연결 상태와 TB_EMP_LST 테이블 접근을 테스트합니다.
+                <br>
+                - 데이터베이스: eri_employee_db (PostgreSQL)
+                <br>
+                - 테이블: TB_EMP_LST
+                <br>
+                - 연결 풀: HikariCP
+                <br>
+                - 용도: 직원 정보 전용 데이터
+            </div>
+            <button class="btn" onclick="testEmployeeDatabaseConnection()">직원 DB 연결 테스트</button>
+            <div class="loading" id="employeeDbLoading">연결 테스트 중...</div>
+            <div class="result" id="employeeDbResult"></div>
+        </div>
+
+        <!-- TB_EMP_LST 테이블 관리 -->
+        <div class="scheduler-section">
+            <div class="scheduler-title">4. TB_EMP_LST 테이블 관리</div>
+            <div class="scheduler-description">
+                직원 정보 테이블(TB_EMP_LST)을 생성하고 샘플 데이터를 적재합니다.
+                <br>
+                - 데이터베이스: eri_employee_db
+                <br>
+                - 테이블: TB_EMP_LST
+                <br>
+                - 기능: 테이블 생성, 샘플 데이터 적재, 전체 초기화
+            </div>
+            <div class="button-group">
+                <button class="btn" onclick="createEmpLstTable()">테이블 생성</button>
+                <button class="btn" onclick="insertSampleData()">샘플 데이터 적재</button>
+                <button class="btn" onclick="initializeEmpLstTable()">전체 초기화</button>
+            </div>
+            <div class="loading" id="tableLoading">처리 중...</div>
+            <div class="result" id="tableResult"></div>
         </div>
 
         <!-- 수동 배치 실행 -->
         <div class="scheduler-section">
-            <div class="scheduler-title">3. 직원 정보 암호화 배치 수동 실행</div>
+            <div class="scheduler-title">5. 직원 정보 배치 수동 실행</div>
             <div class="scheduler-description">
-                empInfo.txt 파일을 읽어서 직원번호, 직원명, 직원이메일을 처리하는 배치를 수동으로 실행합니다.
+                empInfo.txt 파일을 읽어서 직원 정보를 TB_EMP_LST 테이블에 처리하는 배치를 수동으로 실행합니다.
                 <br>
                 - 파일 위치: src/main/resources/templates/empInfo.txt
                 <br>
-                - 처리 방식: 직원번호 SHA256 해시, 직원명 랜덤 변형, 이메일 원본 저장
+                - 처리 방식: 직원번호, 직원명, 부서코드, 부서명, 직급코드, 직급명, 직원상태, 이메일 처리
                 <br>
-                - 처리 과정: 원본 데이터 → 해시/변형 → TB_EMP_ENCRYPT 테이블 저장
+                - 처리 과정: 파일 읽기 → 데이터 검증 → TB_EMP_LST 테이블 저장/업데이트
             </div>
             <div class="cron-info">
-                <strong>정기 실행 스케줄:</strong> 매일 오전 2시 (0 0 2 * * ?)
+                <strong>정기 실행 스케줄:</strong> 매일 새벽 3시 (0 0 3 * * ?)
             </div>
             <button class="btn" onclick="runManualBatch()">수동 배치 실행</button>
             <div class="loading" id="batchLoading">배치 실행 중...</div>
@@ -177,17 +217,17 @@
 
         <!-- 스케줄링 정보 -->
         <div class="scheduler-section">
-            <div class="scheduler-title">3. 스케줄링 정보</div>
+            <div class="scheduler-title">6. 스케줄링 정보</div>
             <div class="scheduler-description">
                 등록된 모든 스케줄링 작업들의 정보입니다.
             </div>
             <div class="status-grid">
                 <div class="status-item">
                     <h4>📅 일일 배치</h4>
-                    <p><strong>작업명:</strong> 직원 정보 해시 처리</p>
-                    <p><strong>실행 시간:</strong> 매일 오전 2시</p>
-                    <p><strong>Cron 표현식:</strong> 0 0 2 * * ?</p>
-                    <p><strong>설명:</strong> empInfo.txt 파일 읽어서 직원 정보 SHA256 해시 및 이메일 처리</p>
+                    <p><strong>작업명:</strong> 직원 정보 처리</p>
+                    <p><strong>실행 시간:</strong> 매일 새벽 3시</p>
+                    <p><strong>Cron 표현식:</strong> 0 0 3 * * ?</p>
+                    <p><strong>설명:</strong> empInfo.txt 파일 읽어서 직원 정보 TB_EMP_LST 테이블에 저장/업데이트</p>
                 </div>
                 <div class="status-item">
                     <h4>🗑️ 주간 정리</h4>
@@ -198,17 +238,17 @@
                 </div>
                 <div class="status-item">
                     <h4>📊 월간 통계</h4>
-                    <p><strong>작업명:</strong> 암호화 통계 생성</p>
+                    <p><strong>작업명:</strong> 직원 통계 생성</p>
                     <p><strong>실행 시간:</strong> 매월 1일 오전 4시</p>
                     <p><strong>Cron 표현식:</strong> 0 0 4 1 * ?</p>
-                    <p><strong>설명:</strong> 전체 및 월간 암호화 통계 조회</p>
+                    <p><strong>설명:</strong> 전체 및 월간 직원 통계 조회</p>
                 </div>
             </div>
         </div>
 
         <!-- 동적 스케줄러 관리 -->
         <div class="scheduler-section">
-            <div class="scheduler-title">4. 동적 스케줄러 관리</div>
+            <div class="scheduler-title">7. 동적 스케줄러 관리</div>
             <div class="scheduler-description">
                 scheduler_empInfo.txt 파일을 읽어서 동적으로 스케줄을 관리합니다.
             </div>
@@ -219,10 +259,10 @@
             <div class="form-group" style="margin-top: 15px;">
                 <label for="methodSelect">실행할 메소드:</label>
                 <select id="methodSelect" class="form-control" style="width: 200px; padding: 5px; margin-left: 10px;">
-                    <option value="dailyEmpEncryptBatch">dailyEmpEncryptBatch</option>
+                    <option value="dailyEmpInfoBatch">dailyEmpInfoBatch</option>
                     <option value="weeklyCleanupBatch">weeklyCleanupBatch</option>
                     <option value="monthlyStatisticsBatch">monthlyStatisticsBatch</option>
-                    <option value="manualEmpEncryptBatch">manualEmpEncryptBatch</option>
+                    <option value="manualEmpInfoBatch">manualEmpInfoBatch</option>
                 </select>
             </div>
             <div class="loading" id="dynamicLoading">처리 중...</div>
@@ -231,7 +271,7 @@
 
         <!-- Cron 표현식 설명 -->
         <div class="scheduler-section">
-            <div class="scheduler-title">5. Cron 표현식 설명</div>
+            <div class="scheduler-title">8. Cron 표현식 설명</div>
             <div class="scheduler-description">
                 Cron 표현식은 6개 또는 7개의 필드로 구성됩니다.
             </div>
@@ -245,16 +285,16 @@
     </div>
 
     <script>
-        function testDatabaseConnection() {
+        function testMainDatabaseConnection() {
             const button = event.target;
-            const loading = document.getElementById('dbLoading');
-            const result = document.getElementById('dbResult');
+            const loading = document.getElementById('mainDbLoading');
+            const result = document.getElementById('mainDbResult');
             
             button.disabled = true;
             loading.style.display = 'block';
             result.style.display = 'none';
             
-            fetch('/api/scheduler/test-db-connection', {
+            fetch('/api/db-test/main-connection-test', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -267,14 +307,76 @@
                 
                 if (data.success) {
                     result.className = 'result success';
-                    let html = `<strong>✅ 데이터베이스 연결 테스트 완료!</strong>\n\n`;
+                    let html = `<strong>✅ 메인 데이터베이스 연결 테스트 완료!</strong>\n\n`;
                     html += `메시지: ${data.message}\n`;
                     html += `테스트 시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    if (data.connectionInfo) {
+                        html += `\n<strong>연결 정보:</strong>\n`;
+                        for (const [key, value] of Object.entries(data.connectionInfo)) {
+                            html += `${key}: ${value}\n`;
+                        }
+                    }
                     
                     result.innerHTML = html;
                 } else {
                     result.className = 'result error';
-                    let html = `❌ 데이터베이스 연결 테스트 실패!\n\n`;
+                    let html = `❌ 메인 데이터베이스 연결 테스트 실패!\n\n`;
+                    html += `오류: ${data.message}\n`;
+                    html += `오류 타입: ${data.error || 'Unknown'}\n`;
+                    html += `시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    result.innerHTML = html;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function testEmployeeDatabaseConnection() {
+            const button = event.target;
+            const loading = document.getElementById('employeeDbLoading');
+            const result = document.getElementById('employeeDbResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('/api/db-test/employee-connection-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ 직원 데이터베이스 연결 테스트 완료!</strong>\n\n`;
+                    html += `메시지: ${data.message}\n`;
+                    html += `테스트 시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    if (data.connectionInfo) {
+                        html += `\n<strong>연결 정보:</strong>\n`;
+                        for (const [key, value] of Object.entries(data.connectionInfo)) {
+                            html += `${key}: ${value}\n`;
+                        }
+                    }
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    let html = `❌ 직원 데이터베이스 연결 테스트 실패!\n\n`;
                     html += `오류: ${data.message}\n`;
                     html += `오류 타입: ${data.error || 'Unknown'}\n`;
                     html += `시간: ${new Date(data.timestamp).toLocaleString()}\n`;
@@ -350,7 +452,7 @@
             loading.style.display = 'block';
             result.style.display = 'none';
             
-            fetch('/api/scheduler/manual-emp-encrypt', {
+            fetch('/api/scheduler/manual-emp-info-batch', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -363,7 +465,7 @@
                 
                 if (data.success) {
                     result.className = 'result success';
-                    let html = `<strong>✅ 배치 실행 완료!</strong>\n\n`;
+                    let html = `<strong>✅ 직원 정보 배치 실행 완료!</strong>\n\n`;
                     html += `메시지: ${data.message}\n`;
                     html += `처리 시간: ${data.processingTime}\n`;
                     html += `실행 시간: ${new Date(data.timestamp).toLocaleString()}\n`;
@@ -374,7 +476,7 @@
                     result.innerHTML = html;
                 } else {
                     result.className = 'result error';
-                    let html = `❌ 배치 실행 실패!\n\n`;
+                    let html = `❌ 직원 정보 배치 실행 실패!\n\n`;
                     html += `오류: ${data.message}\n`;
                     html += `오류 타입: ${data.error || 'Unknown'}\n`;
                     html += `시간: ${new Date(data.timestamp).toLocaleString()}\n`;
@@ -486,6 +588,156 @@
                 } else {
                     result.className = 'result error';
                     result.innerHTML = `❌ 메소드 실행 실패!\n\n메소드: ${data.methodName}\n오류: ${data.message}\n\n시간: ${new Date(data.timestamp).toLocaleString()}`;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function createEmpLstTable() {
+            const button = event.target;
+            const loading = document.getElementById('tableLoading');
+            const result = document.getElementById('tableResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('/api/scheduler/create-emp-lst-table', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ TB_EMP_LST 테이블 생성 완료!</strong>\n\n`;
+                    html += `메시지: ${data.message}\n`;
+                    html += `결과: ${data.result}\n`;
+                    html += `처리 시간: ${data.processingTime}\n`;
+                    html += `실행 시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    let html = `❌ 테이블 생성 실패!\n\n`;
+                    html += `오류: ${data.message}\n`;
+                    html += `오류 타입: ${data.error || 'Unknown'}\n`;
+                    html += `시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    result.innerHTML = html;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function insertSampleData() {
+            const button = event.target;
+            const loading = document.getElementById('tableLoading');
+            const result = document.getElementById('tableResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('/api/scheduler/insert-sample-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ 샘플 데이터 적재 완료!</strong>\n\n`;
+                    html += `메시지: ${data.message}\n`;
+                    html += `결과: ${data.result}\n`;
+                    html += `처리 시간: ${data.processingTime}\n`;
+                    html += `실행 시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    let html = `❌ 샘플 데이터 적재 실패!\n\n`;
+                    html += `오류: ${data.message}\n`;
+                    html += `오류 타입: ${data.error || 'Unknown'}\n`;
+                    html += `시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    result.innerHTML = html;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function initializeEmpLstTable() {
+            const button = event.target;
+            const loading = document.getElementById('tableLoading');
+            const result = document.getElementById('tableResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('/api/scheduler/initialize-emp-lst-table', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ TB_EMP_LST 테이블 초기화 완료!</strong>\n\n`;
+                    html += `메시지: ${data.message}\n`;
+                    html += `결과: ${data.result}\n`;
+                    html += `처리 시간: ${data.processingTime}\n`;
+                    html += `실행 시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    let html = `❌ 테이블 초기화 실패!\n\n`;
+                    html += `오류: ${data.message}\n`;
+                    html += `오류 타입: ${data.error || 'Unknown'}\n`;
+                    html += `시간: ${new Date(data.timestamp).toLocaleString()}\n`;
+                    
+                    result.innerHTML = html;
                 }
             })
             .catch(error => {

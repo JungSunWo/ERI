@@ -16,6 +16,11 @@ public class NtiLstPageRequestDto extends PageRequestDto {
     private String ttl;
     
     /**
+     * 내용 검색어
+     */
+    private String cntn;
+    
+    /**
      * 상태코드
      */
     private String stsCd;
@@ -23,7 +28,7 @@ public class NtiLstPageRequestDto extends PageRequestDto {
     /**
      * 등록자ID
      */
-    private String rgstEmpId;
+    private String regEmpId;
     
     /**
      * 시작일자

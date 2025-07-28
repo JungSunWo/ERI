@@ -37,8 +37,7 @@ public class AuthLstController {
         PageRequestDto pageRequest = new PageRequestDto();
         pageRequest.setPage(page);
         pageRequest.setSize(size);
-        pageRequest.setSearchKeyword(keyword);
-        pageRequest.setSearchField(searchField);
+        pageRequest.setKeyword(keyword);
         pageRequest.setSortBy(sortKey);
         pageRequest.setSortDirection(sortOrder);
         

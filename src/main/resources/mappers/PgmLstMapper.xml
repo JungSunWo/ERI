@@ -22,10 +22,10 @@
             PGM_STS_CD,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             UPDT_DT,
             UPDT_TM,
-            UPDT_EMP_ID
+            UPD_EMP_ID
         FROM TB_PGM_LST
         <where>
             <if test="empLstVO.seq != null">
@@ -46,8 +46,8 @@
             <if test="empLstVO.pgmStsCd != null and empLstVO.pgmStsCd != ''">
                 AND PGM_STS_CD = #{empLstVO.pgmStsCd}
             </if>
-            <if test="empLstVO.rgstEmpId != null and empLstVO.rgstEmpId != ''">
-                AND RGST_EMP_ID = #{empLstVO.rgstEmpId}
+            <if test="empLstVO.regEmpId != null and empLstVO.regEmpId != ''">
+                AND REG_EMP_ID = #{empLstVO.regEmpId}
             </if>
             <if test="pageRequest.keyword != null and pageRequest.keyword != ''">
                 <choose>
@@ -102,8 +102,8 @@
             <if test="empLstVO.pgmStsCd != null and empLstVO.pgmStsCd != ''">
                 AND PGM_STS_CD = #{empLstVO.pgmStsCd}
             </if>
-            <if test="empLstVO.rgstEmpId != null and empLstVO.rgstEmpId != ''">
-                AND RGST_EMP_ID = #{empLstVO.rgstEmpId}
+            <if test="empLstVO.regEmpId != null and empLstVO.regEmpId != ''">
+                AND REG_EMP_ID = #{empLstVO.regEmpId}
             </if>
             <if test="pageRequest.keyword != null and pageRequest.keyword != ''">
                 <choose>
@@ -146,10 +146,10 @@
             PGM_STS_CD,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             UPDT_DT,
             UPDT_TM,
-            UPDT_EMP_ID
+            UPD_EMP_ID
         FROM TB_PGM_LST
         <where>
             <if test="seq != null">
@@ -170,8 +170,8 @@
             <if test="pgmStsCd != null and pgmStsCd != ''">
                 AND PGM_STS_CD = #{pgmStsCd}
             </if>
-            <if test="rgstEmpId != null and rgstEmpId != ''">
-                AND RGST_EMP_ID = #{rgstEmpId}
+            <if test="regEmpId != null and regEmpId != ''">
+                AND REG_EMP_ID = #{regEmpId}
             </if>
         </where>
         ORDER BY SEQ DESC
@@ -197,10 +197,10 @@
             PGM_STS_CD,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             UPDT_DT,
             UPDT_TM,
-            UPDT_EMP_ID
+            UPD_EMP_ID
         FROM TB_PGM_LST
         WHERE SEQ = #{seq}
     </select>
@@ -224,7 +224,7 @@
             PGM_STS_CD,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID
+            REG_EMP_ID
         ) VALUES (
             #{seq},
             #{pgmId},
@@ -242,7 +242,7 @@
             #{pgmStsCd},
             #{rgstDt},
             #{rgstTm},
-            #{rgstEmpId}
+            #{regEmpId}
         )
     </insert>
 
@@ -265,7 +265,7 @@
             PGM_STS_CD = #{pgmStsCd},
             UPDT_DT = #{updtDt},
             UPDT_TM = #{updtTm},
-            UPDT_EMP_ID = #{updtEmpId}
+            UPD_EMP_ID = #{updEmpId}
         WHERE SEQ = #{seq}
     </update>
 

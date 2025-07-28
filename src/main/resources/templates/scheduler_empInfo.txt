@@ -3,13 +3,13 @@
 # cron 표현식: 초 분 시 일 월 요일
 
 # 매일 오전 2시에 직원 정보 SHA256 해시 배치
-dailyEmpEncryptBatch=0 0 2 * * ?
+#dailyEmpEncryptBatch=0 0 2 * * ?
 
 # 매주 일요일 오전 3시에 주간 정리 배치
-weeklyCleanupBatch=0 0 3 ? * SUN
+#weeklyCleanupBatch=0 0 3 ? * SUN
 
 # 매월 1일 오전 4시에 월간 통계 배치
-monthlyStatisticsBatch=0 0 4 1 * ?
+#monthlyStatisticsBatch=0 0 4 1 * ?
 
 # 테스트용: 매분마다 실행 (개발/테스트 환경에서만 사용)
-# testBatch=0 * * * * ?
+#testBatch=0 * * * * ?

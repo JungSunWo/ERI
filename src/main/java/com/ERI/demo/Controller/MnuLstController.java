@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,21 +51,25 @@ public class MnuLstController {
      * 전체 메뉴 목록 조회 (계층 구조)
      */
     @GetMapping("/all")
-    public ResponseEntity<Map<String, Object>> getAllMenus(HttpSession session) {
+    public ResponseEntity<Map<String, Object>> getAllMenus(HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            // 세션에서 관리자 여부 조회
-            Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+            // AuthInterceptor에서 전달받은 관리자 여부와 상담사 여부 사용
+            Boolean isAdmin = (Boolean) request.getAttribute("isAdmin");
+            Boolean isCounselor = (Boolean) request.getAttribute("isCounselor");
             if (isAdmin == null) isAdmin = false; // 기본값은 일반 사용자
+            if (isCounselor == null) isCounselor = false; // 기본값은 일반 사용자
             
+            log.info("전체 메뉴 목록 조회: 관리자 여부 = {}, 상담사 여부 = {}", isAdmin, isCounselor);
             
-            List<MnuLstVO> menuList = mnuLstService.getAllMenus(isAdmin);
+            List<MnuLstVO> menuList = mnuLstService.getAllMenus(isAdmin, isCounselor);
             
             response.put("success", true);
             response.put("data", menuList);
             response.put("message", "전체 메뉴 목록을 조회했습니다.");
             response.put("isAdmin", isAdmin); // 응답에 관리자 여부 포함
+            response.put("isCounselor", isCounselor); // 응답에 상담사 여부 포함
             
             return ResponseEntity.ok(response);
             
@@ -204,10 +208,26 @@ public class MnuLstController {
      */
     @PostMapping
     public ResponseEntity<Map<String, Object>> insertMenu(@RequestBody MnuLstVO mnuLstVO,
-                                                         @RequestParam(defaultValue = "ADMIN001") String empId) {
+                                                         HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         
         try {
+            // AuthInterceptor에서 전달받은 사용자 정보 사용
+            String empId = (String) request.getAttribute("EMP_ID");
+            if (empId == null) {
+                response.put("success", false);
+                response.put("message", "인증 정보를 찾을 수 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+            
+            // 받은 데이터 로그 출력
+            log.info("메뉴 등록 요청 데이터: mnuCd={}, mnuNm={}, mnuLvl={}, pMnuCd={}, empId={}", 
+                    mnuLstVO.getMnuCd(), mnuLstVO.getMnuNm(), mnuLstVO.getMnuLvl(), 
+                    mnuLstVO.getPMnuCd(), empId);
+            
+            // 전체 VO 객체 로그 출력
+            log.info("전체 MnuLstVO 객체: {}", mnuLstVO);
+            
             boolean result = mnuLstService.insertMenu(mnuLstVO, empId);
             
             if (result) {
@@ -244,11 +264,25 @@ public class MnuLstController {
     @PutMapping("/{mnuCd}")
     public ResponseEntity<Map<String, Object>> updateMenu(@PathVariable String mnuCd,
                                                          @RequestBody MnuLstVO mnuLstVO,
-                                                         @RequestParam(defaultValue = "ADMIN001") String empId) {
+                                                         HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         
         try {
+            // AuthInterceptor에서 전달받은 사용자 정보 사용
+            String empId = (String) request.getAttribute("EMP_ID");
+            if (empId == null) {
+                response.put("success", false);
+                response.put("message", "인증 정보를 찾을 수 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+            
             mnuLstVO.setMnuCd(mnuCd);
+            
+            // 받은 데이터 로그 출력
+            log.info("메뉴 수정 요청 데이터: mnuCd={}, mnuNm={}, mnuLvl={}, pMnuCd={}, empId={}", 
+                    mnuLstVO.getMnuCd(), mnuLstVO.getMnuNm(), mnuLstVO.getMnuLvl(), 
+                    mnuLstVO.getPMnuCd(), empId);
+            
             boolean result = mnuLstService.updateMenu(mnuLstVO, empId);
             
             if (result) {
@@ -284,10 +318,18 @@ public class MnuLstController {
      */
     @DeleteMapping("/{mnuCd}")
     public ResponseEntity<Map<String, Object>> deleteMenu(@PathVariable String mnuCd,
-                                                         @RequestParam(defaultValue = "ADMIN001") String empId) {
+                                                         HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         
         try {
+            // AuthInterceptor에서 전달받은 사용자 정보 사용
+            String empId = (String) request.getAttribute("EMP_ID");
+            if (empId == null) {
+                response.put("success", false);
+                response.put("message", "인증 정보를 찾을 수 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+            
             boolean result = mnuLstService.deleteMenu(mnuCd, empId);
             
             if (result) {
@@ -324,10 +366,18 @@ public class MnuLstController {
     @PutMapping("/{mnuCd}/order")
     public ResponseEntity<Map<String, Object>> updateMenuOrder(@PathVariable String mnuCd,
                                                               @RequestParam Integer mnuOrd,
-                                                              @RequestParam(defaultValue = "ADMIN001") String empId) {
+                                                              HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         
         try {
+            // AuthInterceptor에서 전달받은 사용자 정보 사용
+            String empId = (String) request.getAttribute("EMP_ID");
+            if (empId == null) {
+                response.put("success", false);
+                response.put("message", "인증 정보를 찾을 수 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+            
             boolean result = mnuLstService.updateMenuOrder(mnuCd, mnuOrd, empId);
             
             if (result) {

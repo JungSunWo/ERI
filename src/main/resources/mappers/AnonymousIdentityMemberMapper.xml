@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.AnonymousIdentityMemberMapper">
+
+    <!-- 그룹 멤버 목록 조회 -->
+    <select id="selectMemberListByGroupSeq" resultType="com.ERI.demo.vo.AnonymousIdentityMemberVO">
+        SELECT 
+            MEMBER_SEQ,
+            GROUP_SEQ,
+            ANONYMOUS_ID,
+            ADD_EMP_ID,
+            ADD_DATE,
+            ADD_REASON,
+            USE_YN,
+            DEL_YN,
+            DEL_DATE
+        FROM TB_ANONYMOUS_IDENTITY_MEMBER
+        WHERE GROUP_SEQ = #{groupSeq}
+        AND DEL_YN = 'N'
+        <if test="useYn != null and useYn != ''">
+            AND USE_YN = #{useYn}
+        </if>
+        ORDER BY ADD_DATE DESC
+    </select>
+
+    <!-- 익명 사용자 ID로 소속 그룹 멤버 조회 -->
+    <select id="selectMemberListByAnonymousId" resultType="com.ERI.demo.vo.AnonymousIdentityMemberVO">
+        SELECT 
+            MEMBER_SEQ,
+            GROUP_SEQ,
+            ANONYMOUS_ID,
+            ADD_EMP_ID,
+            ADD_DATE,
+            ADD_REASON,
+            USE_YN,
+            DEL_YN,
+            DEL_DATE
+        FROM TB_ANONYMOUS_IDENTITY_MEMBER
+        WHERE ANONYMOUS_ID = #{anonymousId}
+        AND DEL_YN = 'N'
+        <if test="useYn != null and useYn != ''">
+            AND USE_YN = #{useYn}
+        </if>
+        ORDER BY ADD_DATE DESC
+    </select>
+
+    <!-- 그룹 멤버 등록 -->
+    <insert id="insertAnonymousIdentityMember" parameterType="com.ERI.demo.vo.AnonymousIdentityMemberVO" useGeneratedKeys="true" keyProperty="memberSeq">
+        INSERT INTO TB_ANONYMOUS_IDENTITY_MEMBER (
+            GROUP_SEQ,
+            ANONYMOUS_ID,
+            ADD_EMP_ID,
+            ADD_DATE,
+            ADD_REASON,
+            USE_YN,
+            DEL_YN
+        ) VALUES (
+            #{groupSeq},
+            #{anonymousId},
+            #{addEmpId},
+            COALESCE(#{addDate}, NOW()),
+            #{addReason},
+            #{useYn},
+            #{delYn}
+        )
+    </insert>
+
+    <!-- 그룹 멤버 삭제 (논리 삭제) -->
+    <update id="deleteAnonymousIdentityMember">
+        UPDATE TB_ANONYMOUS_IDENTITY_MEMBER
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = NOW()
+        WHERE MEMBER_SEQ = #{memberSeq}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 그룹에서 특정 익명 사용자 제거 -->
+    <update id="removeMemberFromGroup">
+        UPDATE TB_ANONYMOUS_IDENTITY_MEMBER
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = NOW()
+        WHERE GROUP_SEQ = #{groupSeq}
+        AND ANONYMOUS_ID = #{anonymousId}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 그룹의 모든 멤버 조회 (상세 정보 포함) -->
+    <select id="selectMemberDetailListByGroupSeq" parameterType="long" resultType="com.ERI.demo.vo.AnonymousIdentityMemberVO">
+        SELECT 
+            m.MEMBER_SEQ,
+            m.GROUP_SEQ,
+            m.ANONYMOUS_ID,
+            m.ADD_EMP_ID,
+            m.ADD_DATE,
+            m.ADD_REASON,
+            m.USE_YN,
+            m.DEL_YN,
+            m.DEL_DATE,
+            u.NICKNAME as nickname,
+            g.GROUP_NAME as groupName,
+            g.GROUP_DESC as groupDesc,
+            g.CONFIDENCE_LEVEL as confidenceLevel
+        FROM TB_ANONYMOUS_IDENTITY_MEMBER m
+        INNER JOIN TB_ANONYMOUS_USER u ON m.ANONYMOUS_ID = u.ANONYMOUS_ID
+        INNER JOIN TB_ANONYMOUS_IDENTITY_GROUP g ON m.GROUP_SEQ = g.GROUP_SEQ
+        WHERE m.GROUP_SEQ = #{groupSeq}
+        AND m.DEL_YN = 'N'
+        AND u.DEL_YN = 'N'
+        AND g.DEL_YN = 'N'
+        ORDER BY m.ADD_DATE DESC
+    </select>
+
+    <!-- 익명 사용자가 이미 그룹에 속해있는지 확인 -->
+    <select id="checkMemberExists" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_ANONYMOUS_IDENTITY_MEMBER
+        WHERE GROUP_SEQ = #{groupSeq}
+        AND ANONYMOUS_ID = #{anonymousId}
+        AND DEL_YN = 'N'
+    </select>
+
+</mapper> 

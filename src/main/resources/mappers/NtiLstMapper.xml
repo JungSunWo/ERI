@@ -10,12 +10,10 @@
             CNTN,
             STS_CD,
             FILE_ATTACH_YN,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
             REG_DATE,
             UPD_DATE
         FROM TB_NTI_LST
@@ -51,12 +49,10 @@
             CNTN,
             STS_CD,
             FILE_ATTACH_YN,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
             REG_DATE,
             UPD_DATE
         FROM TB_NTI_LST
@@ -71,11 +67,9 @@
             CNTN,
             STS_CD,
             FILE_ATTACH_YN,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
             REG_DATE,
             UPD_DATE
         ) VALUES (
@@ -83,11 +77,9 @@
             #{cntn,jdbcType=VARCHAR},
             #{stsCd,jdbcType=VARCHAR},
             COALESCE(#{fileAttachYn,jdbcType=VARCHAR}, 'N'),
-            #{rgstEmpId,jdbcType=VARCHAR},
-            #{updtEmpId,jdbcType=VARCHAR},
+            #{regEmpId,jdbcType=VARCHAR},
+            #{updEmpId,jdbcType=VARCHAR},
             'N',
-            #{rgstEmpId,jdbcType=VARCHAR},
-            #{updtEmpId,jdbcType=VARCHAR},
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
         )
@@ -101,8 +93,7 @@
             <if test="cntn != null">CNTN = #{cntn,jdbcType=VARCHAR},</if>
             <if test="stsCd != null">STS_CD = #{stsCd,jdbcType=VARCHAR},</if>
             <if test="fileAttachYn != null and fileAttachYn != ''">FILE_ATTACH_YN = #{fileAttachYn,jdbcType=VARCHAR},</if>
-            <if test="updtEmpId != null">UPDT_EMP_ID = #{updtEmpId,jdbcType=VARCHAR},</if>
-            UPD_EMP_ID = COALESCE(#{updtEmpId,jdbcType=VARCHAR}, #{rgstEmpId,jdbcType=VARCHAR}),
+            UPD_EMP_ID = COALESCE(#{updEmpId,jdbcType=VARCHAR}, #{regEmpId,jdbcType=VARCHAR}),
             UPD_DATE = CURRENT_TIMESTAMP
         WHERE SEQ = #{seq,jdbcType=BIGINT}
         AND DEL_YN = 'N'
@@ -128,12 +119,10 @@
             CNTN,
             STS_CD,
             FILE_ATTACH_YN,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
             REG_DATE,
             UPD_DATE
         FROM TB_NTI_LST
@@ -149,12 +138,10 @@
             CNTN,
             STS_CD,
             FILE_ATTACH_YN,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
             REG_DATE,
             UPD_DATE
         FROM TB_NTI_LST
@@ -174,12 +161,10 @@
             CNTN,
             STS_CD,
             FILE_ATTACH_YN,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
             REG_DATE,
             UPD_DATE
         FROM TB_NTI_LST
@@ -190,8 +175,8 @@
         <if test="stsCd != null and stsCd != ''">
             AND STS_CD = #{stsCd,jdbcType=VARCHAR}
         </if>
-        <if test="rgstEmpId != null and rgstEmpId != ''">
-            AND RGST_EMP_ID = #{rgstEmpId,jdbcType=VARCHAR}
+        <if test="regEmpId != null and regEmpId != ''">
+            AND REG_EMP_ID = #{regEmpId,jdbcType=VARCHAR}
         </if>
         <if test="startDate != null and startDate != ''">
             AND DATE(REG_DATE) &gt;= DATE(#{startDate,jdbcType=VARCHAR})
@@ -226,12 +211,10 @@
             CNTN,
             STS_CD,
             FILE_ATTACH_YN,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
             REG_DATE,
             UPD_DATE
         FROM TB_NTI_LST
@@ -246,11 +229,9 @@
             CNTN,
             STS_CD,
             FILE_ATTACH_YN,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
             REG_DATE,
             UPD_DATE
         ) VALUES (
@@ -258,11 +239,9 @@
             #{cntn,jdbcType=VARCHAR},
             COALESCE(#{stsCd,jdbcType=VARCHAR}, 'STS001'),
             COALESCE(#{fileAttachYn,jdbcType=VARCHAR}, 'N'),
-            #{rgstEmpId,jdbcType=VARCHAR},
-            #{updtEmpId,jdbcType=VARCHAR},
+            #{regEmpId,jdbcType=VARCHAR},
+            #{updEmpId,jdbcType=VARCHAR},
             'N',
-            #{rgstEmpId,jdbcType=VARCHAR},
-            #{updtEmpId,jdbcType=VARCHAR},
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
         )
@@ -276,8 +255,7 @@
             <if test="cntn != null">CNTN = #{cntn,jdbcType=VARCHAR},</if>
             <if test="stsCd != null">STS_CD = #{stsCd,jdbcType=VARCHAR},</if>
             <if test="fileAttachYn != null and fileAttachYn != ''">FILE_ATTACH_YN = #{fileAttachYn,jdbcType=VARCHAR},</if>
-            <if test="updtEmpId != null">UPDT_EMP_ID = #{updtEmpId,jdbcType=VARCHAR},</if>
-            UPD_EMP_ID = COALESCE(#{updtEmpId,jdbcType=VARCHAR}, #{rgstEmpId,jdbcType=VARCHAR}),
+            UPD_EMP_ID = COALESCE(#{updEmpId,jdbcType=VARCHAR}, #{regEmpId,jdbcType=VARCHAR}),
             UPD_DATE = CURRENT_TIMESTAMP
         WHERE SEQ = #{seq,jdbcType=BIGINT}
         AND DEL_YN = 'N'
@@ -319,24 +297,32 @@
             CNTN,
             STS_CD,
             FILE_ATTACH_YN,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
             REG_DATE,
             UPD_DATE
         FROM TB_NTI_LST
         WHERE DEL_YN = 'N'
-        <if test="ttl != null and ttl != ''">
-            AND TTL LIKE CONCAT('%', #{ttl}, '%')
-        </if>
+        <choose>
+            <when test="ttl != null and ttl != '' and cntn != null and cntn != ''">
+                AND (TTL LIKE CONCAT('%', #{ttl}, '%') OR CNTN LIKE CONCAT('%', #{cntn}, '%'))
+            </when>
+            <otherwise>
+                <if test="ttl != null and ttl != ''">
+                    AND TTL LIKE CONCAT('%', #{ttl}, '%')
+                </if>
+                <if test="cntn != null and cntn != ''">
+                    AND CNTN LIKE CONCAT('%', #{cntn}, '%')
+                </if>
+            </otherwise>
+        </choose>
         <if test="stsCd != null and stsCd != ''">
             AND STS_CD = #{stsCd}
         </if>
-        <if test="rgstEmpId != null and rgstEmpId != ''">
-            AND RGST_EMP_ID = #{rgstEmpId}
+        <if test="regEmpId != null and regEmpId != ''">
+            AND REG_EMP_ID = #{regEmpId}
         </if>
         <if test="startDate != null and startDate != ''">
             AND DATE(REG_DATE) &gt;= DATE(#{startDate})
@@ -369,14 +355,24 @@
         SELECT COUNT(*)
         FROM TB_NTI_LST
         WHERE DEL_YN = 'N'
-        <if test="ttl != null and ttl != ''">
-            AND TTL LIKE CONCAT('%', #{ttl}, '%')
-        </if>
+        <choose>
+            <when test="ttl != null and ttl != '' and cntn != null and cntn != ''">
+                AND (TTL LIKE CONCAT('%', #{ttl}, '%') OR CNTN LIKE CONCAT('%', #{cntn}, '%'))
+            </when>
+            <otherwise>
+                <if test="ttl != null and ttl != ''">
+                    AND TTL LIKE CONCAT('%', #{ttl}, '%')
+                </if>
+                <if test="cntn != null and cntn != ''">
+                    AND CNTN LIKE CONCAT('%', #{cntn}, '%')
+                </if>
+            </otherwise>
+        </choose>
         <if test="stsCd != null and stsCd != ''">
             AND STS_CD = #{stsCd}
         </if>
-        <if test="rgstEmpId != null and rgstEmpId != ''">
-            AND RGST_EMP_ID = #{rgstEmpId}
+        <if test="regEmpId != null and regEmpId != ''">
+            AND REG_EMP_ID = #{regEmpId}
         </if>
         <if test="startDate != null and startDate != ''">
             AND DATE(REG_DATE) &gt;= DATE(#{startDate})

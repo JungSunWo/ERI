@@ -29,23 +29,32 @@ public class DbTestController {
 
     @Autowired
     @Qualifier("mainDataSource")
-    private DataSource dataSource;
+    private DataSource mainDataSource;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    @Qualifier("employeeDataSource")
+    private DataSource employeeDataSource;
+
+    @Autowired
+    @Qualifier("mainJdbcTemplate")
+    private JdbcTemplate mainJdbcTemplate;
+
+    @Autowired
+    @Qualifier("employeeJdbcTemplate")
+    private JdbcTemplate employeeJdbcTemplate;
     
 
     /**
-     * 데이터베이스 연결 테스트
+     * 메인 데이터베이스 연결 테스트
      */
-    @PostMapping("/connection-test")
+    @PostMapping("/main-connection-test")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> testConnection() {
+    public ResponseEntity<Map<String, Object>> testMainConnection() {
         Map<String, Object> response = new HashMap<>();
         
         try {
             // 1. DataSource 연결 테스트
-            Connection connection = dataSource.getConnection();
+            Connection connection = mainDataSource.getConnection();
             DatabaseMetaData metaData = connection.getMetaData();
             
             Map<String, Object> connectionInfo = new HashMap<>();
@@ -59,14 +68,52 @@ public class DbTestController {
             connectionInfo.put("autoCommit", connection.getAutoCommit());
             
             response.put("success", true);
-            response.put("message", "데이터베이스 연결 성공");
+            response.put("message", "메인 데이터베이스(eri_db) 연결 성공");
             response.put("connectionInfo", connectionInfo);
             
             connection.close();
             
         } catch (SQLException e) {
             response.put("success", false);
-            response.put("message", "데이터베이스 연결 실패: " + e.getMessage());
+            response.put("message", "메인 데이터베이스 연결 실패: " + e.getMessage());
+            response.put("error", e.getClass().getSimpleName());
+        }
+        
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 직원 데이터베이스 연결 테스트
+     */
+    @PostMapping("/employee-connection-test")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> testEmployeeConnection() {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // 1. DataSource 연결 테스트
+            Connection connection = employeeDataSource.getConnection();
+            DatabaseMetaData metaData = connection.getMetaData();
+            
+            Map<String, Object> connectionInfo = new HashMap<>();
+            connectionInfo.put("databaseProductName", metaData.getDatabaseProductName());
+            connectionInfo.put("databaseProductVersion", metaData.getDatabaseProductVersion());
+            connectionInfo.put("driverName", metaData.getDriverName());
+            connectionInfo.put("driverVersion", metaData.getDriverVersion());
+            connectionInfo.put("url", metaData.getURL());
+            connectionInfo.put("userName", metaData.getUserName());
+            connectionInfo.put("isReadOnly", connection.isReadOnly());
+            connectionInfo.put("autoCommit", connection.getAutoCommit());
+            
+            response.put("success", true);
+            response.put("message", "직원 데이터베이스(eri_employee_db) 연결 성공");
+            response.put("connectionInfo", connectionInfo);
+            
+            connection.close();
+            
+        } catch (SQLException e) {
+            response.put("success", false);
+            response.put("message", "직원 데이터베이스 연결 실패: " + e.getMessage());
             response.put("error", e.getClass().getSimpleName());
         }
         
@@ -97,7 +144,7 @@ public class DbTestController {
             for (String tableName : batchTables) {
                 try {
                     String sql = "SELECT COUNT(*) FROM " + tableName;
-                    jdbcTemplate.queryForObject(sql, Integer.class);
+                    mainJdbcTemplate.queryForObject(sql, Integer.class);
                     tableStatus.put(tableName, true);
                 } catch (Exception e) {
                     tableStatus.put(tableName, false);
@@ -139,7 +186,7 @@ public class DbTestController {
             for (String tableName : eriTables) {
                 try {
                     String sql = "SELECT COUNT(*) FROM " + tableName;
-                    jdbcTemplate.queryForObject(sql, Integer.class);
+                    mainJdbcTemplate.queryForObject(sql, Integer.class);
                     tableStatus.put(tableName, true);
                 } catch (Exception e) {
                     tableStatus.put(tableName, false);
@@ -170,15 +217,15 @@ public class DbTestController {
         try {
             // 현재 시간 조회
             String currentTimeSql = "SELECT NOW() as current_time";
-            String currentTime = jdbcTemplate.queryForObject(currentTimeSql, String.class);
+            String currentTime = mainJdbcTemplate.queryForObject(currentTimeSql, String.class);
             
             // 데이터베이스 버전 조회
             String versionSql = "SELECT version() as db_version";
-            String version = jdbcTemplate.queryForObject(versionSql, String.class);
+            String version = mainJdbcTemplate.queryForObject(versionSql, String.class);
             
             // 활성 연결 수 조회
             String connectionsSql = "SELECT count(*) as active_connections FROM pg_stat_activity WHERE state = 'active'";
-            Integer activeConnections = jdbcTemplate.queryForObject(connectionsSql, Integer.class);
+            Integer activeConnections = mainJdbcTemplate.queryForObject(connectionsSql, Integer.class);
             
             Map<String, Object> queryResults = new HashMap<>();
             queryResults.put("currentTime", currentTime);

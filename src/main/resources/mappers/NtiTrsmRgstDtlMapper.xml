@@ -10,10 +10,10 @@
             NTI_SEQ,
             TRSM_MDI_CD,
             RGST_TM,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             UPDT_DT,
             UPDT_TM,
-            UPDT_EMP_ID
+            UPD_EMP_ID
         FROM TB_NTI_TRSM_RGST_DTL
         <where>
             <if test="rgstDt != null">
@@ -28,8 +28,8 @@
             <if test="trsmMdiCd != null and trsmMdiCd != ''">
                 AND TRSM_MDI_CD = #{trsmMdiCd}
             </if>
-            <if test="rgstEmpId != null and rgstEmpId != ''">
-                AND RGST_EMP_ID = #{rgstEmpId}
+            <if test="regEmpId != null and regEmpId != ''">
+                AND REG_EMP_ID = #{regEmpId}
             </if>
         </where>
         ORDER BY RGST_DT DESC, SEQ DESC
@@ -43,10 +43,10 @@
             NTI_SEQ,
             TRSM_MDI_CD,
             RGST_TM,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             UPDT_DT,
             UPDT_TM,
-            UPDT_EMP_ID
+            UPD_EMP_ID
         FROM TB_NTI_TRSM_RGST_DTL
         WHERE RGST_DT = #{rgstDt} AND SEQ = #{seq}
     </select>
@@ -59,14 +59,14 @@
             NTI_SEQ,
             TRSM_MDI_CD,
             RGST_TM,
-            RGST_EMP_ID
+            REG_EMP_ID
         ) VALUES (
             #{rgstDt},
             #{seq},
             #{ntiSeq},
             #{trsmMdiCd},
             #{rgstTm},
-            #{rgstEmpId}
+            #{regEmpId}
         )
     </insert>
 
@@ -78,7 +78,7 @@
             TRSM_MDI_CD = #{trsmMdiCd},
             UPDT_DT = #{updtDt},
             UPDT_TM = #{updtTm},
-            UPDT_EMP_ID = #{updtEmpId}
+            UPD_EMP_ID = #{updEmpId}
         WHERE RGST_DT = #{rgstDt} AND SEQ = #{seq}
     </update>
 

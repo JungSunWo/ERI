@@ -11,8 +11,6 @@ public class NtiLstVO {
     private String cntn;        // 내용
     private String stsCd;       // 상태코드
     private String fileAttachYn; // 첨부파일 존재 여부
-    private String rgstEmpId;   // 등록직원ID
-    private String updtEmpId;   // 수정직원ID
     private String delYn;       // 삭제여부
     private LocalDateTime delDate; // 삭제일시
     private String regEmpId;    // 등록직원ID

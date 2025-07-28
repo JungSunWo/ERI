@@ -36,19 +36,27 @@
             b.CATEGORY_CD,
             b.SECRET_YN,
             b.NOTICE_YN,
-            b.RGST_EMP_ID,
-            b.UPDT_EMP_ID,
             b.DEL_YN,
             b.DEL_DATE,
             b.REG_EMP_ID,
             b.UPD_EMP_ID,
             b.REG_DATE,
             b.UPD_DATE,
-            rgst.EMP_NM as rgstEmpNm,
-            updt.EMP_NM as updtEmpNm
+            reg_emp.EMP_NM as regEmpNm,
+            upd_emp.EMP_NM as updEmpNm,
+        
+            COALESCE(comment_counts.COMMENT_COUNT, 0) as commentCount
         FROM TB_EMP_RIGHTS_BOARD b
-        LEFT JOIN TB_EMP_LST rgst ON b.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
-        LEFT JOIN TB_EMP_LST updt ON b.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_REF reg_emp ON b.REG_EMP_ID = reg_emp.ERI_EMP_ID AND reg_emp.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_REF upd_emp ON b.UPD_EMP_ID = upd_emp.ERI_EMP_ID AND upd_emp.DEL_YN = 'N'
+        LEFT JOIN (
+            SELECT 
+                BOARD_SEQ,
+                COUNT(*) as COMMENT_COUNT
+            FROM TB_EMP_RIGHTS_COMMENT
+            WHERE DEL_YN = 'N'
+            GROUP BY BOARD_SEQ
+        ) comment_counts ON b.SEQ = comment_counts.BOARD_SEQ
         WHERE b.DEL_YN = 'N'
         <if test="searchKeyword != null and searchKeyword != ''">
             <choose>
@@ -84,7 +92,7 @@
                     <when test="sortBy == 'regDate'">b.REG_DATE</when>
                     <when test="sortBy == 'viewCnt'">b.VIEW_CNT</when>
                     <when test="sortBy == 'likeCnt'">b.LIKE_CNT</when>
-                    <when test="sortBy == 'commentCount'">COMMENT_COUNT</when>
+                    <when test="sortBy == 'commentCount'">commentCount</when>
                     <otherwise>b.REG_DATE</otherwise>
                 </choose>
             </when>
@@ -143,19 +151,26 @@
             b.CATEGORY_CD,
             b.SECRET_YN,
             b.NOTICE_YN,
-            b.RGST_EMP_ID,
-            b.UPDT_EMP_ID,
             b.DEL_YN,
             b.DEL_DATE,
             b.REG_EMP_ID,
             b.UPD_EMP_ID,
             b.REG_DATE,
             b.UPD_DATE,
-            rgst.EMP_NM as rgstEmpNm,
-            updt.EMP_NM as updtEmpNm
+            reg_emp.EMP_NM as regEmpNm,
+            upd_emp.EMP_NM as updEmpNm,
+            COALESCE(comment_counts.COMMENT_COUNT, 0) as commentCount
         FROM TB_EMP_RIGHTS_BOARD b
-        LEFT JOIN TB_EMP_LST rgst ON b.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
-        LEFT JOIN TB_EMP_LST updt ON b.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_REF reg_emp ON b.REG_EMP_ID = reg_emp.ERI_EMP_ID AND reg_emp.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_REF upd_emp ON b.UPD_EMP_ID = upd_emp.ERI_EMP_ID AND upd_emp.DEL_YN = 'N'
+        LEFT JOIN (
+            SELECT 
+                BOARD_SEQ,
+                COUNT(*) as COMMENT_COUNT
+            FROM TB_EMP_RIGHTS_COMMENT
+            WHERE DEL_YN = 'N'
+            GROUP BY BOARD_SEQ
+        ) comment_counts ON b.SEQ = comment_counts.BOARD_SEQ
         WHERE b.SEQ = #{seq}
         AND b.DEL_YN = 'N'
     </select>
@@ -173,8 +188,6 @@
             CATEGORY_CD,
             SECRET_YN,
             NOTICE_YN,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
             DEL_YN,
             REG_EMP_ID,
             UPD_EMP_ID,
@@ -191,11 +204,9 @@
             #{categoryCd,jdbcType=VARCHAR},
             COALESCE(#{secretYn,jdbcType=CHAR}, 'N'),
             COALESCE(#{noticeYn,jdbcType=CHAR}, 'N'),
-            #{rgstEmpId,jdbcType=VARCHAR},
-            #{updtEmpId,jdbcType=VARCHAR},
             'N',
-            #{rgstEmpId,jdbcType=VARCHAR},
-            #{updtEmpId,jdbcType=VARCHAR},
+            #{regEmpId,jdbcType=VARCHAR},
+            #{updEmpId,jdbcType=VARCHAR},
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
         )
@@ -212,8 +223,7 @@
             <if test="categoryCd != null">CATEGORY_CD = #{categoryCd,jdbcType=VARCHAR},</if>
             <if test="secretYn != null">SECRET_YN = #{secretYn,jdbcType=CHAR},</if>
             <if test="noticeYn != null">NOTICE_YN = #{noticeYn,jdbcType=CHAR},</if>
-            <if test="updtEmpId != null">UPDT_EMP_ID = #{updtEmpId,jdbcType=VARCHAR},</if>
-            UPD_EMP_ID = COALESCE(#{updtEmpId,jdbcType=VARCHAR}, #{rgstEmpId,jdbcType=VARCHAR}),
+            UPD_EMP_ID = COALESCE(#{updEmpId,jdbcType=VARCHAR}, #{regEmpId,jdbcType=VARCHAR}),
             UPD_DATE = CURRENT_TIMESTAMP
         WHERE SEQ = #{seq,jdbcType=BIGINT}
         AND DEL_YN = 'N'
@@ -285,19 +295,24 @@
             b.CATEGORY_CD,
             b.SECRET_YN,
             b.NOTICE_YN,
-            b.RGST_EMP_ID,
-            b.UPDT_EMP_ID,
             b.DEL_YN,
             b.DEL_DATE,
             b.REG_EMP_ID,
             b.UPD_EMP_ID,
             b.REG_DATE,
             b.UPD_DATE,
-            rgst.EMP_NM as rgstEmpNm,
-            updt.EMP_NM as updtEmpNm
+          
+            COALESCE(comment_counts.COMMENT_COUNT, 0) as commentCount
         FROM TB_EMP_RIGHTS_BOARD b
-        LEFT JOIN TB_EMP_LST rgst ON b.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
-        LEFT JOIN TB_EMP_LST updt ON b.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        
+        LEFT JOIN (
+            SELECT 
+                BOARD_SEQ,
+                COUNT(*) as COMMENT_COUNT
+            FROM TB_EMP_RIGHTS_COMMENT
+            WHERE DEL_YN = 'N'
+            GROUP BY BOARD_SEQ
+        ) comment_counts ON b.SEQ = comment_counts.BOARD_SEQ
         WHERE b.DEL_YN = 'N'
         AND b.NOTICE_YN = 'Y'
         AND b.STS_CD = 'ACTIVE'
@@ -318,21 +333,26 @@
             b.CATEGORY_CD,
             b.SECRET_YN,
             b.NOTICE_YN,
-            b.RGST_EMP_ID,
-            b.UPDT_EMP_ID,
             b.DEL_YN,
             b.DEL_DATE,
             b.REG_EMP_ID,
             b.UPD_EMP_ID,
             b.REG_DATE,
             b.UPD_DATE,
-            rgst.EMP_NM as rgstEmpNm,
-            updt.EMP_NM as updtEmpNm
+           
+            COALESCE(comment_counts.COMMENT_COUNT, 0) as commentCount
         FROM TB_EMP_RIGHTS_BOARD b
-        LEFT JOIN TB_EMP_LST rgst ON b.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
-        LEFT JOIN TB_EMP_LST updt ON b.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        
+        LEFT JOIN (
+            SELECT 
+                BOARD_SEQ,
+                COUNT(*) as COMMENT_COUNT
+            FROM TB_EMP_RIGHTS_COMMENT
+            WHERE DEL_YN = 'N'
+            GROUP BY BOARD_SEQ
+        ) comment_counts ON b.SEQ = comment_counts.BOARD_SEQ
         WHERE b.DEL_YN = 'N'
-        AND b.RGST_EMP_ID = #{empId,jdbcType=VARCHAR}
+        AND b.REG_EMP_ID = #{empId,jdbcType=VARCHAR}
         ORDER BY b.REG_DATE DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
@@ -342,7 +362,7 @@
         SELECT COUNT(*)
         FROM TB_EMP_RIGHTS_BOARD b
         WHERE b.DEL_YN = 'N'
-        AND b.RGST_EMP_ID = #{empId,jdbcType=VARCHAR}
+        AND b.REG_EMP_ID = #{empId,jdbcType=VARCHAR}
     </select>
 
 </mapper> 

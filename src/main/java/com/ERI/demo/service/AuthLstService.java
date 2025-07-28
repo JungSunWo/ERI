@@ -26,7 +26,7 @@ public class AuthLstService {
     public PageResponseDto<AuthLstVO> getAllAuthsWithPaging(PageRequestDto pageRequest) {
         List<AuthLstVO> content = authLstMapper.selectAllWithPaging(pageRequest);
         long totalElements = authLstMapper.selectAllCount(pageRequest);
-        return new PageResponseDto<>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
+        return new PageResponseDto<AuthLstVO>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
     }
     
     /**

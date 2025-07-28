@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.SurveyResponseMapper">
+
+    <!-- 설문조사 응답 등록 -->
+    <insert id="insertSurveyResponse" parameterType="com.ERI.demo.vo.SurveyResponseVO" useGeneratedKeys="true" keyProperty="responseSeq">
+        INSERT INTO TB_SURVEY_RESPONSE (
+            SURVEY_SEQ,
+            EMP_NO,
+            EMP_NM,
+            DEPT_NM,
+            RESPONSE_STT_DT,
+            RESPONSE_END_DT,
+            RESPONSE_DUR_MIN,
+            RESPONSE_STS_CD,
+            ANONYMOUS_YN,
+            IP_ADDR,
+            USER_AGENT,
+            REG_ID,
+            REG_DT,
+            UPD_ID,
+            UPD_DT,
+            DEL_YN
+        ) VALUES (
+            #{surveySeq},
+            #{empNo},
+            #{empNm},
+            #{deptNm},
+            NOW(),
+            NOW(),
+            #{responseDurMin},
+            #{responseStsCd},
+            #{anonymousYn},
+            #{ipAddr},
+            #{userAgent},
+            #{regId},
+            NOW(),
+            #{updId},
+            NOW(),
+            'N'
+        )
+    </insert>
+
+    <!-- 설문조사 응답 상세 등록 -->
+    <insert id="insertSurveyResponseDetail" parameterType="com.ERI.demo.vo.SurveyResponseDetailVO" useGeneratedKeys="true" keyProperty="responseDetailSeq">
+        INSERT INTO TB_SURVEY_RESPONSE_DETAIL (
+            RESPONSE_SEQ,
+            SURVEY_SEQ,
+            QUESTION_SEQ,
+            CHOICE_SEQ,
+            TEXT_RESPONSE,
+            RESPONSE_ORD,
+            RESPONSE_SCORE,
+            REG_ID,
+            REG_DT,
+            UPD_ID,
+            UPD_DT,
+            DEL_YN
+        ) VALUES (
+            #{responseSeq},
+            #{surveySeq},
+            #{questionSeq},
+            #{choiceSeq},
+            #{textResponse},
+            #{responseOrd},
+            #{responseScore},
+            #{regId},
+            NOW(),
+            #{updId},
+            NOW(),
+            'N'
+        )
+    </insert>
+
+    <!-- 설문조사 응답 수정 -->
+    <update id="updateSurveyResponse" parameterType="com.ERI.demo.vo.SurveyResponseVO">
+        UPDATE TB_SURVEY_RESPONSE
+        SET RESPONSE_END_DT = NOW(),
+            RESPONSE_DUR_MIN = #{responseDurMin},
+            RESPONSE_STS_CD = #{responseStsCd},
+            UPD_ID = #{updId},
+            UPD_DT = NOW()
+        WHERE RESPONSE_SEQ = #{responseSeq}
+    </update>
+
+    <!-- 설문조사 응답 조회 -->
+    <select id="selectSurveyResponseBySeq" parameterType="long" resultType="com.ERI.demo.vo.SurveyResponseVO">
+        SELECT 
+            RESPONSE_SEQ,
+            SURVEY_SEQ,
+            EMP_NO,
+            EMP_NM,
+            DEPT_NM,
+            RESPONSE_STT_DT,
+            RESPONSE_END_DT,
+            RESPONSE_DUR_MIN,
+            RESPONSE_STS_CD,
+            ANONYMOUS_YN,
+            IP_ADDR,
+            USER_AGENT,
+            REG_ID,
+            REG_DT,
+            UPD_ID,
+            UPD_DT,
+            DEL_YN
+        FROM TB_SURVEY_RESPONSE
+        WHERE RESPONSE_SEQ = #{responseSeq}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 설문조사별 응답 목록 조회 -->
+    <select id="selectSurveyResponsesBySurveySeq" resultType="com.ERI.demo.vo.SurveyResponseVO">
+        SELECT 
+            RESPONSE_SEQ,
+            SURVEY_SEQ,
+            EMP_NO,
+            EMP_NM,
+            DEPT_NM,
+            RESPONSE_STT_DT,
+            RESPONSE_END_DT,
+            RESPONSE_DUR_MIN,
+            RESPONSE_STS_CD,
+            ANONYMOUS_YN,
+            IP_ADDR,
+            USER_AGENT,
+            REG_ID,
+            REG_DT,
+            UPD_ID,
+            UPD_DT,
+            DEL_YN
+        FROM TB_SURVEY_RESPONSE
+        WHERE SURVEY_SEQ = #{surveySeq}
+        AND DEL_YN = 'N'
+        <if test="params != null">
+            <if test="params.responseStsCd != null and params.responseStsCd != ''">
+                AND RESPONSE_STS_CD = #{params.responseStsCd}
+            </if>
+            <if test="params.anonymousYn != null and params.anonymousYn != ''">
+                AND ANONYMOUS_YN = #{params.anonymousYn}
+            </if>
+        </if>
+        ORDER BY REG_DT DESC
+        <if test="params != null and params.offset != null and params.size != null">
+            LIMIT #{params.size} OFFSET #{params.offset}
+        </if>
+    </select>
+
+    <!-- 설문조사 응답 상세 목록 조회 -->
+    <select id="selectResponseDetailsByResponseSeq" parameterType="long" resultType="com.ERI.demo.vo.SurveyResponseDetailVO">
+        SELECT 
+            RESPONSE_DETAIL_SEQ,
+            RESPONSE_SEQ,
+            SURVEY_SEQ,
+            QUESTION_SEQ,
+            CHOICE_SEQ,
+            TEXT_RESPONSE,
+            RESPONSE_ORD,
+            RESPONSE_SCORE,
+            REG_ID,
+            REG_DT,
+            UPD_ID,
+            UPD_DT,
+            DEL_YN
+        FROM TB_SURVEY_RESPONSE_DETAIL
+        WHERE RESPONSE_SEQ = #{responseSeq}
+        AND DEL_YN = 'N'
+        ORDER BY RESPONSE_ORD ASC
+    </select>
+
+    <!-- 설문조사 응답 개수 조회 -->
+    <select id="countSurveyResponses" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_SURVEY_RESPONSE
+        WHERE SURVEY_SEQ = #{surveySeq}
+        AND DEL_YN = 'N'
+        <if test="params != null">
+            <if test="params.responseStsCd != null and params.responseStsCd != ''">
+                AND RESPONSE_STS_CD = #{params.responseStsCd}
+            </if>
+            <if test="params.anonymousYn != null and params.anonymousYn != ''">
+                AND ANONYMOUS_YN = #{params.anonymousYn}
+            </if>
+        </if>
+    </select>
+
+    <!-- 직원별 설문조사 응답 여부 확인 -->
+    <select id="selectResponseBySurveyAndEmp" resultType="com.ERI.demo.vo.SurveyResponseVO">
+        SELECT 
+            RESPONSE_SEQ,
+            SURVEY_SEQ,
+            EMP_NO,
+            EMP_NM,
+            DEPT_NM,
+            RESPONSE_STT_DT,
+            RESPONSE_END_DT,
+            RESPONSE_DUR_MIN,
+            RESPONSE_STS_CD,
+            ANONYMOUS_YN,
+            IP_ADDR,
+            USER_AGENT,
+            REG_ID,
+            REG_DT,
+            UPD_ID,
+            UPD_DT,
+            DEL_YN
+        FROM TB_SURVEY_RESPONSE
+        WHERE SURVEY_SEQ = #{surveySeq}
+        AND EMP_NO = #{empNo}
+        AND DEL_YN = 'N'
+        LIMIT 1
+    </select>
+
+    <!-- 설문조사 응답 삭제 (논리 삭제) -->
+    <update id="deleteSurveyResponse">
+        UPDATE TB_SURVEY_RESPONSE
+        SET DEL_YN = 'Y',
+            UPD_ID = #{empId},
+            UPD_DT = NOW()
+        WHERE RESPONSE_SEQ = #{responseSeq}
+    </update>
+
+    <!-- 설문조사 응답 상세 삭제 (논리 삭제) -->
+    <update id="deleteSurveyResponseDetails">
+        UPDATE TB_SURVEY_RESPONSE_DETAIL
+        SET DEL_YN = 'Y',
+            UPD_ID = #{empId},
+            UPD_DT = NOW()
+        WHERE RESPONSE_SEQ = #{responseSeq}
+    </update>
+
+</mapper> 

@@ -14,12 +14,17 @@ import java.util.List;
 public interface AdminLstMapper {
     
     /**
-     * 전체 관리자 목록 조회 (삭제되지 않은 데이터만)
+     * 전체 관리자 목록 조회
      */
     List<AdminLstVO> selectAllAdminLst();
     
     /**
-     * 관리자 ID로 관리자 정보 조회 (삭제되지 않은 데이터만)
+     * 페이징을 위한 관리자 목록 조회
+     */
+    List<AdminLstVO> selectAdminLstWithPaging(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size, @Param("sort") String sort);
+    
+    /**
+     * 관리자 ID로 관리자 정보 조회
      */
     AdminLstVO selectByAdminId(@Param("adminId") String adminId);
     
@@ -29,7 +34,7 @@ public interface AdminLstMapper {
     AdminLstVO selectByAdminIdWithDeleted(@Param("adminId") String adminId);
     
     /**
-     * 관리자 상태 코드로 관리자 목록 조회 (삭제되지 않은 데이터만)
+     * 관리자 상태 코드로 관리자 목록 조회
      */
     List<AdminLstVO> selectByAdminStsCd(@Param("adminStsCd") String adminStsCd);
     
@@ -44,22 +49,32 @@ public interface AdminLstMapper {
     int updateAdminLst(AdminLstVO adminLst);
     
     /**
-     * 관리자 ID로 논리적 삭제
+     * 관리자 ID로 실제 삭제
      */
     int deleteAdminLstByAdminId(@Param("adminId") String adminId);
     
     /**
-     * 관리자 ID로 복구
+     * 관리자 ID로 복구 (실제 삭제에서는 사용하지 않음)
      */
     int restoreAdminLstByAdminId(@Param("adminId") String adminId);
     
     /**
-     * 전체 관리자 수 조회 (삭제되지 않은 데이터만)
+     * 전체 관리자 수 조회
      */
     int countAllAdminLst();
     
     /**
-     * 관리자 상태 코드별 관리자 수 조회 (삭제되지 않은 데이터만)
+     * 검색 조건에 따른 관리자 수 조회
+     */
+    int countAdminLstWithSearch(@Param("keyword") String keyword);
+    
+    /**
+     * 관리자 상태 코드별 관리자 수 조회
      */
     int countByAdminStsCd(@Param("adminStsCd") String adminStsCd);
+    
+    /**
+     * 관리자 ID로 관리자 수 조회
+     */
+    int countByAdminId(@Param("adminId") String adminId);
 } 

@@ -12,10 +12,10 @@ public class MgrAuthGrpMapVO {
     private String authGrpCd;        // 권한그룹코드
     private LocalDate rgstDt;        // 등록일자
     private LocalTime rgstTm;        // 등록시간
-    private String rgstEmpId;        // 등록직원번호
+    private String regEmpId;         // 등록직원번호
     private LocalDate updtDt;        // 수정일자
     private LocalTime updtTm;        // 수정시간
-    private String updtEmpId;        // 수정직원번호
+    private String updEmpId;         // 수정직원번호
     private String delYn;            // 삭제 여부
     private LocalDateTime delDate;   // 삭제 일시
     private LocalDateTime regDate;   // 등록 일시
@@ -26,16 +26,16 @@ public class MgrAuthGrpMapVO {
 
     // 전체 필드 생성자
     public MgrAuthGrpMapVO(String mgrEmpId, String authGrpCd, LocalDate rgstDt, LocalTime rgstTm, 
-                          String rgstEmpId, LocalDate updtDt, LocalTime updtTm, String updtEmpId, 
+                          String regEmpId, LocalDate updtDt, LocalTime updtTm, String updEmpId, 
                           String delYn, LocalDateTime delDate, LocalDateTime regDate, LocalDateTime updDate) {
         this.mgrEmpId = mgrEmpId;
         this.authGrpCd = authGrpCd;
         this.rgstDt = rgstDt;
         this.rgstTm = rgstTm;
-        this.rgstEmpId = rgstEmpId;
+        this.regEmpId = regEmpId;
         this.updtDt = updtDt;
         this.updtTm = updtTm;
-        this.updtEmpId = updtEmpId;
+        this.updEmpId = updEmpId;
         this.delYn = delYn;
         this.delDate = delDate;
         this.regDate = regDate;
@@ -55,8 +55,8 @@ public class MgrAuthGrpMapVO {
     public LocalTime getRgstTm() { return rgstTm; }
     public void setRgstTm(LocalTime rgstTm) { this.rgstTm = rgstTm; }
 
-    public String getRgstEmpId() { return rgstEmpId; }
-    public void setRgstEmpId(String rgstEmpId) { this.rgstEmpId = rgstEmpId; }
+    public String getRegEmpId() { return regEmpId; }
+    public void setRegEmpId(String regEmpId) { this.regEmpId = regEmpId; }
 
     public LocalDate getUpdtDt() { return updtDt; }
     public void setUpdtDt(LocalDate updtDt) { this.updtDt = updtDt; }
@@ -64,8 +64,8 @@ public class MgrAuthGrpMapVO {
     public LocalTime getUpdtTm() { return updtTm; }
     public void setUpdtTm(LocalTime updtTm) { this.updtTm = updtTm; }
 
-    public String getUpdtEmpId() { return updtEmpId; }
-    public void setUpdtEmpId(String updtEmpId) { this.updtEmpId = updtEmpId; }
+    public String getUpdEmpId() { return updEmpId; }
+    public void setUpdEmpId(String updEmpId) { this.updEmpId = updEmpId; }
 
     public String getDelYn() { return delYn; }
     public void setDelYn(String delYn) { this.delYn = delYn; }
@@ -86,10 +86,10 @@ public class MgrAuthGrpMapVO {
                 ", authGrpCd='" + authGrpCd + '\'' +
                 ", rgstDt=" + rgstDt +
                 ", rgstTm=" + rgstTm +
-                ", rgstEmpId='" + rgstEmpId + '\'' +
+                ", regEmpId='" + regEmpId + '\'' +
                 ", updtDt=" + updtDt +
                 ", updtTm=" + updtTm +
-                ", updtEmpId='" + updtEmpId + '\'' +
+                ", updEmpId='" + updEmpId + '\'' +
                 ", delYn='" + delYn + '\'' +
                 ", delDate=" + delDate +
                 ", regDate=" + regDate +

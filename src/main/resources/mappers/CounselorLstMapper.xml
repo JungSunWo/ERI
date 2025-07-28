@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.CounselorLstMapper">
+
+    <!-- 결과 매핑 -->
+    <resultMap id="CounselorLstResultMap" type="com.ERI.demo.vo.CounselorLstVO">
+        <id column="CNSLR_EMP_ID" property="counselorEmpId" jdbcType="VARCHAR"/>
+        <result column="CNSLR_INFO_CLSF_CD" property="counselorInfoClsfCd" jdbcType="VARCHAR"/>
+        <result column="REG_EMP_ID" property="regEmpId" jdbcType="VARCHAR"/>
+        <result column="UPD_EMP_ID" property="updEmpId" jdbcType="VARCHAR"/>
+        <result column="DEL_YN" property="delYn" jdbcType="CHAR"/>
+        <result column="DEL_DATE" property="delDate" jdbcType="TIMESTAMP"/>
+        <result column="REG_DATE" property="regDate" jdbcType="TIMESTAMP"/>
+        <result column="UPD_DATE" property="updDate" jdbcType="TIMESTAMP"/>
+        <!-- TB_EMP_REF 테이블에서 JOIN으로 가져오는 필드들 -->
+        <result column="ERI_EMP_ID" property="eriEmpId" jdbcType="VARCHAR"/>
+        <result column="EMP_NM" property="empNm" jdbcType="VARCHAR"/>
+        <result column="BLNG_BRCD" property="blngBrcd" jdbcType="VARCHAR"/>
+        <result column="BETEAM_CD" property="beteamCd" jdbcType="VARCHAR"/>
+        <result column="JBTT_CD" property="jbttCd" jdbcType="VARCHAR"/>
+        <result column="JBCL_CD" property="jbclCd" jdbcType="VARCHAR"/>
+        <result column="EMP_CPN" property="empCpn" jdbcType="VARCHAR"/>
+        <result column="EAD" property="ead" jdbcType="VARCHAR"/>
+        <!-- 공통코드에서 가져오는 상담자정보구분명 -->
+        <result column="CNSLR_INFO_CLSF_NM" property="counselorInfoClsfNm" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 전체 상담사 목록 조회 -->
+    <select id="selectAllCounselorLst" resultMap="CounselorLstResultMap">
+        SELECT 
+            ROW_NUMBER() OVER (ORDER BY CNSLR_EMP_ID) AS rowNum,
+            CNSLR_EMP_ID,
+            CNSLR_INFO_CLSF_CD,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_CNSLR_LST
+        WHERE DEL_YN = 'N'
+        ORDER BY CNSLR_EMP_ID
+    </select>
+
+    <!-- 페이징을 위한 상담사 목록 조회 (TB_EMP_REF JOIN, 검색 기능 포함) -->
+    <select id="selectCounselorLstWithPaging" resultMap="CounselorLstResultMap">
+        SELECT 
+            ROW_NUMBER() OVER (
+                <choose>
+                    <when test="sort != null and sort != ''">
+                        <choose>
+                            <when test="sort == 'counselorEmpId,asc'">ORDER BY c.CNSLR_EMP_ID ASC</when>
+                            <when test="sort == 'counselorEmpId,desc'">ORDER BY c.CNSLR_EMP_ID DESC</when>
+                            <when test="sort == 'counselorInfoClsfCd,asc'">ORDER BY c.CNSLR_INFO_CLSF_CD ASC</when>
+                            <when test="sort == 'counselorInfoClsfCd,desc'">ORDER BY c.CNSLR_INFO_CLSF_CD DESC</when>
+                            <when test="sort == 'regDate,asc'">ORDER BY c.REG_DATE ASC</when>
+                            <when test="sort == 'regDate,desc'">ORDER BY c.REG_DATE DESC</when>
+                            <when test="sort == 'empNm,asc'">ORDER BY e.EMP_NM ASC</when>
+                            <when test="sort == 'empNm,desc'">ORDER BY e.EMP_NM DESC</when>
+                            <when test="sort == 'blngBrcd,asc'">ORDER BY e.BLNG_BRCD ASC</when>
+                            <when test="sort == 'blngBrcd,desc'">ORDER BY e.BLNG_BRCD DESC</when>
+                            <otherwise>ORDER BY c.CNSLR_EMP_ID ASC</otherwise>
+                        </choose>
+                    </when>
+                    <otherwise>ORDER BY c.CNSLR_EMP_ID ASC</otherwise>
+                </choose>
+            ) AS rowNum,
+            c.CNSLR_EMP_ID,
+            c.CNSLR_INFO_CLSF_CD,
+            c.REG_EMP_ID,
+            c.UPD_EMP_ID,
+            c.DEL_YN,
+            c.DEL_DATE,
+            c.REG_DATE,
+            c.UPD_DATE,
+            e.ERI_EMP_ID,
+            e.EMP_NM,
+            e.BLNG_BRCD,
+            e.BETEAM_CD,
+            e.JBTT_CD,
+            e.JBCL_CD,
+            e.EMP_CPN,
+            e.EAD,
+            cd.DTL_CD_NM AS CNSLR_INFO_CLSF_NM
+        FROM TB_CNSLR_LST c
+        LEFT JOIN TB_EMP_REF e ON c.CNSLR_EMP_ID = e.ERI_EMP_ID
+        LEFT JOIN TB_CMN_DTL_CD cd ON c.CNSLR_INFO_CLSF_CD = cd.DTL_CD AND cd.GRP_CD = 'CNSLR_INFO_CLSF'
+        WHERE c.DEL_YN = 'N'
+        <if test="keyword != null and keyword != ''">
+            AND (
+                c.CNSLR_EMP_ID LIKE CONCAT('%', #{keyword}, '%')
+                OR e.EMP_NM LIKE CONCAT('%', #{keyword}, '%')
+                OR e.BLNG_BRCD LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        <choose>
+            <when test="sort != null and sort != ''">
+                <choose>
+                    <when test="sort == 'counselorEmpId,asc'">ORDER BY c.CNSLR_EMP_ID ASC</when>
+                    <when test="sort == 'counselorEmpId,desc'">ORDER BY c.CNSLR_EMP_ID DESC</when>
+                    <when test="sort == 'counselorInfoClsfCd,asc'">ORDER BY c.CNSLR_INFO_CLSF_CD ASC</when>
+                    <when test="sort == 'counselorInfoClsfCd,desc'">ORDER BY c.CNSLR_INFO_CLSF_CD DESC</when>
+                    <when test="sort == 'regDate,asc'">ORDER BY c.REG_DATE ASC</when>
+                    <when test="sort == 'regDate,desc'">ORDER BY c.REG_DATE DESC</when>
+                    <when test="sort == 'empNm,asc'">ORDER BY e.EMP_NM ASC</when>
+                    <when test="sort == 'empNm,desc'">ORDER BY e.EMP_NM DESC</when>
+                    <when test="sort == 'blngBrcd,asc'">ORDER BY e.BLNG_BRCD ASC</when>
+                    <when test="sort == 'blngBrcd,desc'">ORDER BY e.BLNG_BRCD DESC</when>
+                    <otherwise>ORDER BY c.CNSLR_EMP_ID ASC</otherwise>
+                </choose>
+            </when>
+            <otherwise>ORDER BY c.CNSLR_EMP_ID ASC</otherwise>
+        </choose>
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 상담사 직원 ID로 상담사 정보 조회 -->
+    <select id="selectCounselorByEmpId" resultMap="CounselorLstResultMap">
+        SELECT 
+            c.CNSLR_EMP_ID,
+            c.CNSLR_INFO_CLSF_CD,
+            c.REG_EMP_ID,
+            c.UPD_EMP_ID,
+            c.DEL_YN,
+            c.DEL_DATE,
+            c.REG_DATE,
+            c.UPD_DATE,
+            e.ERI_EMP_ID,
+            e.EMP_NM,
+            e.BLNG_BRCD,
+            e.BETEAM_CD,
+            e.JBTT_CD,
+            e.JBCL_CD,
+            e.EMP_CPN,
+            e.EAD,
+            cd.DTL_CD_NM AS CNSLR_INFO_CLSF_NM
+        FROM TB_CNSLR_LST c
+        LEFT JOIN TB_EMP_REF e ON c.CNSLR_EMP_ID = e.ERI_EMP_ID
+        LEFT JOIN TB_CMN_DTL_CD cd ON c.CNSLR_INFO_CLSF_CD = cd.DTL_CD AND cd.GRP_CD = 'CNSLR_INFO_CLSF'
+        WHERE c.CNSLR_EMP_ID = #{counselorEmpId}
+        AND c.DEL_YN = 'N'
+    </select>
+
+    <!-- 상담사 직원 ID로 상담사 정보 조회 (삭제된 데이터 포함) -->
+    <select id="selectCounselorByEmpIdWithDeleted" resultMap="CounselorLstResultMap">
+        SELECT 
+            c.CNSLR_EMP_ID,
+            c.CNSLR_INFO_CLSF_CD,
+            c.REG_EMP_ID,
+            c.UPD_EMP_ID,
+            c.DEL_YN,
+            c.DEL_DATE,
+            c.REG_DATE,
+            c.UPD_DATE,
+            e.ERI_EMP_ID,
+            e.EMP_NM,
+            e.BLNG_BRCD,
+            e.BETEAM_CD,
+            e.JBTT_CD,
+            e.JBCL_CD,
+            e.EMP_CPN,
+            e.EAD,
+            cd.DTL_CD_NM AS CNSLR_INFO_CLSF_NM
+        FROM TB_CNSLR_LST c
+        LEFT JOIN TB_EMP_REF e ON c.CNSLR_EMP_ID = e.ERI_EMP_ID
+        LEFT JOIN TB_CMN_DTL_CD cd ON c.CNSLR_INFO_CLSF_CD = cd.DTL_CD AND cd.GRP_CD = 'CNSLR_INFO_CLSF'
+        WHERE c.CNSLR_EMP_ID = #{counselorEmpId}
+    </select>
+
+    <!-- 상담자정보구분 코드로 상담사 목록 조회 -->
+    <select id="selectByCounselorInfoClsfCd" resultMap="CounselorLstResultMap">
+        SELECT 
+            c.CNSLR_EMP_ID,
+            c.CNSLR_INFO_CLSF_CD,
+            c.REG_EMP_ID,
+            c.UPD_EMP_ID,
+            c.DEL_YN,
+            c.DEL_DATE,
+            c.REG_DATE,
+            c.UPD_DATE,
+            e.ERI_EMP_ID,
+            e.EMP_NM,
+            e.BLNG_BRCD,
+            e.BETEAM_CD,
+            e.JBTT_CD,
+            e.JBCL_CD,
+            e.EMP_CPN,
+            e.EAD,
+            cd.DTL_CD_NM AS CNSLR_INFO_CLSF_NM
+        FROM TB_CNSLR_LST c
+        LEFT JOIN TB_EMP_REF e ON c.CNSLR_EMP_ID = e.ERI_EMP_ID
+        LEFT JOIN TB_CMN_DTL_CD cd ON c.CNSLR_INFO_CLSF_CD = cd.DTL_CD AND cd.GRP_CD = 'CNSLR_INFO_CLSF'
+        WHERE c.CNSLR_INFO_CLSF_CD = #{counselorInfoClsfCd}
+        AND c.DEL_YN = 'N'
+        ORDER BY c.CNSLR_EMP_ID
+    </select>
+
+    <!-- 상담사 정보 등록 -->
+    <insert id="insertCounselor" parameterType="com.ERI.demo.vo.CounselorLstVO">
+        INSERT INTO TB_CNSLR_LST (
+            CNSLR_EMP_ID,
+            CNSLR_INFO_CLSF_CD,
+            REG_EMP_ID,
+            REG_DATE
+        ) VALUES (
+            #{counselorEmpId},
+            #{counselorInfoClsfCd},
+            #{regEmpId},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 상담사 정보 수정 -->
+    <update id="updateCounselor" parameterType="com.ERI.demo.vo.CounselorLstVO">
+        UPDATE TB_CNSLR_LST
+        SET 
+            CNSLR_INFO_CLSF_CD = #{counselorInfoClsfCd},
+            UPD_EMP_ID = #{updEmpId},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE CNSLR_EMP_ID = #{counselorEmpId}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 상담사 직원 ID로 논리적 삭제 -->
+    <update id="deleteCounselor">
+        UPDATE TB_CNSLR_LST
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP
+        WHERE CNSLR_EMP_ID = #{counselorEmpId}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 상담사 직원 ID로 복구 -->
+    <update id="restoreCounselorByEmpId">
+        UPDATE TB_CNSLR_LST
+        SET 
+            DEL_YN = 'N',
+            DEL_DATE = NULL
+        WHERE CNSLR_EMP_ID = #{counselorEmpId}
+        AND DEL_YN = 'Y'
+    </update>
+
+    <!-- 전체 상담사 수 조회 -->
+    <select id="countAllCounselorLst" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_CNSLR_LST
+        WHERE DEL_YN = 'N'
+    </select>
+
+    <!-- 검색 조건에 따른 상담사 수 조회 -->
+    <select id="countCounselorLstWithSearch" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_CNSLR_LST c
+        LEFT JOIN TB_EMP_REF e ON c.CNSLR_EMP_ID = e.ERI_EMP_ID
+        WHERE c.DEL_YN = 'N'
+        <if test="keyword != null and keyword != ''">
+            AND (
+                c.CNSLR_EMP_ID LIKE CONCAT('%', #{keyword}, '%')
+                OR e.EMP_NM LIKE CONCAT('%', #{keyword}, '%')
+                OR e.BLNG_BRCD LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+    </select>
+
+    <!-- 상담자정보구분 코드별 상담사 수 조회 -->
+    <select id="countByCounselorInfoClsfCd" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_CNSLR_LST
+        WHERE CNSLR_INFO_CLSF_CD = #{counselorInfoClsfCd}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 상담사 직원 ID로 상담사 수 조회 -->
+    <select id="countByCounselorEmpId" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_CNSLR_LST
+        WHERE CNSLR_EMP_ID = #{counselorEmpId}
+        AND DEL_YN = 'N'
+    </select>
+
+</mapper> 

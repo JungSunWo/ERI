@@ -450,7 +450,7 @@
                             <div class="board-meta">
                                 <div class="board-stats">
                                     <span class="stat-item">
-                                        <i class="fas fa-user"></i> ${board.rgstEmpNm || board.rgstEmpId}
+                                        <i class="fas fa-user"></i> ${board.regEmpNm || board.regEmpId}
                                     </span>
                                     <span class="stat-item">
                                         <i class="fas fa-calendar"></i> ${formatDate(board.regDate)}
@@ -524,7 +524,7 @@
                                     ${board.secretYn === 'Y' ? '<span class="secret-badge">비밀</span>' : ''}
                                 </div>
                                 <div class="text-muted">
-                                    <small>작성자: ${board.rgstEmpNm || board.rgstEmpId} | 작성일: ${formatDate(board.regDate)}</small>
+                                    <small>작성자: ${board.regEmpNm || board.regEmpId} | 작성일: ${formatDate(board.regDate)}</small>
                                 </div>
                             </div>
                             <div class="board-stats mb-3">
@@ -579,7 +579,7 @@
                 <div class="comment-item" style="margin-left: ${comment.depth * 20}px;">
                     <div class="comment-meta">
                         <div>
-                            <strong>${comment.rgstEmpNm || comment.rgstEmpId}</strong>
+                            <strong>${comment.regEmpNm || comment.regEmpId}</strong>
                             <small class="text-muted ms-2">${formatDate(comment.regDate)}</small>
                             ${comment.secretYn === 'Y' ? '<span class="secret-badge">비밀</span>' : ''}
                         </div>

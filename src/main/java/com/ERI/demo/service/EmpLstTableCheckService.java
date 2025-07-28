@@ -1,6 +1,6 @@
 package com.ERI.demo.service;
 
-import com.ERI.demo.mappers.EmpLstMapper;
+import com.ERI.demo.mappers.employee.EmpLstMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +15,16 @@ public class EmpLstTableCheckService {
     @Autowired
     private EmpLstMapper empLstMapper;
 
-    @Transactional(transactionManager = "mainTransactionManager", rollbackFor = Exception.class)
+    @Transactional(transactionManager = "employeeTransactionManager", rollbackFor = Exception.class)
     public int getEmpLstCount() {
         try {
-            logger.info("eri_db TB_EMP_LST 테이블 카운트 조회 시작");
-            int count = empLstMapper.selectTotalCount();
-            logger.info("eri_db TB_EMP_LST 테이블 카운트: {}", count);
+            logger.info("eri_employee_db TB_EMP_LST 테이블 카운트 조회 시작");
+            int count = empLstMapper.countEmployees();
+            logger.info("eri_employee_db TB_EMP_LST 테이블 카운트: {}", count);
             return count;
         } catch (Exception e) {
-            logger.error("eri_db TB_EMP_LST 테이블 카운트 조회 실패: {}", e.getMessage(), e);
-            throw new RuntimeException("eri_db TB_EMP_LST 테이블 카운트 조회 실패: " + e.getMessage(), e);
+            logger.error("eri_employee_db TB_EMP_LST 테이블 카운트 조회 실패: {}", e.getMessage(), e);
+            throw new RuntimeException("eri_employee_db TB_EMP_LST 테이블 카운트 조회 실패: " + e.getMessage(), e);
         }
     }
 } 

@@ -25,20 +25,20 @@ public class NtiLstController {
      * 공지사항 목록 조회 (전체)
      * @param ttl 제목 검색어 (선택)
      * @param stsCd 상태코드 (선택)
-     * @param rgstEmpId 등록자ID (선택)
+     * @param regEmpId 등록자ID (선택)
      * @return 공지사항 목록
      */
     @GetMapping("/list")
     public ResponseEntity<?> getNtiLstList(
             @RequestParam(required = false) String ttl,
             @RequestParam(required = false) String stsCd,
-            @RequestParam(required = false) String rgstEmpId) {
+            @RequestParam(required = false) String regEmpId) {
         
         try {
             NtiLstVO searchVO = new NtiLstVO();
             searchVO.setTtl(ttl);
             searchVO.setStsCd(stsCd);
-            searchVO.setRgstEmpId(rgstEmpId);
+            searchVO.setRegEmpId(regEmpId);
             
             List<NtiLstVO> noticeList = ntiLstService.getNtiLstList(searchVO);
             
@@ -64,7 +64,7 @@ public class NtiLstController {
      * @param sortOrder 정렬 방향 (선택, asc/desc, 기본값: desc)
      * @param ttl 제목 검색어 (선택)
      * @param stsCd 상태코드 (선택)
-     * @param rgstEmpId 등록자ID (선택)
+     * @param regEmpId 등록자ID (선택)
      * @param startDate 시작일자 (선택, YYYY-MM-DD 형식)
      * @param endDate 종료일자 (선택, YYYY-MM-DD 형식)
      * @return 페이징된 공지사항 목록
@@ -76,8 +76,10 @@ public class NtiLstController {
             @RequestParam(required = false) String sortKey,
             @RequestParam(required = false) String sortOrder,
             @RequestParam(required = false) String ttl,
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam(required = false) String searchField,
             @RequestParam(required = false) String stsCd,
-            @RequestParam(required = false) String rgstEmpId,
+            @RequestParam(required = false) String regEmpId,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
         
@@ -94,9 +96,26 @@ public class NtiLstController {
             pageRequest.setSize(size);
             pageRequest.setSortBy(sortKey != null ? sortKey : "seq");
             pageRequest.setSortDirection(sortOrder != null ? sortOrder.toUpperCase() : "ASC");
-            pageRequest.setTtl(ttl);
+            
+            // 검색 조건 설정 (기존 ttl 파라미터와 새로운 searchKeyword/searchField 파라미터 모두 지원)
+            if (searchKeyword != null && searchField != null) {
+                // 새로운 검색 파라미터 사용
+                if ("ttl".equals(searchField)) {
+                    pageRequest.setTtl(searchKeyword);
+                } else if ("cntn".equals(searchField)) {
+                    pageRequest.setCntn(searchKeyword);
+                } else if ("both".equals(searchField)) {
+                    // 제목+내용 검색
+                    pageRequest.setTtl(searchKeyword);
+                    pageRequest.setCntn(searchKeyword);
+                }
+            } else if (ttl != null) {
+                // 기존 ttl 파라미터 사용 (하위 호환성)
+                pageRequest.setTtl(ttl);
+            }
+            
             pageRequest.setStsCd(stsCd);
-            pageRequest.setRgstEmpId(rgstEmpId);
+            pageRequest.setRegEmpId(regEmpId);
             pageRequest.setStartDate(startDate);
             pageRequest.setEndDate(endDate);
             
@@ -154,11 +173,13 @@ public class NtiLstController {
     public ResponseEntity<?> insertNtiLst(@RequestBody NtiLstVO ntiLstVO, HttpSession session) {
         try {
             // 세션에서 사용자 정보 가져오기
-            String empId = (String) session.getAttribute("encryptEmpNo");
-            if (empId == null) {
+            com.ERI.demo.vo.employee.EmpLstVO empInfo = (com.ERI.demo.vo.employee.EmpLstVO) session.getAttribute("EMP_INFO");
+            if (empInfo == null) {
                 ErrorResponseDto errorResponse = ErrorResponseDto.unauthorized("/api/nti/register");
                 return ResponseEntity.status(401).body(errorResponse);
             }
+            
+            String empId = empInfo.getEmpId();
             
             // 필수 필드 검증
             if (ntiLstVO.getTtl() == null || ntiLstVO.getTtl().trim().isEmpty()) {
@@ -172,7 +193,6 @@ public class NtiLstController {
             }
             
             // 등록자 정보 설정
-            ntiLstVO.setRgstEmpId(empId);
             ntiLstVO.setRegEmpId(empId);
             
             int result = ntiLstService.insertNtiLst(ntiLstVO);
@@ -206,11 +226,13 @@ public class NtiLstController {
     public ResponseEntity<?> updateNtiLst(@PathVariable Long seq, @RequestBody NtiLstVO ntiLstVO, HttpSession session) {
         try {
             // 세션에서 사용자 정보 가져오기
-            String empId = (String) session.getAttribute("encryptEmpNo");
-            if (empId == null) {
+            com.ERI.demo.vo.employee.EmpLstVO empInfo = (com.ERI.demo.vo.employee.EmpLstVO) session.getAttribute("EMP_INFO");
+            if (empInfo == null) {
                 ErrorResponseDto errorResponse = ErrorResponseDto.unauthorized("/api/nti/" + seq);
                 return ResponseEntity.status(401).body(errorResponse);
             }
+            
+            String empId = empInfo.getEmpId();
             
             // 기존 공지사항 확인
             NtiLstVO existingNotice = ntiLstService.getNtiLst(seq);
@@ -232,7 +254,6 @@ public class NtiLstController {
             
             // 수정자 정보 설정
             ntiLstVO.setSeq(seq);
-            ntiLstVO.setUpdtEmpId(empId);
             ntiLstVO.setUpdEmpId(empId);
             
             int result = ntiLstService.updateNtiLst(ntiLstVO);
@@ -265,11 +286,13 @@ public class NtiLstController {
     public ResponseEntity<?> deleteNtiLst(@PathVariable Long seq, HttpSession session) {
         try {
             // 세션에서 사용자 정보 가져오기
-            String empId = (String) session.getAttribute("encryptEmpNo");
-            if (empId == null) {
+            com.ERI.demo.vo.employee.EmpLstVO empInfo = (com.ERI.demo.vo.employee.EmpLstVO) session.getAttribute("EMP_INFO");
+            if (empInfo == null) {
                 ErrorResponseDto errorResponse = ErrorResponseDto.unauthorized("/api/nti/" + seq);
                 return ResponseEntity.status(401).body(errorResponse);
             }
+            
+            String empId = empInfo.getEmpId();
             
             // 기존 공지사항 확인
             NtiLstVO existingNotice = ntiLstService.getNtiLst(seq);

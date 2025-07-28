@@ -127,21 +127,33 @@
     <div class="container">
         <h1>ERI 데이터베이스 연결 테스트</h1>
         
-        <!-- 데이터베이스 연결 테스트 -->
+        <!-- 메인 데이터베이스 연결 테스트 -->
         <div class="test-section">
-            <div class="test-title">1. 데이터베이스 연결 테스트</div>
+            <div class="test-title">1. 메인 데이터베이스 연결 테스트 (eri_db)</div>
             <div class="test-description">
-                PostgreSQL 데이터베이스 연결 상태와 기본 정보를 확인합니다.
+                메인 PostgreSQL 데이터베이스(eri_db) 연결 상태와 기본 정보를 확인합니다.
                 <br>- 연결 상태, 데이터베이스 버전, 드라이버 정보 등
             </div>
-            <button class="btn" onclick="testConnection()">연결 테스트</button>
-            <div class="loading" id="connectionLoading">연결 테스트 중...</div>
-            <div class="result" id="connectionResult"></div>
+            <button class="btn" onclick="testMainConnection()">메인 DB 연결 테스트</button>
+            <div class="loading" id="mainConnectionLoading">메인 DB 연결 테스트 중...</div>
+            <div class="result" id="mainConnectionResult"></div>
+        </div>
+
+        <!-- 직원 데이터베이스 연결 테스트 -->
+        <div class="test-section">
+            <div class="test-title">2. 직원 데이터베이스 연결 테스트 (eri_employee_db)</div>
+            <div class="test-description">
+                직원 정보 PostgreSQL 데이터베이스(eri_employee_db) 연결 상태와 기본 정보를 확인합니다.
+                <br>- 연결 상태, 데이터베이스 버전, 드라이버 정보 등
+            </div>
+            <button class="btn" onclick="testEmployeeConnection()">직원 DB 연결 테스트</button>
+            <div class="loading" id="employeeConnectionLoading">직원 DB 연결 테스트 중...</div>
+            <div class="result" id="employeeConnectionResult"></div>
         </div>
 
         <!-- Spring Batch 테이블 테스트 -->
         <div class="test-section">
-            <div class="test-title">2. Spring Batch 메타데이터 테이블 확인</div>
+            <div class="test-title">3. Spring Batch 메타데이터 테이블 확인</div>
             <div class="test-description">
                 Spring Boot Batch 작업에 필요한 메타데이터 테이블들의 존재 여부를 확인합니다.
                 <br>- BATCH_JOB_INSTANCE, BATCH_JOB_EXECUTION, BATCH_STEP_EXECUTION 등
@@ -153,7 +165,7 @@
 
         <!-- ERI 애플리케이션 테이블 테스트 -->
         <div class="test-section">
-            <div class="test-title">3. ERI 애플리케이션 테이블 확인</div>
+            <div class="test-title">4. ERI 애플리케이션 테이블 확인</div>
             <div class="test-description">
                 ERI 애플리케이션에서 사용하는 주요 테이블들의 존재 여부를 확인합니다.
                 <br>- TB_EMP_LST, TB_EMP_ENCRYPT, TB_CMN_GRP_CD 등
@@ -165,7 +177,7 @@
 
         <!-- 쿼리 실행 테스트 -->
         <div class="test-section">
-            <div class="test-title">4. 기본 쿼리 실행 테스트</div>
+            <div class="test-title">5. 기본 쿼리 실행 테스트</div>
             <div class="test-description">
                 데이터베이스에서 기본적인 쿼리를 실행하여 정상 작동을 확인합니다.
                 <br>- 현재 시간, 데이터베이스 버전, 활성 연결 수 등
@@ -177,7 +189,7 @@
 
         <!-- 전체 테스트 -->
         <div class="test-section">
-            <div class="test-title">5. 전체 테스트 실행</div>
+            <div class="test-title">6. 전체 테스트 실행</div>
             <div class="test-description">
                 모든 테스트를 순차적으로 실행하여 전체적인 데이터베이스 상태를 확인합니다.
             </div>
@@ -188,16 +200,16 @@
     </div>
 
     <script>
-        function testConnection() {
+        function testMainConnection() {
             const button = event.target;
-            const loading = document.getElementById('connectionLoading');
-            const result = document.getElementById('connectionResult');
+            const loading = document.getElementById('mainConnectionLoading');
+            const result = document.getElementById('mainConnectionResult');
             
             button.disabled = true;
             loading.style.display = 'block';
             result.style.display = 'none';
             
-            fetch('./api/db-test/connection-test', {
+            fetch('./api/db-test/main-connection-test', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -210,7 +222,7 @@
                 
                 if (data.success) {
                     result.className = 'result success';
-                    let html = `<strong>✅ 연결 성공!</strong>\n\n`;
+                    let html = `<strong>✅ 메인 DB 연결 성공!</strong>\n\n`;
                     html += `<strong>연결 정보:</strong>\n`;
                     
                     if (data.connectionInfo) {
@@ -226,7 +238,59 @@
                     result.innerHTML = html;
                 } else {
                     result.className = 'result error';
-                    result.innerHTML = `❌ 연결 실패!\n\n오류: ${data.message}\n\n시간: ${new Date().toLocaleString()}`;
+                    result.innerHTML = `❌ 메인 DB 연결 실패!\n\n오류: ${data.message}\n\n시간: ${new Date().toLocaleString()}`;
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `❌ 오류 발생!\n\n메시지: ${error.message}\n\n시간: ${new Date().toLocaleString()}`;
+            })
+            .finally(() => {
+                button.disabled = false;
+            });
+        }
+
+        function testEmployeeConnection() {
+            const button = event.target;
+            const loading = document.getElementById('employeeConnectionLoading');
+            const result = document.getElementById('employeeConnectionResult');
+            
+            button.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            fetch('./api/db-test/employee-connection-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                
+                if (data.success) {
+                    result.className = 'result success';
+                    let html = `<strong>✅ 직원 DB 연결 성공!</strong>\n\n`;
+                    html += `<strong>연결 정보:</strong>\n`;
+                    
+                    if (data.connectionInfo) {
+                        html += `<div class="connection-info">`;
+                        html += `<table>`;
+                        html += `<tr><th>항목</th><th>값</th></tr>`;
+                        for (const [key, value] of Object.entries(data.connectionInfo)) {
+                            html += `<tr><td>${key}</td><td>${value}</td></tr>`;
+                        }
+                        html += `</table></div>`;
+                    }
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `❌ 직원 DB 연결 실패!\n\n오류: ${data.message}\n\n시간: ${new Date().toLocaleString()}`;
                 }
             })
             .catch(error => {
@@ -400,22 +464,27 @@
             const results = [];
             
             try {
-                // 1. 연결 테스트
-                const connectionResponse = await fetch('/api/db-test/connection-test', { method: 'POST' });
-                const connectionData = await connectionResponse.json();
-                results.push({ name: '연결 테스트', success: connectionData.success, message: connectionData.message });
+                // 1. 메인 DB 연결 테스트
+                const mainConnectionResponse = await fetch('/api/db-test/main-connection-test', { method: 'POST' });
+                const mainConnectionData = await mainConnectionResponse.json();
+                results.push({ name: '메인 DB 연결 테스트', success: mainConnectionData.success, message: mainConnectionData.message });
                 
-                // 2. Batch 테이블 테스트
+                // 2. 직원 DB 연결 테스트
+                const employeeConnectionResponse = await fetch('/api/db-test/employee-connection-test', { method: 'POST' });
+                const employeeConnectionData = await employeeConnectionResponse.json();
+                results.push({ name: '직원 DB 연결 테스트', success: employeeConnectionData.success, message: employeeConnectionData.message });
+                
+                // 3. Batch 테이블 테스트
                 const batchResponse = await fetch('/api/db-test/batch-tables-test', { method: 'POST' });
                 const batchData = await batchResponse.json();
                 results.push({ name: 'Batch 테이블 확인', success: batchData.success, message: batchData.message });
                 
-                // 3. ERI 테이블 테스트
+                // 4. ERI 테이블 테스트
                 const eriResponse = await fetch('/api/db-test/eri-tables-test', { method: 'POST' });
                 const eriData = await eriResponse.json();
                 results.push({ name: 'ERI 테이블 확인', success: eriData.success, message: eriData.message });
                 
-                // 4. 쿼리 테스트
+                // 5. 쿼리 테스트
                 const queryResponse = await fetch('/api/db-test/query-test', { method: 'POST' });
                 const queryData = await queryResponse.json();
                 results.push({ name: '쿼리 실행 테스트', success: queryData.success, message: queryData.message });

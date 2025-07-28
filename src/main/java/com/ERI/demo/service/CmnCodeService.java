@@ -33,7 +33,7 @@ public class CmnCodeService {
     public PageResponseDto<CmnGrpCdVO> getAllGroupCodesWithPaging(PageRequestDto pageRequest) {
         List<CmnGrpCdVO> content = cmnGrpCdMapper.selectAllWithPaging(pageRequest);
         long totalElements = cmnGrpCdMapper.selectAllCount(pageRequest);
-        return new PageResponseDto<>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
+        return new PageResponseDto<CmnGrpCdVO>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
     }
     
     /**
@@ -79,7 +79,7 @@ public class CmnCodeService {
     public PageResponseDto<CmnGrpCdVO> getGroupCodesByUseYnWithPaging(String useYn, PageRequestDto pageRequest) {
         List<CmnGrpCdVO> content = cmnGrpCdMapper.selectByUseYnWithPaging(useYn, pageRequest);
         long totalElements = cmnGrpCdMapper.selectByUseYnCount(useYn, pageRequest);
-        return new PageResponseDto<>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
+        return new PageResponseDto<CmnGrpCdVO>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
     }
     
     /**
@@ -97,7 +97,7 @@ public class CmnCodeService {
     public PageResponseDto<CmnDtlCdVO> getAllDetailCodesWithPaging(PageRequestDto pageRequest) {
         List<CmnDtlCdVO> content = cmnDtlCdMapper.selectAllWithPaging(pageRequest);
         long totalElements = cmnDtlCdMapper.selectAllCount(pageRequest);
-        return new PageResponseDto<>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
+        return new PageResponseDto<CmnDtlCdVO>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
     }
     
     /**
@@ -113,7 +113,7 @@ public class CmnCodeService {
     public PageResponseDto<CmnDtlCdVO> getDetailCodesByGrpCdWithPaging(String grpCd, PageRequestDto pageRequest) {
         List<CmnDtlCdVO> content = cmnDtlCdMapper.selectByGrpCdWithPaging(grpCd, pageRequest);
         long totalElements = cmnDtlCdMapper.selectByGrpCdCount(grpCd, pageRequest);
-        return new PageResponseDto<>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
+        return new PageResponseDto<CmnDtlCdVO>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
     }
     
     /**
@@ -157,7 +157,7 @@ public class CmnCodeService {
     public PageResponseDto<CmnDtlCdVO> getDetailCodesByUseYnWithPaging(String useYn, PageRequestDto pageRequest) {
         List<CmnDtlCdVO> content = cmnDtlCdMapper.selectByUseYnWithPaging(useYn, pageRequest);
         long totalElements = cmnDtlCdMapper.selectByUseYnCount(useYn, pageRequest);
-        return new PageResponseDto<>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
+        return new PageResponseDto<CmnDtlCdVO>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
     }
     
     /**
@@ -173,7 +173,7 @@ public class CmnCodeService {
     public PageResponseDto<CmnDtlCdVO> getDetailCodesByGrpCdAndUseYnWithPaging(String grpCd, String useYn, PageRequestDto pageRequest) {
         List<CmnDtlCdVO> content = cmnDtlCdMapper.selectByGrpCdAndUseYnWithPaging(grpCd, useYn, pageRequest);
         long totalElements = cmnDtlCdMapper.selectByGrpCdAndUseYnCount(grpCd, useYn, pageRequest);
-        return new PageResponseDto<>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
+        return new PageResponseDto<CmnDtlCdVO>(content, totalElements, pageRequest.getPage(), pageRequest.getSize());
     }
     
     /**

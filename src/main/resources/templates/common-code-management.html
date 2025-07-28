@@ -590,10 +590,10 @@
                     <td>${code.grpCdNm}</td>
                     <td>${code.desc || ''}</td>
                     <td><span class="${code.useYn === 'Y' ? 'status-active' : 'status-inactive'}">${code.useYn === 'Y' ? '사용' : '미사용'}</span></td>
-                    <td>${code.rgstEmpId || ''}</td>
+                    <td>${code.regEmpId || ''}</td>
                     <td>${code.regDate || ''}</td>
-                    <td>${code.modEmpId || ''}</td>
-                    <td>${code.modDate || ''}</td>
+                    <td>${code.updEmpId || ''}</td>
+                    <td>${code.updDate || ''}</td>
                     <td class="action-buttons">
                         <button class="btn btn-warning" onclick="editGroupCode('${code.grpCd}')">수정</button>
                         <button class="btn btn-danger" onclick="deleteGroupCode('${code.grpCd}')">삭제</button>
@@ -829,10 +829,10 @@
                     <td>${code.desc || ''}</td>
                     <td>${code.sortOrder || ''}</td>
                     <td><span class="${code.useYn === 'Y' ? 'status-active' : 'status-inactive'}">${code.useYn === 'Y' ? '사용' : '미사용'}</span></td>
-                    <td>${code.rgstEmpId || ''}</td>
+                    <td>${code.regEmpId || ''}</td>
                     <td>${code.regDate || ''}</td>
-                    <td>${code.modEmpId || ''}</td>
-                    <td>${code.modDate || ''}</td>
+                    <td>${code.updEmpId || ''}</td>
+                    <td>${code.updDate || ''}</td>
                     <td class="action-buttons">
                         <button class="btn btn-warning" onclick="editDetailCode('${code.grpCd}', '${code.dtlCd}')">수정</button>
                         <button class="btn btn-danger" onclick="deleteDetailCode('${code.grpCd}', '${code.dtlCd}')">삭제</button>

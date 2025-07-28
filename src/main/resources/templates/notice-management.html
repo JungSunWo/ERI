@@ -501,7 +501,7 @@
                         </div>
                         <div class="notice-meta">
                             등록일: ${new Date(notice.regDate).toLocaleString()} | 
-                            등록자: ${notice.rgstEmpId || '시스템'} |
+                            등록자: ${notice.regEmpId || '시스템'} |
                             첨부파일: ${hasFiles ? '있음' : '없음'}
                         </div>
                         <div class="notice-content">
@@ -581,7 +581,7 @@
                     document.getElementById('noticeTitle').value = notice.ttl;
                     document.getElementById('noticeContent').value = notice.cntn;
                     document.getElementById('noticeStatus').value = notice.stsCd;
-                    document.getElementById('empId').value = notice.rgstEmpId || 'ADMIN001';
+                    document.getElementById('empId').value = notice.regEmpId || 'ADMIN001';
                     
                     // 기존 첨부파일 목록 표시
                     if (notice.fileAttachYn === 'Y') {

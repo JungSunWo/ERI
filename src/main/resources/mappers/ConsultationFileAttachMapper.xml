@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.ConsultationFileAttachMapper">
+
+    <!-- 상담 게시글별 파일 첨부 목록 조회 -->
+    <select id="selectConsultationFileAttachByBoardSeq" resultType="com.ERI.demo.vo.ConsultationFileAttachVO">
+        SELECT 
+            FILE_SEQ,
+            BOARD_SEQ,
+            ANSWER_SEQ,
+            ORIGINAL_FILE_NAME,
+            STORED_FILE_NAME,
+            FILE_PATH,
+            FILE_SIZE,
+            FILE_EXT,
+            FILE_TYPE,
+            DOWNLOAD_CNT,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_CONSULTATION_FILE_ATTACH
+        WHERE BOARD_SEQ = #{boardSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+        ORDER BY REG_DATE ASC
+    </select>
+
+    <!-- 상담 답변별 파일 첨부 목록 조회 -->
+    <select id="selectConsultationFileAttachByAnswerSeq" resultType="com.ERI.demo.vo.ConsultationFileAttachVO">
+        SELECT 
+            FILE_SEQ,
+            BOARD_SEQ,
+            ANSWER_SEQ,
+            ORIGINAL_FILE_NAME,
+            STORED_FILE_NAME,
+            FILE_PATH,
+            FILE_SIZE,
+            FILE_EXT,
+            FILE_TYPE,
+            DOWNLOAD_CNT,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_CONSULTATION_FILE_ATTACH
+        WHERE ANSWER_SEQ = #{answerSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+        ORDER BY REG_DATE ASC
+    </select>
+
+    <!-- 파일 첨부 상세 조회 -->
+    <select id="selectConsultationFileAttachBySeq" resultType="com.ERI.demo.vo.ConsultationFileAttachVO">
+        SELECT 
+            FILE_SEQ,
+            BOARD_SEQ,
+            ANSWER_SEQ,
+            ORIGINAL_FILE_NAME,
+            STORED_FILE_NAME,
+            FILE_PATH,
+            FILE_SIZE,
+            FILE_EXT,
+            FILE_TYPE,
+            DOWNLOAD_CNT,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_CONSULTATION_FILE_ATTACH
+        WHERE FILE_SEQ = #{fileSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 파일 첨부 등록 -->
+    <insert id="insertConsultationFileAttach" parameterType="com.ERI.demo.vo.ConsultationFileAttachVO" useGeneratedKeys="true" keyProperty="fileSeq">
+        INSERT INTO TB_CONSULTATION_FILE_ATTACH (
+            BOARD_SEQ,
+            ANSWER_SEQ,
+            ORIGINAL_FILE_NAME,
+            STORED_FILE_NAME,
+            FILE_PATH,
+            FILE_SIZE,
+            FILE_EXT,
+            FILE_TYPE,
+            DOWNLOAD_CNT,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            DEL_YN,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{boardSeq,jdbcType=BIGINT},
+            #{answerSeq,jdbcType=BIGINT},
+            #{originalFileName,jdbcType=VARCHAR},
+            #{storedFileName,jdbcType=VARCHAR},
+            #{filePath,jdbcType=VARCHAR},
+            #{fileSize,jdbcType=BIGINT},
+            #{fileExt,jdbcType=VARCHAR},
+            #{fileType,jdbcType=VARCHAR},
+            0,
+            #{regEmpId,jdbcType=VARCHAR},
+            #{updEmpId,jdbcType=VARCHAR},
+            'N',
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 파일 첨부 삭제 (논리 삭제) -->
+    <update id="deleteConsultationFileAttach">
+        UPDATE TB_CONSULTATION_FILE_ATTACH
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE FILE_SEQ = #{fileSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 상담 게시글별 파일 첨부 전체 삭제 (논리 삭제) -->
+    <update id="deleteConsultationFileAttachByBoardSeq">
+        UPDATE TB_CONSULTATION_FILE_ATTACH
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE BOARD_SEQ = #{boardSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 상담 답변별 파일 첨부 전체 삭제 (논리 삭제) -->
+    <update id="deleteConsultationFileAttachByAnswerSeq">
+        UPDATE TB_CONSULTATION_FILE_ATTACH
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE ANSWER_SEQ = #{answerSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 다운로드 횟수 증가 -->
+    <update id="incrementDownloadCount">
+        UPDATE TB_CONSULTATION_FILE_ATTACH
+        SET DOWNLOAD_CNT = DOWNLOAD_CNT + 1
+        WHERE FILE_SEQ = #{fileSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+</mapper> 

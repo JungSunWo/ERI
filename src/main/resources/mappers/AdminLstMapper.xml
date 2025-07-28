@@ -6,52 +6,124 @@
     <resultMap id="AdminLstResultMap" type="com.ERI.demo.vo.AdminLstVO">
         <id column="ADMIN_ID" property="adminId" jdbcType="VARCHAR"/>
         <result column="ADMIN_STS_CD" property="adminStsCd" jdbcType="VARCHAR"/>
-        <result column="RGST_EMP_ID" property="rgstEmpId" jdbcType="VARCHAR"/>
-        <result column="UPDT_EMP_ID" property="updtEmpId" jdbcType="VARCHAR"/>
-        <result column="DEL_YN" property="delYn" jdbcType="CHAR"/>
-        <result column="DEL_DATE" property="delDate" jdbcType="TIMESTAMP"/>
         <result column="REG_EMP_ID" property="regEmpId" jdbcType="VARCHAR"/>
         <result column="UPD_EMP_ID" property="updEmpId" jdbcType="VARCHAR"/>
+        <result column="DEL_YN" property="delYn" jdbcType="CHAR"/>
+        <result column="DEL_DATE" property="delDate" jdbcType="TIMESTAMP"/>
         <result column="REG_DATE" property="regDate" jdbcType="TIMESTAMP"/>
         <result column="UPD_DATE" property="updDate" jdbcType="TIMESTAMP"/>
+        <!-- TB_EMP_REF 테이블에서 JOIN으로 가져오는 필드들 -->
+        <result column="ERI_EMP_ID" property="eriEmpId" jdbcType="VARCHAR"/>
+        <result column="EMP_NM" property="empNm" jdbcType="VARCHAR"/>
+        <result column="BLNG_BRCD" property="blngBrcd" jdbcType="VARCHAR"/>
+        <result column="BETEAM_CD" property="beteamCd" jdbcType="VARCHAR"/>
+        <result column="JBTT_CD" property="jbttCd" jdbcType="VARCHAR"/>
+        <result column="JBCL_CD" property="jbclCd" jdbcType="VARCHAR"/>
+        <result column="EMP_CPN" property="empCpn" jdbcType="VARCHAR"/>
+        <result column="EAD" property="ead" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <!-- 전체 관리자 목록 조회 (삭제되지 않은 데이터만) -->
+    <!-- 전체 관리자 목록 조회 -->
     <select id="selectAllAdminLst" resultMap="AdminLstResultMap">
         SELECT 
             ROW_NUMBER() OVER (ORDER BY ADMIN_ID) AS rowNum,
             ADMIN_ID,
             ADMIN_STS_CD,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
             REG_DATE,
             UPD_DATE
         FROM TB_ADMIN_LST
-        WHERE DEL_YN = 'N'
         ORDER BY ADMIN_ID
     </select>
 
-    <!-- 관리자 ID로 관리자 정보 조회 (삭제되지 않은 데이터만) -->
+    <!-- 페이징을 위한 관리자 목록 조회 (TB_EMP_REF JOIN, 검색 기능 포함) -->
+    <select id="selectAdminLstWithPaging" resultMap="AdminLstResultMap">
+        SELECT 
+            ROW_NUMBER() OVER (
+                <choose>
+                    <when test="sort != null and sort != ''">
+                        <choose>
+                            <when test="sort == 'adminId,asc'">ORDER BY a.ADMIN_ID ASC</when>
+                            <when test="sort == 'adminId,desc'">ORDER BY a.ADMIN_ID DESC</when>
+                            <when test="sort == 'adminStsCd,asc'">ORDER BY a.ADMIN_STS_CD ASC</when>
+                            <when test="sort == 'adminStsCd,desc'">ORDER BY a.ADMIN_STS_CD DESC</when>
+                            <when test="sort == 'regDate,asc'">ORDER BY a.REG_DATE ASC</when>
+                            <when test="sort == 'regDate,desc'">ORDER BY a.REG_DATE DESC</when>
+                            <when test="sort == 'empNm,asc'">ORDER BY e.EMP_NM ASC</when>
+                            <when test="sort == 'empNm,desc'">ORDER BY e.EMP_NM DESC</when>
+                            <when test="sort == 'blngBrcd,asc'">ORDER BY e.BLNG_BRCD ASC</when>
+                            <when test="sort == 'blngBrcd,desc'">ORDER BY e.BLNG_BRCD DESC</when>
+                            <otherwise>ORDER BY a.ADMIN_ID ASC</otherwise>
+                        </choose>
+                    </when>
+                    <otherwise>ORDER BY a.ADMIN_ID ASC</otherwise>
+                </choose>
+            ) AS rowNum,
+            a.ADMIN_ID,
+            a.ADMIN_STS_CD,
+            a.REG_EMP_ID,
+            a.UPD_EMP_ID,
+            a.DEL_YN,
+            a.DEL_DATE,
+            a.REG_DATE,
+            a.UPD_DATE,
+            e.ERI_EMP_ID,
+            e.EMP_NM,
+            e.BLNG_BRCD,
+            e.BETEAM_CD,
+            e.JBTT_CD,
+            e.JBCL_CD,
+            e.EMP_CPN,
+            e.EAD
+        FROM TB_ADMIN_LST a
+        LEFT JOIN TB_EMP_REF e ON a.ADMIN_ID = e.ERI_EMP_ID
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    a.ADMIN_ID LIKE CONCAT('%', #{keyword}, '%')
+                    OR e.EMP_NM LIKE CONCAT('%', #{keyword}, '%')
+                    OR e.BLNG_BRCD LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        <choose>
+            <when test="sort != null and sort != ''">
+                <choose>
+                    <when test="sort == 'adminId,asc'">ORDER BY a.ADMIN_ID ASC</when>
+                    <when test="sort == 'adminId,desc'">ORDER BY a.ADMIN_ID DESC</when>
+                    <when test="sort == 'adminStsCd,asc'">ORDER BY a.ADMIN_STS_CD ASC</when>
+                    <when test="sort == 'adminStsCd,desc'">ORDER BY a.ADMIN_STS_CD DESC</when>
+                    <when test="sort == 'regDate,asc'">ORDER BY a.REG_DATE ASC</when>
+                    <when test="sort == 'regDate,desc'">ORDER BY a.REG_DATE DESC</when>
+                    <when test="sort == 'empNm,asc'">ORDER BY e.EMP_NM ASC</when>
+                    <when test="sort == 'empNm,desc'">ORDER BY e.EMP_NM DESC</when>
+                    <when test="sort == 'blngBrcd,asc'">ORDER BY e.BLNG_BRCD ASC</when>
+                    <when test="sort == 'blngBrcd,desc'">ORDER BY e.BLNG_BRCD DESC</when>
+                    <otherwise>ORDER BY a.ADMIN_ID ASC</otherwise>
+                </choose>
+            </when>
+            <otherwise>ORDER BY a.ADMIN_ID ASC</otherwise>
+        </choose>
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 관리자 ID로 관리자 정보 조회 -->
     <select id="selectByAdminId" parameterType="string" resultMap="AdminLstResultMap">
         SELECT 
             ROW_NUMBER() OVER (ORDER BY ADMIN_ID) AS rowNum,
             ADMIN_ID,
             ADMIN_STS_CD,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
             REG_DATE,
             UPD_DATE
         FROM TB_ADMIN_LST
         WHERE ADMIN_ID = #{adminId}
-          AND DEL_YN = 'N'
     </select>
 
     <!-- 관리자 ID로 관리자 정보 조회 (삭제된 데이터 포함) -->
@@ -60,35 +132,30 @@
             ROW_NUMBER() OVER (ORDER BY ADMIN_ID) AS rowNum,
             ADMIN_ID,
             ADMIN_STS_CD,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
             REG_DATE,
             UPD_DATE
         FROM TB_ADMIN_LST
         WHERE ADMIN_ID = #{adminId}
     </select>
 
-    <!-- 관리자 상태 코드로 관리자 목록 조회 (삭제되지 않은 데이터만) -->
+    <!-- 관리자 상태 코드로 관리자 목록 조회 -->
     <select id="selectByAdminStsCd" parameterType="string" resultMap="AdminLstResultMap">
         SELECT 
             ROW_NUMBER() OVER (ORDER BY ADMIN_ID) AS rowNum,
             ADMIN_ID,
             ADMIN_STS_CD,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
             REG_DATE,
             UPD_DATE
         FROM TB_ADMIN_LST
         WHERE ADMIN_STS_CD = #{adminStsCd}
-          AND DEL_YN = 'N'
         ORDER BY ADMIN_ID
     </select>
 
@@ -97,10 +164,6 @@
         INSERT INTO TB_ADMIN_LST (
             ADMIN_ID,
             ADMIN_STS_CD,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
-            DEL_YN,
-            DEL_DATE,
             REG_EMP_ID,
             UPD_EMP_ID,
             REG_DATE,
@@ -108,14 +171,10 @@
         ) VALUES (
             #{adminId},
             #{adminStsCd},
-            #{rgstEmpId},
-            #{updtEmpId},
-            COALESCE(#{delYn}, 'N'),
-            #{delDate},
             #{regEmpId},
             #{updEmpId},
-            COALESCE(#{regDate}, CURRENT_TIMESTAMP),
-            COALESCE(#{updDate}, CURRENT_TIMESTAMP)
+            COALESCE(#{regDate,jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP),
+            COALESCE(#{updDate,jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP)
         )
     </insert>
 
@@ -124,25 +183,19 @@
         UPDATE TB_ADMIN_LST
         SET 
             ADMIN_STS_CD = #{adminStsCd},
-            RGST_EMP_ID = #{rgstEmpId},
-            UPDT_EMP_ID = #{updtEmpId},
-            DEL_YN = #{delYn},
-            DEL_DATE = #{delDate},
+            REG_EMP_ID = #{regEmpId},
             UPD_EMP_ID = #{updEmpId},
             UPD_DATE = CURRENT_TIMESTAMP
         WHERE ADMIN_ID = #{adminId}
     </update>
 
-    <!-- 관리자 ID로 논리적 삭제 -->
-    <update id="deleteAdminLstByAdminId" parameterType="string">
-        UPDATE TB_ADMIN_LST
-        SET 
-            DEL_YN = 'Y',
-            DEL_DATE = CURRENT_TIMESTAMP
+    <!-- 관리자 ID로 실제 삭제 -->
+    <delete id="deleteAdminLstByAdminId" parameterType="string">
+        DELETE FROM TB_ADMIN_LST
         WHERE ADMIN_ID = #{adminId}
-    </update>
+    </delete>
 
-    <!-- 관리자 ID로 복구 -->
+    <!-- 관리자 ID로 복구 (실제 삭제에서는 사용하지 않음) -->
     <update id="restoreAdminLstByAdminId" parameterType="string">
         UPDATE TB_ADMIN_LST
         SET 
@@ -151,19 +204,40 @@
         WHERE ADMIN_ID = #{adminId}
     </update>
 
-    <!-- 전체 관리자 수 조회 (삭제되지 않은 데이터만) -->
+    <!-- 전체 관리자 수 조회 -->
     <select id="countAllAdminLst" resultType="int">
         SELECT COUNT(*)
         FROM TB_ADMIN_LST
-        WHERE DEL_YN = 'N'
     </select>
 
-    <!-- 관리자 상태 코드별 관리자 수 조회 (삭제되지 않은 데이터만) -->
+    <!-- 검색 조건에 따른 관리자 수 조회 -->
+    <select id="countAdminLstWithSearch" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_ADMIN_LST a
+        LEFT JOIN TB_EMP_REF e ON a.ADMIN_ID = e.ERI_EMP_ID
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    a.ADMIN_ID LIKE CONCAT('%', #{keyword}, '%')
+                    OR e.EMP_NM LIKE CONCAT('%', #{keyword}, '%')
+                    OR e.BLNG_BRCD LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+    </select>
+
+    <!-- 관리자 상태 코드별 관리자 수 조회 -->
     <select id="countByAdminStsCd" parameterType="string" resultType="int">
         SELECT COUNT(*)
         FROM TB_ADMIN_LST
         WHERE ADMIN_STS_CD = #{adminStsCd}
-          AND DEL_YN = 'N'
+    </select>
+
+    <!-- 관리자 ID로 관리자 수 조회 -->
+    <select id="countByAdminId" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_ADMIN_LST
+        WHERE ADMIN_ID = #{adminId}
     </select>
 
 </mapper> 

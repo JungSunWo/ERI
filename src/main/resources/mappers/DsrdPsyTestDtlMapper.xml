@@ -13,10 +13,10 @@
             PSY_TEST_DESC,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             UPDT_DT,
             UPDT_TM,
-            UPDT_EMP_ID
+            UPD_EMP_ID
         FROM TB_DSRD_PSY_TEST_DTL
         <where>
             <if test="appDt != null">
@@ -34,8 +34,8 @@
             <if test="psyTestNm != null and psyTestNm != ''">
                 AND PSY_TEST_NM LIKE CONCAT('%', #{psyTestNm}, '%')
             </if>
-            <if test="rgstEmpId != null and rgstEmpId != ''">
-                AND RGST_EMP_ID = #{rgstEmpId}
+            <if test="regEmpId != null and regEmpId != ''">
+                AND REG_EMP_ID = #{regEmpId}
             </if>
         </where>
         ORDER BY APP_DT DESC, CNSL_APP_SEQ DESC, CNSL_SEQ DESC, PSY_TEST_CD
@@ -52,10 +52,10 @@
             PSY_TEST_DESC,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             UPDT_DT,
             UPDT_TM,
-            UPDT_EMP_ID
+            UPD_EMP_ID
         FROM TB_DSRD_PSY_TEST_DTL
         WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CNSL_SEQ = #{cnslSeq} AND PSY_TEST_CD = #{psyTestCd}
     </select>
@@ -71,7 +71,7 @@
             PSY_TEST_DESC,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID
+            REG_EMP_ID
         ) VALUES (
             #{appDt},
             #{cnslAppSeq},
@@ -81,7 +81,7 @@
             #{psyTestDesc},
             #{rgstDt},
             #{rgstTm},
-            #{rgstEmpId}
+            #{regEmpId}
         )
     </insert>
 
@@ -93,7 +93,7 @@
             PSY_TEST_DESC = #{psyTestDesc},
             UPDT_DT = #{updtDt},
             UPDT_TM = #{updtTm},
-            UPDT_EMP_ID = #{updtEmpId}
+            UPD_EMP_ID = #{updEmpId}
         WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CNSL_SEQ = #{cnslSeq} AND PSY_TEST_CD = #{psyTestCd}
     </update>
 

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import org.apache.catalina.connector.ClientAbortException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -212,6 +214,16 @@ public class GlobalExceptionHandler {
             .body(errorResponse);
     }
     
+    /**
+     * 클라이언트 연결 중단 예외 처리 (파일 스트리밍 등에서 발생)
+     */
+    @ExceptionHandler({AsyncRequestNotUsableException.class, ClientAbortException.class})
+    public ResponseEntity<Void> handleClientAbortException(Exception e, HttpServletRequest request) {
+        // 클라이언트 연결 중단은 정상적인 상황이므로 로그만 출력하고 응답하지 않음
+        log.debug("클라이언트 연결 중단: {} {} - {}", request.getMethod(), request.getRequestURI(), e.getMessage());
+        return ResponseEntity.ok().build();
+    }
+
     /**
      * 기타 모든 예외 처리
      */

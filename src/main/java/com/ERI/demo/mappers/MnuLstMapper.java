@@ -17,7 +17,7 @@ public interface MnuLstMapper {
     /**
      * 전체 메뉴 목록 조회 (계층 구조)
      */
-    List<MnuLstVO> selectAllMenus(@Param("isAdmin")boolean isAdmin);
+    List<MnuLstVO> selectAllMenus(@Param("isAdmin") boolean isAdmin, @Param("isCounselor") boolean isCounselor);
     
     /**
      * 메뉴 목록 조회 (페이징)

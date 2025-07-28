@@ -8,53 +8,49 @@ import java.util.List;
 
 @Mapper
 public interface FileAttachMapper {
-    
+
     /**
-     * 첨부파일 목록 조회
+     * 특정 참조 테이블의 첨부파일 목록 조회
+     * @param refTblCd 참조 테이블 코드
+     * @param refPkVal 참조 테이블의 PK 값
+     * @return 첨부파일 목록
      */
     List<FileAttachVO> selectFileAttachList(@Param("refTblCd") String refTblCd, 
                                            @Param("refPkVal") String refPkVal);
-    
+
     /**
      * 첨부파일 상세 조회
+     * @param fileSeq 파일 시퀀스
+     * @return 첨부파일 정보
      */
-    FileAttachVO selectFileAttachBySeq(@Param("fileSeq") Long fileSeq);
-    
+    FileAttachVO selectFileAttach(@Param("fileSeq") Long fileSeq);
+
     /**
      * 첨부파일 등록
+     * @param fileAttach 첨부파일 정보
      */
-    int insertFileAttach(FileAttachVO fileAttachVO);
-    
+    void insertFileAttach(FileAttachVO fileAttach);
+
     /**
-     * 첨부파일 수정
+     * 첨부파일 다운로드 횟수 증가
+     * @param fileSeq 파일 시퀀스
      */
-    int updateFileAttach(FileAttachVO fileAttachVO);
-    
+    void incrementDownloadCount(@Param("fileSeq") Long fileSeq);
+
     /**
      * 첨부파일 삭제 (논리 삭제)
+     * @param fileSeq 파일 시퀀스
+     * @param empId 삭제자 직원 ID
      */
-    int deleteFileAttach(@Param("fileSeq") Long fileSeq, 
-                        @Param("updEmpId") String updEmpId);
-    
+    void deleteFileAttach(@Param("fileSeq") Long fileSeq, @Param("empId") String empId);
+
     /**
-     * 첨부파일 물리 삭제
+     * 참조 테이블의 모든 첨부파일 삭제
+     * @param refTblCd 참조 테이블 코드
+     * @param refPkVal 참조 테이블의 PK 값
+     * @param empId 삭제자 직원 ID
      */
-    int deleteFileAttachPhysical(@Param("fileSeq") Long fileSeq);
-    
-    /**
-     * 참조 테이블의 모든 첨부파일 삭제 (논리 삭제)
-     */
-    int deleteFileAttachByRef(@Param("refTblCd") String refTblCd, 
-                             @Param("refPkVal") String refPkVal, 
-                             @Param("updEmpId") String updEmpId);
-    
-    /**
-     * 다운로드 횟수 증가
-     */
-    int updateDownloadCount(@Param("fileSeq") Long fileSeq);
-    
-    /**
-     * 파일명으로 첨부파일 조회
-     */
-    FileAttachVO selectFileAttachBySaveName(@Param("fileSaveNm") String fileSaveNm);
+    void deleteFileAttachByRef(@Param("refTblCd") String refTblCd, 
+                               @Param("refPkVal") String refPkVal, 
+                               @Param("empId") String empId);
 } 

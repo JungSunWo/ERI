@@ -303,6 +303,7 @@ INSERT INTO TB_CMN_GRP_CD (GRP_CD, GRP_CD_NM, GRP_CD_DESC, USE_YN) VALUES
 ('PGM_APP_TY', '프로그램 신청 구분 코드', '프로그램 신청의 구분을 위한 코드 (신청/승인/반려)', 'Y'),
 ('PGM_APP_STS', '프로그램 신청 상태 코드', '프로그램 신청의 상태를 관리하기 위한 코드 (정상/취소/종료)', 'Y'),
 ('CNSL_TY', '상담 종류 코드', '상담의 종류를 구분하기 위한 코드 (일반/비대면)', 'Y'),
+('CNSLR_INFO_CLSF', '상담자정보구분 코드', '상담자의 정보 구분을 위한 코드 (전문상담사/일반상담사/인턴)', 'Y'),
 ('SCT_STS', '바로가기 상태 코드', '바로가기의 상태를 관리하기 위한 코드 (정상/취소/종료)', 'Y');
 
 INSERT INTO TB_CMN_DTL_CD (GRP_CD, DTL_CD, DTL_CD_NM, DTL_CD_DESC, SORT_ORD, USE_YN) VALUES
@@ -317,6 +318,9 @@ INSERT INTO TB_CMN_DTL_CD (GRP_CD, DTL_CD, DTL_CD_NM, DTL_CD_DESC, SORT_ORD, USE
 ('PGM_APP_STS', 'END', '종료', '종료된 상태', 3, 'Y'),
 ('CNSL_TY', 'GENERAL', '일반', '일반 상담', 1, 'Y'),
 ('CNSL_TY', 'REMOTE', '비대면', '비대면 상담', 2, 'Y'),
+('CNSLR_INFO_CLSF', 'PROFESSIONAL', '전문상담사', '전문 상담사', 1, 'Y'),
+('CNSLR_INFO_CLSF', 'GENERAL', '일반상담사', '일반 상담사', 2, 'Y'),
+('CNSLR_INFO_CLSF', 'INTERN', '인턴', '상담 인턴', 3, 'Y'),
 ('SCT_STS', 'NORMAL', '정상', '정상 상태', 1, 'Y'),
 ('SCT_STS', 'CANCEL', '취소', '취소된 상태', 2, 'Y'),
 ('SCT_STS', 'END', '종료', '종료된 상태', 3, 'Y');
@@ -338,8 +342,6 @@ CREATE TABLE TB_EMP_RIGHTS_BOARD (
     CATEGORY_CD     VARCHAR(20)  NULL,                    -- 카테고리 코드 (GENERAL/COMPLAINT/SUGGESTION/QUESTION)
     SECRET_YN       CHAR(1)      NOT NULL DEFAULT 'N',    -- 비밀글 여부
     NOTICE_YN       CHAR(1)      NOT NULL DEFAULT 'N',    -- 공지글 여부
-    RGST_EMP_ID     VARCHAR(255) NULL,                    -- 등록직원ID
-    UPDT_EMP_ID     VARCHAR(255) NULL,                    -- 수정직원ID
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',    -- 삭제여부
     DEL_DATE        TIMESTAMP    NULL,                    -- 삭제일시
     REG_EMP_ID      VARCHAR(255) NULL,                    -- 등록직원ID
@@ -377,17 +379,13 @@ CREATE TABLE TB_EMP_RIGHTS_COMMENT (
     LIKE_CNT        INTEGER      NOT NULL DEFAULT 0,      -- 좋아요 수
     DISLIKE_CNT     INTEGER      NOT NULL DEFAULT 0,      -- 싫어요 수
     SECRET_YN       CHAR(1)      NOT NULL DEFAULT 'N',    -- 비밀댓글 여부
-    RGST_EMP_ID     VARCHAR(255) NULL,                    -- 등록직원ID
-    UPDT_EMP_ID     VARCHAR(255) NULL,                    -- 수정직원ID
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',    -- 삭제여부
     DEL_DATE        TIMESTAMP    NULL,                    -- 삭제일시
     REG_EMP_ID      VARCHAR(255) NULL,                    -- 등록직원ID
     UPD_EMP_ID      VARCHAR(255) NULL,                    -- 수정직원ID
     REG_DATE        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록일시
     UPD_DATE        TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,         -- 수정일시
-    PRIMARY KEY (SEQ),
-    FOREIGN KEY (BOARD_SEQ) REFERENCES TB_EMP_RIGHTS_BOARD(SEQ) ON DELETE CASCADE,
-    FOREIGN KEY (PARENT_SEQ) REFERENCES TB_EMP_RIGHTS_COMMENT(SEQ) ON DELETE CASCADE
+    PRIMARY KEY (SEQ)
 );
 
 COMMENT ON TABLE TB_EMP_RIGHTS_COMMENT IS '직원권익게시판 댓글';
@@ -412,16 +410,13 @@ CREATE TABLE TB_EMP_RIGHTS_LIKE (
     BOARD_SEQ       BIGINT       NULL,                    -- 게시글 일련번호 (NULL이면 댓글 좋아요)
     COMMENT_SEQ     BIGINT       NULL,                    -- 댓글 일련번호 (NULL이면 게시글 좋아요)
     LIKE_TYPE       CHAR(1)      NOT NULL,                -- 좋아요 타입 (L: 좋아요, D: 싫어요)
-    RGST_EMP_ID     VARCHAR(255) NOT NULL,                -- 등록직원ID
+    REG_EMP_ID      VARCHAR(255) NOT NULL,                -- 등록직원ID
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',    -- 삭제여부
     DEL_DATE        TIMESTAMP    NULL,                    -- 삭제일시
-    REG_EMP_ID      VARCHAR(255) NULL,                    -- 등록직원ID
     UPD_EMP_ID      VARCHAR(255) NULL,                    -- 수정직원ID
     REG_DATE        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록일시
     UPD_DATE        TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,         -- 수정일시
     PRIMARY KEY (SEQ),
-    FOREIGN KEY (BOARD_SEQ) REFERENCES TB_EMP_RIGHTS_BOARD(SEQ) ON DELETE CASCADE,
-    FOREIGN KEY (COMMENT_SEQ) REFERENCES TB_EMP_RIGHTS_COMMENT(SEQ) ON DELETE CASCADE,
     CONSTRAINT CHK_LIKE_TYPE CHECK (LIKE_TYPE IN ('L', 'D')),
     CONSTRAINT CHK_LIKE_TARGET CHECK (
         (BOARD_SEQ IS NOT NULL AND COMMENT_SEQ IS NULL) OR 
@@ -434,11 +429,11 @@ COMMENT ON COLUMN TB_EMP_RIGHTS_LIKE.SEQ IS '일련번호';
 COMMENT ON COLUMN TB_EMP_RIGHTS_LIKE.BOARD_SEQ IS '게시글 일련번호';
 COMMENT ON COLUMN TB_EMP_RIGHTS_LIKE.COMMENT_SEQ IS '댓글 일련번호';
 COMMENT ON COLUMN TB_EMP_RIGHTS_LIKE.LIKE_TYPE IS '좋아요 타입 (L: 좋아요, D: 싫어요)';
-COMMENT ON COLUMN TB_EMP_RIGHTS_LIKE.RGST_EMP_ID IS '등록직원ID';
+COMMENT ON COLUMN TB_EMP_RIGHTS_LIKE.REG_EMP_ID IS '등록직원ID';
 
 CREATE INDEX IDX_EMP_RIGHTS_LIKE_BOARD ON TB_EMP_RIGHTS_LIKE (BOARD_SEQ);
 CREATE INDEX IDX_EMP_RIGHTS_LIKE_COMMENT ON TB_EMP_RIGHTS_LIKE (COMMENT_SEQ);
-CREATE INDEX IDX_EMP_RIGHTS_LIKE_EMP ON TB_EMP_RIGHTS_LIKE (RGST_EMP_ID);
+CREATE INDEX IDX_EMP_RIGHTS_LIKE_EMP ON TB_EMP_RIGHTS_LIKE (REG_EMP_ID);
 CREATE INDEX IDX_EMP_RIGHTS_LIKE_TYPE ON TB_EMP_RIGHTS_LIKE (LIKE_TYPE);
 CREATE INDEX IDX_EMP_RIGHTS_LIKE_DEL_YN ON TB_EMP_RIGHTS_LIKE (DEL_YN);
 
@@ -446,23 +441,22 @@ CREATE INDEX IDX_EMP_RIGHTS_LIKE_DEL_YN ON TB_EMP_RIGHTS_LIKE (DEL_YN);
 CREATE TABLE TB_EMP_RIGHTS_VIEW_LOG (
     SEQ             BIGSERIAL    NOT NULL,
     BOARD_SEQ       BIGINT       NOT NULL,                -- 게시글 일련번호
-    RGST_EMP_ID     VARCHAR(255) NULL,                    -- 조회자 직원ID (NULL이면 비로그인)
+    REG_EMP_ID      VARCHAR(255) NULL,                    -- 조회자 직원ID (NULL이면 비로그인)
     IP_ADDR         VARCHAR(45)  NULL,                    -- IP 주소
     USER_AGENT      TEXT         NULL,                    -- 사용자 에이전트
     REG_DATE        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 조회일시
-    PRIMARY KEY (SEQ),
-    FOREIGN KEY (BOARD_SEQ) REFERENCES TB_EMP_RIGHTS_BOARD(SEQ) ON DELETE CASCADE
+    PRIMARY KEY (SEQ)
 );
 
 COMMENT ON TABLE TB_EMP_RIGHTS_VIEW_LOG IS '직원권익게시판 조회이력';
 COMMENT ON COLUMN TB_EMP_RIGHTS_VIEW_LOG.SEQ IS '일련번호';
 COMMENT ON COLUMN TB_EMP_RIGHTS_VIEW_LOG.BOARD_SEQ IS '게시글 일련번호';
-COMMENT ON COLUMN TB_EMP_RIGHTS_VIEW_LOG.RGST_EMP_ID IS '조회자 직원ID';
+COMMENT ON COLUMN TB_EMP_RIGHTS_VIEW_LOG.REG_EMP_ID IS '조회자 직원ID';
 COMMENT ON COLUMN TB_EMP_RIGHTS_VIEW_LOG.IP_ADDR IS 'IP 주소';
 COMMENT ON COLUMN TB_EMP_RIGHTS_VIEW_LOG.USER_AGENT IS '사용자 에이전트';
 
 CREATE INDEX IDX_EMP_RIGHTS_VIEW_LOG_BOARD ON TB_EMP_RIGHTS_VIEW_LOG (BOARD_SEQ);
-CREATE INDEX IDX_EMP_RIGHTS_VIEW_LOG_EMP ON TB_EMP_RIGHTS_VIEW_LOG (RGST_EMP_ID);
+CREATE INDEX IDX_EMP_RIGHTS_VIEW_LOG_EMP ON TB_EMP_RIGHTS_VIEW_LOG (REG_EMP_ID);
 CREATE INDEX IDX_EMP_RIGHTS_VIEW_LOG_DATE ON TB_EMP_RIGHTS_VIEW_LOG (REG_DATE);
 
 -- =================================================================
@@ -488,14 +482,14 @@ INSERT INTO TB_CMN_DTL_CD (GRP_CD, DTL_CD, DTL_CD_NM, DTL_CD_DESC, SORT_ORD, USE
 -- =================================================================
 
 -- 샘플 게시글 데이터
-INSERT INTO TB_EMP_RIGHTS_BOARD (TTL, CNTN, STS_CD, CATEGORY_CD, NOTICE_YN, RGST_EMP_ID, VIEW_CNT) VALUES
+INSERT INTO TB_EMP_RIGHTS_BOARD (TTL, CNTN, STS_CD, CATEGORY_CD, NOTICE_YN, REG_EMP_ID, VIEW_CNT) VALUES
 ('직원권익보호 시스템 오픈 안내', '직원권익보호 시스템이 오픈되었습니다. 많은 관심과 참여 부탁드립니다.', 'ACTIVE', 'GENERAL', 'Y', 'ADMIN001', 0),
 ('근무환경 개선 건의사항', '사무실 조명이 너무 어두워서 업무에 지장이 있습니다. 개선 부탁드립니다.', 'ACTIVE', 'SUGGESTION', 'N', 'EMP001', 0),
 ('급여 관련 문의', '이번 달 급여에서 공제된 항목에 대해 문의드립니다.', 'ACTIVE', 'QUESTION', 'N', 'EMP002', 0),
 ('식당 메뉴 개선 요청', '직원식당 메뉴가 단조로워서 개선을 요청드립니다.', 'ACTIVE', 'SUGGESTION', 'N', 'EMP003', 0);
 
 -- 샘플 댓글 데이터
-INSERT INTO TB_EMP_RIGHTS_COMMENT (BOARD_SEQ, CNTN, DEPTH, RGST_EMP_ID) VALUES
+INSERT INTO TB_EMP_RIGHTS_COMMENT (BOARD_SEQ, CNTN, DEPTH, REG_EMP_ID) VALUES
 (1, '시스템이 정말 유용해 보입니다. 잘 활용하겠습니다.', 0, 'EMP001'),
 (1, '감사합니다. 많은 도움이 될 것 같습니다.', 0, 'EMP002'),
 (2, '저도 같은 생각입니다. 조명 개선이 필요해 보입니다.', 0, 'EMP004'),
@@ -503,13 +497,13 @@ INSERT INTO TB_EMP_RIGHTS_COMMENT (BOARD_SEQ, CNTN, DEPTH, RGST_EMP_ID) VALUES
 (3, '급여팀에서 확인 후 답변드리겠습니다.', 0, 'ADMIN002');
 
 -- 샘플 대댓글 데이터
-INSERT INTO TB_EMP_RIGHTS_COMMENT (BOARD_SEQ, PARENT_SEQ, CNTN, DEPTH, RGST_EMP_ID) VALUES
+INSERT INTO TB_EMP_RIGHTS_COMMENT (BOARD_SEQ, PARENT_SEQ, CNTN, DEPTH, REG_EMP_ID) VALUES
 (2, 4, '빠른 대응 감사합니다.', 1, 'EMP001'),
 (2, 4, '기대하겠습니다.', 1, 'EMP005'),
 (3, 5, '답변 기다리겠습니다.', 1, 'EMP002');
 
 -- 샘플 좋아요 데이터
-INSERT INTO TB_EMP_RIGHTS_LIKE (BOARD_SEQ, LIKE_TYPE, RGST_EMP_ID) VALUES
+INSERT INTO TB_EMP_RIGHTS_LIKE (BOARD_SEQ, LIKE_TYPE, REG_EMP_ID) VALUES
 (1, 'L', 'EMP001'),
 (1, 'L', 'EMP002'),
 (2, 'L', 'EMP003'),
@@ -517,7 +511,7 @@ INSERT INTO TB_EMP_RIGHTS_LIKE (BOARD_SEQ, LIKE_TYPE, RGST_EMP_ID) VALUES
 (3, 'L', 'EMP001');
 
 -- 샘플 댓글 좋아요 데이터
-INSERT INTO TB_EMP_RIGHTS_LIKE (COMMENT_SEQ, LIKE_TYPE, RGST_EMP_ID) VALUES
+INSERT INTO TB_EMP_RIGHTS_LIKE (COMMENT_SEQ, LIKE_TYPE, REG_EMP_ID) VALUES
 (1, 'L', 'EMP002'),
 (1, 'L', 'EMP003'),
 (4, 'L', 'EMP001'),

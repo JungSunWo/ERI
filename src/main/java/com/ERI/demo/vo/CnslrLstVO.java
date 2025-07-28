@@ -16,10 +16,10 @@ public class CnslrLstVO {
     private String cnslrSpecCd;   // 상담사전문분야코드
     private LocalDate rgstDt;     // 등록일자
     private LocalTime rgstTm;     // 등록시간
-    private String rgstEmpId;     // 등록직원번호
+    private String regEmpId;      // 등록직원번호
     private LocalDate updtDt;     // 수정일자
     private LocalTime updtTm;     // 수정시간
-    private String updtEmpId;     // 수정직원번호
+    private String updEmpId;      // 수정직원번호
     private String delYn;         // 삭제 여부 (Y: 삭제, N: 사용)
     private LocalDateTime delDate; // 삭제 일시
     private LocalDateTime regDate; // 등록 일시

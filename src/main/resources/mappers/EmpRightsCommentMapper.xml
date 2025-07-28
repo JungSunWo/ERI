@@ -13,22 +13,23 @@
             c.LIKE_CNT,
             c.DISLIKE_CNT,
             c.SECRET_YN,
-            c.RGST_EMP_ID,
-            c.UPDT_EMP_ID,
             c.DEL_YN,
             c.DEL_DATE,
             c.REG_EMP_ID,
             c.UPD_EMP_ID,
             c.REG_DATE,
             c.UPD_DATE,
-            rgst.EMP_NM as rgstEmpNm,
-            updt.EMP_NM as updtEmpNm
+            reg_emp.EMP_NM as regEmpNm,
+            upd_emp.EMP_NM as updEmpNm
         FROM TB_EMP_RIGHTS_COMMENT c
-        LEFT JOIN TB_EMP_LST rgst ON c.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
-        LEFT JOIN TB_EMP_LST updt ON c.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_REF reg_emp ON c.REG_EMP_ID = reg_emp.ERI_EMP_ID AND reg_emp.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_REF upd_emp ON c.UPD_EMP_ID = upd_emp.ERI_EMP_ID AND upd_emp.DEL_YN = 'N'
         WHERE c.BOARD_SEQ = #{boardSeq}
         AND c.DEL_YN = 'N'
-        ORDER BY c.REG_DATE ASC
+        ORDER BY 
+            CASE WHEN c.PARENT_SEQ IS NULL THEN c.SEQ ELSE c.PARENT_SEQ END ASC,  -- 부모 댓글 순서
+            CASE WHEN c.PARENT_SEQ IS NULL THEN 0 ELSE 1 END ASC,                  -- 최상위 댓글 먼저
+            c.REG_DATE ASC                                                         -- 같은 레벨 내에서는 등록 순서
     </select>
 
     <!-- 댓글 상세 조회 -->
@@ -42,21 +43,46 @@
             c.LIKE_CNT,
             c.DISLIKE_CNT,
             c.SECRET_YN,
-            c.RGST_EMP_ID,
-            c.UPDT_EMP_ID,
             c.DEL_YN,
             c.DEL_DATE,
             c.REG_EMP_ID,
             c.UPD_EMP_ID,
             c.REG_DATE,
             c.UPD_DATE,
-            rgst.EMP_NM as rgstEmpNm,
-            updt.EMP_NM as updtEmpNm
+            reg_emp.EMP_NM as regEmpNm,
+            upd_emp.EMP_NM as updEmpNm
         FROM TB_EMP_RIGHTS_COMMENT c
-        LEFT JOIN TB_EMP_LST rgst ON c.RGST_EMP_ID = rgst.EMP_ID AND rgst.DEL_YN = 'N'
-        LEFT JOIN TB_EMP_LST updt ON c.UPDT_EMP_ID = updt.EMP_ID AND updt.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_REF reg_emp ON c.REG_EMP_ID = reg_emp.ERI_EMP_ID AND reg_emp.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_REF upd_emp ON c.UPD_EMP_ID = upd_emp.ERI_EMP_ID AND upd_emp.DEL_YN = 'N'
         WHERE c.SEQ = #{seq}
         AND c.DEL_YN = 'N'
+    </select>
+
+    <!-- 하위 답글들 조회 -->
+    <select id="selectChildComments" resultType="com.ERI.demo.vo.EmpRightsCommentVO">
+        SELECT 
+            c.SEQ,
+            c.BOARD_SEQ,
+            c.PARENT_SEQ,
+            c.CNTN,
+            c.DEPTH,
+            c.LIKE_CNT,
+            c.DISLIKE_CNT,
+            c.SECRET_YN,
+            c.DEL_YN,
+            c.DEL_DATE,
+            c.REG_EMP_ID,
+            c.UPD_EMP_ID,
+            c.REG_DATE,
+            c.UPD_DATE,
+            reg_emp.EMP_NM as regEmpNm,
+            upd_emp.EMP_NM as updEmpNm
+        FROM TB_EMP_RIGHTS_COMMENT c
+        LEFT JOIN TB_EMP_REF reg_emp ON c.REG_EMP_ID = reg_emp.ERI_EMP_ID AND reg_emp.DEL_YN = 'N'
+        LEFT JOIN TB_EMP_REF upd_emp ON c.UPD_EMP_ID = upd_emp.ERI_EMP_ID AND upd_emp.DEL_YN = 'N'
+        WHERE c.PARENT_SEQ = #{parentSeq}
+        AND c.DEL_YN = 'N'
+        ORDER BY c.REG_DATE ASC
     </select>
 
     <!-- 댓글 등록 -->
@@ -69,8 +95,6 @@
             LIKE_CNT,
             DISLIKE_CNT,
             SECRET_YN,
-            RGST_EMP_ID,
-            UPDT_EMP_ID,
             DEL_YN,
             REG_EMP_ID,
             UPD_EMP_ID,
@@ -84,11 +108,9 @@
             COALESCE(#{likeCnt,jdbcType=INTEGER}, 0),
             COALESCE(#{dislikeCnt,jdbcType=INTEGER}, 0),
             COALESCE(#{secretYn,jdbcType=CHAR}, 'N'),
-            #{rgstEmpId,jdbcType=VARCHAR},
-            #{updtEmpId,jdbcType=VARCHAR},
             'N',
-            #{rgstEmpId,jdbcType=VARCHAR},
-            #{updtEmpId,jdbcType=VARCHAR},
+            #{regEmpId,jdbcType=VARCHAR},
+            #{updEmpId,jdbcType=VARCHAR},
             CURRENT_TIMESTAMP,
             CURRENT_TIMESTAMP
         )
@@ -100,8 +122,7 @@
         SET 
             <if test="cntn != null">CNTN = #{cntn,jdbcType=LONGVARCHAR},</if>
             <if test="secretYn != null">SECRET_YN = #{secretYn,jdbcType=CHAR},</if>
-            <if test="updtEmpId != null">UPDT_EMP_ID = #{updtEmpId,jdbcType=VARCHAR},</if>
-            UPD_EMP_ID = COALESCE(#{updtEmpId,jdbcType=VARCHAR}, #{rgstEmpId,jdbcType=VARCHAR}),
+            UPD_EMP_ID = COALESCE(#{updEmpId,jdbcType=VARCHAR}, #{regEmpId,jdbcType=VARCHAR}),
             UPD_DATE = CURRENT_TIMESTAMP
         WHERE SEQ = #{seq,jdbcType=BIGINT}
         AND DEL_YN = 'N'
@@ -116,6 +137,18 @@
             UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
             UPD_DATE = CURRENT_TIMESTAMP
         WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 하위 답글들 삭제 (논리 삭제) -->
+    <update id="deleteChildComments">
+        UPDATE TB_EMP_RIGHTS_COMMENT
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE PARENT_SEQ = #{parentSeq,jdbcType=BIGINT}
         AND DEL_YN = 'N'
     </update>
 

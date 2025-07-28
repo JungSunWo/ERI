@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERI 배치 처리 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .btn-info:hover {
+            background-color: #117a8b;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        .schedule-controls {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+        .schedule-controls h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        .schedule-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-small {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            background-color: #6c757d;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-small:hover {
+            background-color: #545b62;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .result.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .result.info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .status-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+        }
+        .status-label {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        .status-value {
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ERI 배치 처리 테스트</h1>
+        
+        <div class="status-grid" id="statusGrid">
+            <!-- 상태 정보가 여기에 표시됩니다 -->
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="runBatch()">배치 처리 실행</button>
+            <button class="btn-success" onclick="testDbConnection()">DB 연결 테스트</button>
+            <button class="btn-info" onclick="getStatus()">상태 확인</button>
+            <button class="btn-info" onclick="getEmployeeList()">직원 목록 조회</button>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="reloadScheduleConfig()">스케줄 설정 다시 로드</button>
+            <button class="btn-info" onclick="getScheduleStatus()">스케줄 상태 조회</button>
+            <button class="btn-warning" onclick="cancelAllSchedules()">모든 스케줄 취소</button>
+        </div>
+        
+        <div class="schedule-controls">
+            <h3>개별 스케줄 제어</h3>
+            <div class="schedule-buttons">
+                <button class="btn-small" onclick="cancelSchedule('dailyEmpEncryptBatch')">일일 암호화 취소</button>
+                <button class="btn-small" onclick="cancelSchedule('weeklyCleanupBatch')">주간 정리 취소</button>
+                <button class="btn-small" onclick="cancelSchedule('monthlyStatisticsBatch')">월간 통계 취소</button>
+                <button class="btn-small" onclick="cancelSchedule('testBatch')">테스트 배치 취소</button>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>처리 중...</p>
+        </div>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // 페이지 로드 시 상태 확인
+        window.onload = function() {
+            getStatus();
+            getScheduleStatus();
+        };
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function showResult(data, isError = false) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result ' + (isError ? 'error' : 'success');
+            resultDiv.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function showInfoResult(data) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result info';
+            resultDiv.textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function runBatch() {
+            showLoading();
+            try {
+                const response = await fetch('/api/scheduler/manual-emp-info-batch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                hideLoading();
+                showResult(data, !data.success);
+                if (data.success) {
+                    getStatus(); // 상태 업데이트
+                }
+            } catch (error) {
+                hideLoading();
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        async function testDbConnection() {
+            showLoading();
+            try {
+                const response = await fetch('/api/scheduler/test-db-connection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                hideLoading();
+                showResult(data, !data.success);
+            } catch (error) {
+                hideLoading();
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        async function getStatus() {
+            showLoading();
+            try {
+                const response = await fetch('/api/scheduler/status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                hideLoading();
+                showInfoResult(data);
+                updateStatusGrid(data.status);
+            } catch (error) {
+                hideLoading();
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        async function getEmployeeList() {
+            showLoading();
+            try {
+                const response = await fetch('/api/scheduler/employee-list', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                hideLoading();
+                showInfoResult(data);
+            } catch (error) {
+                hideLoading();
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        async function reloadScheduleConfig() {
+            showLoading();
+            try {
+                const response = await fetch('/api/scheduler/reload-config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                hideLoading();
+                showResult(data, !data.success);
+                if (data.success) {
+                    getScheduleStatus(); // 스케줄 상태 업데이트
+                }
+            } catch (error) {
+                hideLoading();
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        async function getScheduleStatus() {
+            showLoading();
+            try {
+                const response = await fetch('/api/scheduler/schedule-status', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                hideLoading();
+                showInfoResult(data);
+            } catch (error) {
+                hideLoading();
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        async function cancelSchedule(methodName) {
+            if (!confirm(`'${methodName}' 스케줄을 취소하시겠습니까?`)) {
+                return;
+            }
+            
+            showLoading();
+            try {
+                const response = await fetch(`/api/scheduler/cancel-schedule?methodName=${methodName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                hideLoading();
+                showResult(data, !data.success);
+                if (data.success) {
+                    getScheduleStatus(); // 스케줄 상태 업데이트
+                }
+            } catch (error) {
+                hideLoading();
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        async function cancelAllSchedules() {
+            if (!confirm('모든 스케줄을 취소하시겠습니까?')) {
+                return;
+            }
+            
+            showLoading();
+            try {
+                const response = await fetch('/api/scheduler/cancel-all-schedules', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                hideLoading();
+                showResult(data, !data.success);
+                if (data.success) {
+                    getScheduleStatus(); // 스케줄 상태 업데이트
+                }
+            } catch (error) {
+                hideLoading();
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        function updateStatusGrid(status) {
+            const statusGrid = document.getElementById('statusGrid');
+            statusGrid.innerHTML = '';
+            
+            for (const [key, value] of Object.entries(status)) {
+                const statusItem = document.createElement('div');
+                statusItem.className = 'status-item';
+                
+                const label = document.createElement('div');
+                label.className = 'status-label';
+                label.textContent = key;
+                
+                const valueDiv = document.createElement('div');
+                valueDiv.className = 'status-value';
+                valueDiv.textContent = typeof value === 'boolean' ? (value ? '연결됨' : '연결안됨') : value;
+                
+                statusItem.appendChild(label);
+                statusItem.appendChild(valueDiv);
+                statusGrid.appendChild(statusItem);
+            }
+        }
+    </script>
+</body>
+</html> 

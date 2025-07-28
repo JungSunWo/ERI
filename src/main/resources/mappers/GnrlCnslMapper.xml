@@ -17,10 +17,10 @@
             CNSL_STS_CD,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             UPDT_DT,
             UPDT_TM,
-            UPDT_EMP_ID
+            UPD_EMP_ID
         FROM TB_GNRL_CNSL
         <where>
             <if test="appDt != null">
@@ -44,8 +44,8 @@
             <if test="cnslStsCd != null and cnslStsCd != ''">
                 AND CNSL_STS_CD = #{cnslStsCd}
             </if>
-            <if test="rgstEmpId != null and rgstEmpId != ''">
-                AND RGST_EMP_ID = #{rgstEmpId}
+            <if test="regEmpId != null and regEmpId != ''">
+                AND REG_EMP_ID = #{regEmpId}
             </if>
         </where>
         ORDER BY APP_DT DESC, CNSL_APP_SEQ DESC, CNSL_SEQ DESC
@@ -66,10 +66,10 @@
             CNSL_STS_CD,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID,
+            REG_EMP_ID,
             UPDT_DT,
             UPDT_TM,
-            UPDT_EMP_ID
+            UPD_EMP_ID
         FROM TB_GNRL_CNSL
         WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CNSL_SEQ = #{cnslSeq}
     </select>
@@ -89,7 +89,7 @@
             CNSL_STS_CD,
             RGST_DT,
             RGST_TM,
-            RGST_EMP_ID
+            REG_EMP_ID
         ) VALUES (
             #{appDt},
             #{cnslAppSeq},
@@ -103,7 +103,7 @@
             #{cnslStsCd},
             #{rgstDt},
             #{rgstTm},
-            #{rgstEmpId}
+            #{regEmpId}
         )
     </insert>
 
@@ -120,7 +120,7 @@
             CNSL_STS_CD = #{cnslStsCd},
             UPDT_DT = #{updtDt},
             UPDT_TM = #{updtTm},
-            UPDT_EMP_ID = #{updtEmpId}
+            UPD_EMP_ID = #{updEmpId}
         WHERE APP_DT = #{appDt} AND CNSL_APP_SEQ = #{cnslAppSeq} AND CNSL_SEQ = #{cnslSeq}
     </update>
 

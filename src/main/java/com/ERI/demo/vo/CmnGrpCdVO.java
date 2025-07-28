@@ -36,7 +36,7 @@ public class CmnGrpCdVO {
     /**
      * 등록자
      */
-    private String rgstEmpId;
+    private String regEmpId;
     
     /**
      * 등록일시
@@ -46,10 +46,10 @@ public class CmnGrpCdVO {
     /**
      * 수정자
      */
-    private String modEmpId;
+    private String updEmpId;
     
     /**
      * 수정일시
      */
-    private String modDate;
+    private String updDate;
 } 

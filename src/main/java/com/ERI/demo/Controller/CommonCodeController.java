@@ -47,7 +47,7 @@ public class CommonCodeController {
             pageRequest.setSize(size);
             pageRequest.setSortBy(sortKey);
             pageRequest.setSortDirection(sortOrder.toUpperCase());
-            pageRequest.setSearchKeyword(keyword);
+            pageRequest.setKeyword(keyword);
             
             PageResponseDto<CmnGrpCdVO> response;
             if (useYn != null && !useYn.isEmpty()) {
@@ -221,7 +221,7 @@ public class CommonCodeController {
             pageRequest.setSize(size);
             pageRequest.setSortBy(sortKey);
             pageRequest.setSortDirection(sortOrder.toUpperCase());
-            pageRequest.setSearchKeyword(keyword);
+            pageRequest.setKeyword(keyword);
             
             PageResponseDto<CmnDtlCdVO> response;
             if (grpCd != null && !grpCd.isEmpty()) {

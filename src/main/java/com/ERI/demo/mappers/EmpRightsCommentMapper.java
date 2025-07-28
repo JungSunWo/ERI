@@ -23,6 +23,11 @@ public interface EmpRightsCommentMapper {
     EmpRightsCommentVO selectCommentBySeq(@Param("seq") Long seq);
 
     /**
+     * 하위 답글들 조회
+     */
+    List<EmpRightsCommentVO> selectChildComments(@Param("parentSeq") Long parentSeq);
+
+    /**
      * 댓글 등록
      */
     int insertComment(EmpRightsCommentVO comment);
@@ -36,6 +41,11 @@ public interface EmpRightsCommentMapper {
      * 댓글 삭제 (논리 삭제)
      */
     int deleteComment(@Param("seq") Long seq, @Param("empId") String empId);
+
+    /**
+     * 하위 답글들 삭제 (논리 삭제)
+     */
+    int deleteChildComments(@Param("parentSeq") Long parentSeq, @Param("empId") String empId);
 
     /**
      * 댓글 좋아요 수 증가

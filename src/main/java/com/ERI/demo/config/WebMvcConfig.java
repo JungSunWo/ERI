@@ -22,9 +22,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 "/api/auth/login",       // 로그인 API
                 "/api/auth/logout",       // 로그아웃 API
                 "/api/batch/emp-info", 
-                "/api/emp-encrypt/**",
+                "/api/auth/get-emp-info",
                 "/api/auth/session-status",
-                "/api/menu/list"
+                "/api/menu/list",
+                "/api/scheduler/**",
+                "/api/db-test/**"
                 
             );
     }
@@ -33,9 +35,19 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
             .allowedOrigins("http://localhost:3000") // 개발용 프론트엔드 주소
-            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
             .allowedHeaders("*")
-            .allowCredentials(true);
+            .exposedHeaders("*")
+            .allowCredentials(true)
+            .maxAge(3600); // preflight 요청 캐시 시간 (1시간)
+        
+        registry.addMapping("/uploads/**")
+            .allowedOrigins("http://localhost:3000")
+            .allowedMethods("GET", "OPTIONS")
+            .allowedHeaders("*")
+            .exposedHeaders("*")
+            .allowCredentials(true)
+            .maxAge(3600);
     }
     
     @Override
@@ -48,6 +60,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // 정적 리소스 처리
         registry.addResourceHandler("/static/**")
             .addResourceLocations("classpath:/static/")
+            .setCachePeriod(3600);
+        
+        // 업로드된 파일 처리
+        registry.addResourceHandler("/uploads/**")
+            .addResourceLocations("file:uploads/")
             .setCachePeriod(3600);
     }
 } 

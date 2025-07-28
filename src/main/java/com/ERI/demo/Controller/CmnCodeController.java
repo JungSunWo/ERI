@@ -49,8 +49,7 @@ public class CmnCodeController {
         pageRequest.setSize(size);
         pageRequest.setSortBy(sortBy);
         pageRequest.setSortDirection(sortDirection);
-        pageRequest.setSearchKeyword(keyword);
-        pageRequest.setSearchField(searchField);
+        pageRequest.setKeyword(keyword);
         
         PageResponseDto<CmnGrpCdVO> response = cmnCodeService.getAllGroupCodesWithPaging(pageRequest);
         log.info("그룹 코드 조회 완료: 총 {}개", response.getTotalElements());
@@ -176,8 +175,7 @@ public class CmnCodeController {
         pageRequest.setSize(size);
         pageRequest.setSortBy(sortBy);
         pageRequest.setSortDirection(sortDirection);
-        pageRequest.setSearchKeyword(keyword);
-        pageRequest.setSearchField(searchField);
+        pageRequest.setKeyword(keyword);
         
         PageResponseDto<CmnGrpCdVO> response = cmnCodeService.getGroupCodesByUseYnWithPaging(useYn, pageRequest);
         return ResponseEntity.ok(response);
@@ -213,8 +211,7 @@ public class CmnCodeController {
         pageRequest.setSize(size);
         pageRequest.setSortBy(sortBy);
         pageRequest.setSortDirection(sortDirection);
-        pageRequest.setSearchKeyword(keyword);
-        pageRequest.setSearchField(searchField);
+        pageRequest.setKeyword(keyword);
         
         PageResponseDto<CmnDtlCdVO> response = cmnCodeService.getAllDetailCodesWithPaging(pageRequest);
         return ResponseEntity.ok(response);
@@ -249,8 +246,7 @@ public class CmnCodeController {
         pageRequest.setSize(size);
         pageRequest.setSortBy(sortBy);
         pageRequest.setSortDirection(sortDirection);
-        pageRequest.setSearchKeyword(keyword);
-        pageRequest.setSearchField(searchField);
+        pageRequest.setKeyword(keyword);
         
         PageResponseDto<CmnDtlCdVO> response = cmnCodeService.getDetailCodesByGrpCdWithPaging(grpCd, pageRequest);
         return ResponseEntity.ok(response);
@@ -376,8 +372,7 @@ public class CmnCodeController {
         pageRequest.setSize(size);
         pageRequest.setSortBy(sortBy);
         pageRequest.setSortDirection(sortDirection);
-        pageRequest.setSearchKeyword(keyword);
-        pageRequest.setSearchField(searchField);
+        pageRequest.setKeyword(keyword);
         
         PageResponseDto<CmnDtlCdVO> response = cmnCodeService.getDetailCodesByUseYnWithPaging(useYn, pageRequest);
         return ResponseEntity.ok(response);
@@ -413,8 +408,7 @@ public class CmnCodeController {
         pageRequest.setSize(size);
         pageRequest.setSortBy(sortBy);
         pageRequest.setSortDirection(sortDirection);
-        pageRequest.setSearchKeyword(keyword);
-        pageRequest.setSearchField(searchField);
+        pageRequest.setKeyword(keyword);
         
         PageResponseDto<CmnDtlCdVO> response = cmnCodeService.getDetailCodesByGrpCdAndUseYnWithPaging(grpCd, useYn, pageRequest);
         return ResponseEntity.ok(response);

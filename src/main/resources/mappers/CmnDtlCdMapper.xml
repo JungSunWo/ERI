@@ -10,10 +10,10 @@
         <result column="DTL_CD_DESC" property="dtlCdDesc" />
         <result column="SORT_ORD" property="sortOrd" />
         <result column="USE_YN" property="useYn" />
-        <result column="REG_EMP_ID" property="rgstEmpId" />
+        <result column="REG_EMP_ID" property="regEmpId" />
         <result column="REG_DATE" property="regDate" />
-        <result column="UPD_EMP_ID" property="modEmpId" />
-        <result column="UPD_DATE" property="modDate" />
+        <result column="UPD_EMP_ID" property="updEmpId" />
+        <result column="UPD_DATE" property="updDate" />
     </resultMap>
 
     <!-- 전체 공통 상세 코드 조회 (페이징) -->

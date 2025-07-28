@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.SurveyMstMapper">
+
+    <!-- 설문조사 목록 조회 -->
+    <select id="selectSurveyList" parameterType="map" resultType="com.ERI.demo.vo.SurveyMstVO">
+        SELECT 
+            sm.SURVEY_SEQ,
+            sm.SURVEY_TTL,
+            sm.SURVEY_DESC,
+            sm.SURVEY_TY_CD,
+            sm.SURVEY_STS_CD,
+            sm.SURVEY_STT_DT,
+            sm.SURVEY_END_DT,
+            sm.SURVEY_DUR_MIN,
+            sm.ANONYMOUS_YN,
+            sm.DUPLICATE_YN,
+            sm.MAX_RESPONSE_CNT,
+            sm.TARGET_EMP_TY_CD,
+            COALESCE(sr.RESPONSE_CNT, 0) as RESPONSE_CNT,
+            COALESCE(sr.RESPONSE_RATE, 0.0) as RESPONSE_RATE,
+            sm.DEL_YN,
+            sm.REG_DATE as REG_DT,
+            sm.REG_EMP_ID,
+            sm.UPD_DATE as MOD_DT,
+            sm.UPD_EMP_ID
+        FROM TB_SURVEY_MST sm
+        LEFT JOIN (
+            SELECT 
+                SURVEY_SEQ,
+                COUNT(*) as RESPONSE_CNT,
+                0.0 as RESPONSE_RATE
+            FROM TB_SURVEY_RESPONSE 
+            WHERE DEL_YN = 'N'
+            GROUP BY SURVEY_SEQ
+        ) sr ON sm.SURVEY_SEQ = sr.SURVEY_SEQ
+        WHERE sm.DEL_YN = 'N'
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (sm.SURVEY_TTL LIKE CONCAT('%', #{searchKeyword}, '%') 
+                 OR sm.SURVEY_DESC LIKE CONCAT('%', #{searchKeyword}, '%'))
+        </if>
+        <if test="surveyTyCd != null and surveyTyCd != '' and surveyTyCd != 'ALL'">
+            AND sm.SURVEY_TY_CD = #{surveyTyCd}
+        </if>
+        <if test="surveyStsCd != null and surveyStsCd != '' and surveyStsCd != 'ALL'">
+            AND sm.SURVEY_STS_CD = #{surveyStsCd}
+        </if>
+        ORDER BY sm.REG_DATE DESC
+        <if test="offset != null and size != null">
+            LIMIT #{size} OFFSET #{offset}
+        </if>
+    </select>
+
+    <!-- 설문조사 목록 총 건수 조회 -->
+    <select id="selectSurveyListCount" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_SURVEY_MST
+        WHERE DEL_YN = 'N'
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (SURVEY_TTL LIKE CONCAT('%', #{searchKeyword}, '%') 
+                 OR SURVEY_DESC LIKE CONCAT('%', #{searchKeyword}, '%'))
+        </if>
+        <if test="surveyTyCd != null and surveyTyCd != '' and surveyTyCd != 'ALL'">
+            AND SURVEY_TY_CD = #{surveyTyCd}
+        </if>
+        <if test="surveyStsCd != null and surveyStsCd != '' and surveyStsCd != 'ALL'">
+            AND SURVEY_STS_CD = #{surveyStsCd}
+        </if>
+    </select>
+
+    <!-- 설문조사 상세 조회 -->
+    <select id="selectSurveyBySeq" parameterType="long" resultType="com.ERI.demo.vo.SurveyMstVO">
+        SELECT 
+            SURVEY_SEQ,
+            SURVEY_TTL,
+            SURVEY_DESC,
+            SURVEY_TY_CD,
+            SURVEY_STS_CD,
+            SURVEY_STT_DT,
+            SURVEY_END_DT,
+            SURVEY_DUR_MIN,
+            ANONYMOUS_YN,
+            DUPLICATE_YN,
+            MAX_RESPONSE_CNT,
+            TARGET_EMP_TY_CD,
+            0 as RESPONSE_CNT,
+            0.0 as RESPONSE_RATE,
+            DEL_YN,
+            REG_DATE as REG_DT,
+            REG_EMP_ID,
+            UPD_DATE as MOD_DT,
+            UPD_EMP_ID
+        FROM TB_SURVEY_MST
+        WHERE SURVEY_SEQ = #{surveySeq}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 설문조사 등록 -->
+    <insert id="insertSurvey" parameterType="com.ERI.demo.vo.SurveyMstVO">
+        <selectKey keyProperty="surveySeq" resultType="long" order="BEFORE">
+            SELECT nextval('tb_survey_mst_survey_seq_seq')
+        </selectKey>
+        INSERT INTO TB_SURVEY_MST (
+            SURVEY_SEQ,
+            SURVEY_TTL,
+            SURVEY_DESC,
+            SURVEY_TY_CD,
+            SURVEY_STS_CD,
+            SURVEY_STT_DT,
+            SURVEY_END_DT,
+            SURVEY_DUR_MIN,
+            ANONYMOUS_YN,
+            DUPLICATE_YN,
+            MAX_RESPONSE_CNT,
+            TARGET_EMP_TY_CD,
+            DEL_YN,
+            REG_DATE,
+            REG_EMP_ID
+        ) VALUES (
+            #{surveySeq},
+            #{surveyTtl},
+            #{surveyDesc,jdbcType=VARCHAR},
+            #{surveyTyCd},
+            #{surveyStsCd},
+            <if test="surveySttDt != null and surveySttDt != ''">
+                #{surveySttDt}::DATE
+            </if>
+            <if test="surveySttDt == null or surveySttDt == ''">
+                NULL
+            </if>,
+            <if test="surveyEndDt != null and surveyEndDt != ''">
+                #{surveyEndDt}::DATE
+            </if>
+            <if test="surveyEndDt == null or surveyEndDt == ''">
+                NULL
+            </if>,
+            #{surveyDurMin,jdbcType=INTEGER},
+            #{anonymousYn},
+            #{duplicateYn},
+            #{maxResponseCnt,jdbcType=INTEGER},
+            #{targetEmpTyCd},
+            'N',
+            CURRENT_TIMESTAMP,
+            #{regEmpId}
+        )
+    </insert>
+
+    <!-- 설문조사 수정 -->
+    <update id="updateSurvey" parameterType="com.ERI.demo.vo.SurveyMstVO">
+        UPDATE TB_SURVEY_MST
+        SET 
+            SURVEY_TTL = #{surveyTtl},
+            SURVEY_DESC = #{surveyDesc,jdbcType=VARCHAR},
+            SURVEY_TY_CD = #{surveyTyCd},
+            SURVEY_STS_CD = #{surveyStsCd,jdbcType=VARCHAR},
+            SURVEY_STT_DT = <if test="surveySttDt != null and surveySttDt != ''">
+                #{surveySttDt}::DATE
+            </if>
+            <if test="surveySttDt == null or surveySttDt == ''">
+                NULL
+            </if>,
+            SURVEY_END_DT = <if test="surveyEndDt != null and surveyEndDt != ''">
+                #{surveyEndDt}::DATE
+            </if>
+            <if test="surveyEndDt == null or surveyEndDt == ''">
+                NULL
+            </if>,
+            SURVEY_DUR_MIN = #{surveyDurMin,jdbcType=INTEGER},
+            ANONYMOUS_YN = #{anonymousYn},
+            DUPLICATE_YN = #{duplicateYn},
+            MAX_RESPONSE_CNT = #{maxResponseCnt,jdbcType=INTEGER},
+            TARGET_EMP_TY_CD = #{targetEmpTyCd,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP,
+                            UPD_EMP_ID = #{updEmpId,jdbcType=VARCHAR}
+        WHERE SURVEY_SEQ = #{surveySeq}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 설문조사 삭제 (논리 삭제) -->
+    <update id="deleteSurvey" parameterType="long">
+        UPDATE TB_SURVEY_MST
+        SET 
+            DEL_YN = 'Y',
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SURVEY_SEQ = #{surveySeq}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 설문조사 응답 수 업데이트 -->
+    <update id="updateResponseCount" parameterType="long">
+        UPDATE TB_SURVEY_MST
+        SET 
+            RESPONSE_CNT = (
+                SELECT COUNT(*)
+                FROM TB_SURVEY_RESPONSE
+                WHERE SURVEY_SEQ = #{surveySeq}
+                AND RESPONSE_STS_CD = 'COMPLETED'
+                AND DEL_YN = 'N'
+            ),
+            RESPONSE_RATE = (
+                SELECT 
+                    CASE 
+                        WHEN COUNT(*) > 0 THEN 
+                            ROUND(
+                                (SELECT COUNT(*)
+                                 FROM TB_SURVEY_RESPONSE
+                                 WHERE SURVEY_SEQ = #{surveySeq}
+                                 AND RESPONSE_STS_CD = 'COMPLETED'
+                                 AND DEL_YN = 'N') * 100.0 / COUNT(*), 1
+                            )
+                        ELSE 0.0
+                    END
+                FROM TB_EMP_LST
+                WHERE DEL_YN = 'N'
+            ),
+            MOD_DT = NOW()
+        WHERE SURVEY_SEQ = #{surveySeq}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 설문 질문 등록 -->
+    <insert id="insertSurveyQuestion" parameterType="com.ERI.demo.vo.SurveyQuestionVO">
+        INSERT INTO TB_SURVEY_QUESTION (
+            SURVEY_SEQ,
+            QUESTION_SEQ,
+            QUESTION_TTL,
+            QUESTION_DESC,
+            QUESTION_TY_CD,
+            QUESTION_ORD,
+            REQUIRED_YN,
+            SKIP_LOGIC_YN,
+            SKIP_CONDITION,
+            SCORE_YN,
+            SCORE_WEIGHT,
+            DEL_YN,
+            REG_DATE,
+            REG_EMP_ID
+        ) VALUES (
+            #{surveySeq},
+            #{questionSeq},
+            #{questionTtl},
+            #{questionDesc,jdbcType=VARCHAR},
+            #{questionTyCd},
+            #{questionOrd},
+            #{requiredYn},
+            COALESCE(#{skipLogicYn,jdbcType=VARCHAR}, 'N'),
+            #{skipCondition,jdbcType=VARCHAR},
+            COALESCE(#{scoreYn,jdbcType=VARCHAR}, 'N'),
+            COALESCE(#{scoreWeight,jdbcType=DECIMAL}, 1.0),
+            'N',
+            CURRENT_TIMESTAMP,
+            #{regEmpId}
+        )
+    </insert>
+
+    <!-- 설문 선택지 등록 -->
+    <insert id="insertSurveyChoice" parameterType="com.ERI.demo.vo.SurveyChoiceVO">
+        INSERT INTO TB_SURVEY_CHOICE (
+            SURVEY_SEQ,
+            QUESTION_SEQ,
+            CHOICE_SEQ,
+            CHOICE_TTL,
+            CHOICE_DESC,
+            CHOICE_ORD,
+            CHOICE_SCORE,
+            CHOICE_VALUE,
+            ETC_YN,
+            DEL_YN,
+            REG_DATE,
+            REG_EMP_ID
+        ) VALUES (
+            #{surveySeq},
+            #{questionSeq},
+            #{choiceSeq},
+            #{choiceTtl},
+            #{choiceDesc,jdbcType=VARCHAR},
+            #{choiceOrd},
+            #{choiceScore,jdbcType=INTEGER},
+            #{choiceValue,jdbcType=VARCHAR},
+            COALESCE(#{etcYn,jdbcType=VARCHAR}, 'N'),
+            'N',
+            CURRENT_TIMESTAMP,
+            #{regEmpId}
+        )
+    </insert>
+
+    <!-- 설문 질문 목록 조회 -->
+    <select id="selectSurveyQuestions" parameterType="long" resultType="com.ERI.demo.vo.SurveyQuestionVO">
+        SELECT 
+            SURVEY_SEQ,
+            QUESTION_SEQ,
+            QUESTION_TTL,
+            QUESTION_DESC,
+            QUESTION_TY_CD,
+            QUESTION_ORD,
+            REQUIRED_YN,
+            SKIP_LOGIC_YN,
+            SKIP_CONDITION,
+            SCORE_YN,
+            SCORE_WEIGHT,
+            DEL_YN,
+            REG_DATE,
+            REG_EMP_ID,
+            UPD_DATE,
+            UPD_EMP_ID
+        FROM TB_SURVEY_QUESTION
+        WHERE SURVEY_SEQ = #{surveySeq}
+        AND DEL_YN = 'N'
+        ORDER BY QUESTION_ORD
+    </select>
+
+    <!-- 설문 선택지 목록 조회 -->
+    <select id="selectSurveyChoices" resultType="com.ERI.demo.vo.SurveyChoiceVO">
+        SELECT 
+            SURVEY_SEQ,
+            QUESTION_SEQ,
+            CHOICE_SEQ,
+            CHOICE_TTL,
+            CHOICE_DESC,
+            CHOICE_ORD,
+            CHOICE_SCORE,
+            CHOICE_VALUE,
+            ETC_YN,
+            DEL_YN,
+            REG_DATE,
+            REG_EMP_ID,
+            UPD_DATE as MOD_DATE,
+            UPD_EMP_ID as MOD_EMP_ID
+        FROM TB_SURVEY_CHOICE
+        WHERE SURVEY_SEQ = #{surveySeq}
+        AND QUESTION_SEQ = #{questionSeq}
+        AND DEL_YN = 'N'
+        ORDER BY CHOICE_ORD
+    </select>
+
+    <!-- 설문 질문 삭제 (물리 삭제) -->
+    <delete id="deleteSurveyQuestions" parameterType="long">
+        DELETE FROM TB_SURVEY_QUESTION
+        WHERE SURVEY_SEQ = #{surveySeq}
+    </delete>
+
+    <!-- 설문 선택지 삭제 (특정 질문의 선택지, 물리 삭제) -->
+    <delete id="deleteSurveyChoices">
+        DELETE FROM TB_SURVEY_CHOICE
+        WHERE SURVEY_SEQ = #{surveySeq}
+        AND QUESTION_SEQ = #{questionSeq}
+    </delete>
+
+    <!-- 설문 선택지 삭제 (모든 선택지, 물리 삭제) -->
+    <delete id="deleteAllSurveyChoices" parameterType="long">
+        DELETE FROM TB_SURVEY_CHOICE
+        WHERE SURVEY_SEQ = #{surveySeq}
+    </delete>
+
+    <!-- 전체 대상자 수 조회 (함수 대체) -->
+    <select id="selectTotalTargetCount" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_EMP_LST
+        WHERE DEL_YN = 'N'
+    </select>
+
+    <!-- 설문 응답자 수 조회 (함수 대체) -->
+    <select id="selectResponseCount" parameterType="long" resultType="int">
+        SELECT COUNT(DISTINCT EMP_ID)
+        FROM TB_SURVEY_RESPONSE
+        WHERE SURVEY_SEQ = #{surveySeq}
+          AND RESPONSE_STS_CD = 'COMPLETED'
+          AND DEL_YN = 'N'
+    </select>
+
+    <!-- 설문 응답 점수 조회 (함수 대체) -->
+    <select id="selectResponseScore" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(srd.RESPONSE_SCORE), 0)
+        FROM TB_SURVEY_RESPONSE_DTL srd
+        JOIN TB_SURVEY_QUESTION sq ON srd.SURVEY_SEQ = sq.SURVEY_SEQ 
+            AND srd.QUESTION_SEQ = sq.QUESTION_SEQ
+        WHERE srd.SURVEY_SEQ = #{surveySeq}
+          AND srd.RESPONSE_SEQ = #{responseSeq}
+          AND sq.SCORE_YN = 'Y'
+          AND srd.DEL_YN = 'N'
+    </select>
+
+    <!-- 설문 통계 삭제 (함수 대체) -->
+    <delete id="deleteSurveyStats" parameterType="long">
+        DELETE FROM TB_SURVEY_STATS 
+        WHERE SURVEY_SEQ = #{surveySeq}
+    </delete>
+
+    <!-- 설문 통계 계산 (함수 대체) -->
+    <select id="calculateSurveyStats" parameterType="long" resultType="com.ERI.demo.vo.SurveyStatsVO">
+        SELECT 
+            srd.SURVEY_SEQ,
+            srd.QUESTION_SEQ,
+            srd.CHOICE_SEQ,
+            COUNT(*) as RESPONSE_CNT,
+            (COUNT(*)::DECIMAL / (SELECT COUNT(*) FROM TB_SURVEY_RESPONSE WHERE SURVEY_SEQ = #{surveySeq} AND RESPONSE_STS_CD = 'COMPLETED')) * 100 as RESPONSE_RATE,
+            AVG(srd.RESPONSE_SCORE) as AVG_SCORE,
+            MIN(srd.RESPONSE_SCORE) as MIN_SCORE,
+            MAX(srd.RESPONSE_SCORE) as MAX_SCORE,
+            STDDEV(srd.RESPONSE_SCORE) as STD_DEV_SCORE,
+            CURRENT_TIMESTAMP as LAST_UPD_DATE
+        FROM TB_SURVEY_RESPONSE_DTL srd
+        JOIN TB_SURVEY_RESPONSE sr ON srd.SURVEY_SEQ = sr.SURVEY_SEQ 
+            AND srd.RESPONSE_SEQ = sr.RESPONSE_SEQ
+        WHERE srd.SURVEY_SEQ = #{surveySeq}
+          AND sr.RESPONSE_STS_CD = 'COMPLETED'
+          AND srd.DEL_YN = 'N'
+        GROUP BY srd.SURVEY_SEQ, srd.QUESTION_SEQ, srd.CHOICE_SEQ
+    </select>
+
+    <!-- 설문 통계 등록 (함수 대체) -->
+    <insert id="insertSurveyStats" parameterType="com.ERI.demo.vo.SurveyStatsVO">
+        INSERT INTO TB_SURVEY_STATS (
+            SURVEY_SEQ,
+            QUESTION_SEQ,
+            CHOICE_SEQ,
+            RESPONSE_CNT,
+            RESPONSE_RATE,
+            AVG_SCORE,
+            MIN_SCORE,
+            MAX_SCORE,
+            STD_DEV_SCORE,
+            LAST_UPD_DATE
+        ) VALUES (
+            #{surveySeq},
+            #{questionSeq},
+            #{choiceSeq},
+            #{responseCnt},
+            #{responseRate},
+            #{avgScore},
+            #{minScore},
+            #{maxScore},
+            #{stdDevScore},
+            #{lastUpdDate}
+        )
+    </insert>
+
+    <!-- 설문 응답 현황 조회 (함수 대체) -->
+    <select id="selectSurveyResponseStatus" parameterType="long" resultType="com.ERI.demo.vo.SurveyResponseVO">
+        SELECT 
+            sm.SURVEY_SEQ,
+            sm.SURVEY_TTL,
+            sm.SURVEY_TY_CD,
+            sm.SURVEY_STS_CD,
+            sm.SURVEY_STT_DT,
+            sm.SURVEY_END_DT,
+            COUNT(DISTINCT sr.EMP_ID) as RESPONSE_COUNT,
+            (SELECT COUNT(*) FROM TB_EMP_LST WHERE DEL_YN = 'N') as TOTAL_TARGET_COUNT
+        FROM TB_SURVEY_MST sm
+        LEFT JOIN TB_SURVEY_RESPONSE sr ON sm.SURVEY_SEQ = sr.SURVEY_SEQ 
+            AND sr.RESPONSE_STS_CD = 'COMPLETED'
+            AND sr.DEL_YN = 'N'
+        WHERE sm.SURVEY_SEQ = #{surveySeq}
+        GROUP BY sm.SURVEY_SEQ, sm.SURVEY_TTL, sm.SURVEY_TY_CD, sm.SURVEY_STS_CD, sm.SURVEY_STT_DT, sm.SURVEY_END_DT
+    </select>
+
+    <!-- 설문 통계 조회 (함수 대체) -->
+    <select id="selectSurveyStats" parameterType="long" resultType="com.ERI.demo.vo.SurveyStatsVO">
+        SELECT 
+            SURVEY_SEQ,
+            QUESTION_SEQ,
+            CHOICE_SEQ,
+            RESPONSE_CNT,
+            RESPONSE_RATE,
+            AVG_SCORE,
+            MIN_SCORE,
+            MAX_SCORE,
+            STD_DEV_SCORE,
+            LAST_UPD_DATE
+        FROM TB_SURVEY_STATS
+        WHERE SURVEY_SEQ = #{surveySeq}
+        ORDER BY QUESTION_SEQ, CHOICE_SEQ
+    </select>
+
+    <!-- 응답 상태 업데이트 (함수 대체) -->
+    <update id="updateResponseStatus">
+        UPDATE TB_SURVEY_RESPONSE
+        SET RESPONSE_STS_CD = #{status},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SURVEY_SEQ = #{surveySeq}
+          AND RESPONSE_SEQ = #{responseSeq}
+    </update>
+
+</mapper> 

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.ConsultationAnswerMapper">
+
+    <!-- 상담 답변 조회 -->
+    <select id="selectConsultationAnswerByBoardSeq" resultType="com.ERI.demo.vo.ConsultationAnswerVO">
+        SELECT 
+            SEQ,
+            BOARD_SEQ,
+            CNTN,
+            STS_CD,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            DEL_YN,
+            DEL_DATE,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        FROM TB_CONSULTATION_ANSWER
+        WHERE BOARD_SEQ = #{boardSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 상담 답변 등록 -->
+    <insert id="insertConsultationAnswer" parameterType="com.ERI.demo.vo.ConsultationAnswerVO" useGeneratedKeys="true" keyProperty="seq">
+        INSERT INTO TB_CONSULTATION_ANSWER (
+            BOARD_SEQ,
+            CNTN,
+            STS_CD,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            DEL_YN,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DATE,
+            UPD_DATE
+        ) VALUES (
+            #{boardSeq,jdbcType=BIGINT},
+            #{cntn,jdbcType=VARCHAR},
+            #{stsCd,jdbcType=VARCHAR},
+            #{regEmpId,jdbcType=VARCHAR},
+            #{updEmpId,jdbcType=VARCHAR},
+            'N',
+            #{regEmpId,jdbcType=VARCHAR},
+            #{updEmpId,jdbcType=VARCHAR},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 상담 답변 수정 -->
+    <update id="updateConsultationAnswer" parameterType="com.ERI.demo.vo.ConsultationAnswerVO">
+        UPDATE TB_CONSULTATION_ANSWER
+        SET 
+            CNTN = #{cntn,jdbcType=VARCHAR},
+            STS_CD = #{stsCd,jdbcType=VARCHAR},
+            UPD_EMP_ID = #{updEmpId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 상담 답변 삭제 (논리 삭제) -->
+    <update id="deleteConsultationAnswer">
+        UPDATE TB_CONSULTATION_ANSWER
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE SEQ = #{seq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 상담 게시글별 답변 삭제 (논리 삭제) -->
+    <update id="deleteConsultationAnswerByBoardSeq">
+        UPDATE TB_CONSULTATION_ANSWER
+        SET 
+            DEL_YN = 'Y',
+            DEL_DATE = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DATE = CURRENT_TIMESTAMP
+        WHERE BOARD_SEQ = #{boardSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+</mapper> 

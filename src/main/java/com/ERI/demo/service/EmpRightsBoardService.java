@@ -4,6 +4,7 @@ import com.ERI.demo.dto.PageRequestDto;
 import com.ERI.demo.dto.PageResponseDto;
 import com.ERI.demo.mappers.EmpRightsBoardMapper;
 import com.ERI.demo.vo.EmpRightsBoardVO;
+import com.ERI.demo.vo.employee.EmpLstVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,9 @@ public class EmpRightsBoardService {
 
     @Autowired
     private EmpRightsBoardMapper empRightsBoardMapper;
+    
+    @Autowired
+    private EmpLstService empLstService;
 
     /**
      * 게시글 목록 조회 (페이징)
@@ -33,20 +37,54 @@ public class EmpRightsBoardService {
         // 게시글 목록 조회
         List<EmpRightsBoardVO> boards = empRightsBoardMapper.selectBoardList(searchCondition);
         
+        // 직원 정보 조회하여 설정
+        for (EmpRightsBoardVO board : boards) {
+            if (board.getRegEmpId() != null) {
+                EmpLstVO regEmp = empLstService.getEmployeeByEmpId(board.getRegEmpId());
+                if (regEmp != null) {
+                    board.setRegEmpNm(regEmp.getEmpNm());
+                }
+            }
+            if (board.getUpdEmpId() != null) {
+                EmpLstVO updEmp = empLstService.getEmployeeByEmpId(board.getUpdEmpId());
+                if (updEmp != null) {
+                    board.setUpdEmpNm(updEmp.getEmpNm());
+                }
+            }
+        }
+        
         // 전체 개수 조회
         int totalCount = empRightsBoardMapper.selectBoardCount(searchCondition);
         
         // 페이지 정보 계산
         int totalPages = (int) Math.ceil((double) totalCount / pageRequest.getSize());
         
-        return new PageResponseDto<>(boards, pageRequest.getPage(), pageRequest.getSize(), totalCount, totalPages);
+        return new PageResponseDto<EmpRightsBoardVO>(boards, pageRequest.getPage(), pageRequest.getSize(), totalCount, totalPages);
     }
 
     /**
      * 게시글 상세 조회
      */
     public EmpRightsBoardVO getBoardBySeq(Long seq) {
-        return empRightsBoardMapper.selectBoardBySeq(seq);
+        EmpRightsBoardVO board = empRightsBoardMapper.selectBoardBySeq(seq);
+        
+        if (board != null) {
+            // 직원 정보 조회하여 설정
+            if (board.getRegEmpId() != null) {
+                EmpLstVO regEmp = empLstService.getEmployeeByEmpId(board.getRegEmpId());
+                if (regEmp != null) {
+                    board.setRegEmpNm(regEmp.getEmpNm());
+                }
+            }
+            if (board.getUpdEmpId() != null) {
+                EmpLstVO updEmp = empLstService.getEmployeeByEmpId(board.getUpdEmpId());
+                if (updEmp != null) {
+                    board.setUpdEmpNm(updEmp.getEmpNm());
+                }
+            }
+        }
+        
+        return board;
     }
 
     /**
@@ -80,11 +118,11 @@ public class EmpRightsBoardService {
         }
 
         // 세션에서 가져온 직원번호 설정
-        if (board.getRgstEmpId() != null) {
-            board.setRegEmpId(board.getRgstEmpId());
+        if (board.getRegEmpId() != null) {
+            board.setRegEmpId(board.getRegEmpId());
         }
-        if (board.getUpdtEmpId() != null) {
-            board.setUpdEmpId(board.getUpdtEmpId());
+        if (board.getUpdEmpId() != null) {
+            board.setUpdEmpId(board.getUpdEmpId());
         }
 
         // 게시글 등록
@@ -105,8 +143,8 @@ public class EmpRightsBoardService {
         }
 
         // 세션에서 가져온 직원번호 설정
-        if (board.getUpdtEmpId() != null) {
-            board.setUpdEmpId(board.getUpdtEmpId());
+        if (board.getUpdEmpId() != null) {
+            board.setUpdEmpId(board.getUpdEmpId());
         }
 
         // 게시글 수정
@@ -179,7 +217,7 @@ public class EmpRightsBoardService {
     public PageResponseDto<EmpRightsBoardVO> getMyBoardList(String empId, PageRequestDto pageRequest) {
         // 검색 조건 설정
         EmpRightsBoardVO searchCondition = new EmpRightsBoardVO();
-        searchCondition.setRgstEmpId(empId);
+        searchCondition.setRegEmpId(empId);
         searchCondition.setOffset((pageRequest.getPage() - 1) * pageRequest.getSize());
         searchCondition.setSize(pageRequest.getSize());
 
@@ -192,6 +230,6 @@ public class EmpRightsBoardService {
         // 페이지 정보 계산
         int totalPages = (int) Math.ceil((double) totalCount / pageRequest.getSize());
         
-        return new PageResponseDto<>(boards, pageRequest.getPage(), pageRequest.getSize(), totalCount, totalPages);
+        return new PageResponseDto<EmpRightsBoardVO>(boards, pageRequest.getPage(), pageRequest.getSize(), totalCount, totalPages);
     }
 } 

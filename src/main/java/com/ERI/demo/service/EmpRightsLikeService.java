@@ -27,13 +27,13 @@ public class EmpRightsLikeService {
      */
     public boolean toggleLike(EmpRightsLikeVO like) {
         // 세션에서 가져온 직원번호 설정
-        if (like.getRgstEmpId() != null) {
-            like.setRegEmpId(like.getRgstEmpId());
-            like.setUpdEmpId(like.getRgstEmpId());
+        if (like.getRegEmpId() != null) {
+            like.setRegEmpId(like.getRegEmpId());
+            like.setUpdEmpId(like.getRegEmpId());
         }
         
         // 기존 좋아요 조회
-        EmpRightsLikeVO existingLike = empRightsLikeMapper.selectLike(like.getBoardSeq(), like.getCommentSeq(), like.getRgstEmpId());
+        EmpRightsLikeVO existingLike = empRightsLikeMapper.selectLike(like.getBoardSeq(), like.getCommentSeq(), like.getRegEmpId());
         
         if (existingLike == null) {
             // 새로운 좋아요 등록
@@ -44,7 +44,7 @@ public class EmpRightsLikeService {
         } else {
             if (existingLike.getLikeType().equals(like.getLikeType())) {
                 // 같은 타입이면 삭제
-                empRightsLikeMapper.deleteLike(existingLike.getSeq(), like.getRgstEmpId());
+                empRightsLikeMapper.deleteLike(existingLike.getSeq(), like.getRegEmpId());
                 
                 // 카운트 감소
                 updateCount(like.getBoardSeq(), like.getCommentSeq(), like.getLikeType(), false);

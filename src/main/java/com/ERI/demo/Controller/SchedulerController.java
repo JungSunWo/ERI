@@ -1,18 +1,20 @@
 package com.ERI.demo.Controller;
 
-import com.ERI.demo.service.DynamicSchedulerService;
-import com.ERI.demo.service.EmpEncryptSchedulerService;
+import com.ERI.demo.service.EmpLstService;
+import com.ERI.demo.service.SchedulerConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 /**
  * 스케줄링 배치 수동 실행 API Controller
@@ -22,89 +24,37 @@ import java.util.Map;
 public class SchedulerController {
 
     @Autowired
-    private EmpEncryptSchedulerService empEncryptSchedulerService;
+    private EmpLstService empLstService;
 
     @Autowired
-    private DynamicSchedulerService dynamicSchedulerService;
+    private SchedulerConfigService schedulerConfigService;
 
     /**
-     * 암호화 데이터베이스 연결 테스트
+     * empInfo.txt 파일 배치 적재 수동 실행
      */
-    @PostMapping("/test-db-connection")
+    @PostMapping("/manual-emp-info-batch")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> testDatabaseConnection() {
-        Map<String, Object> response = new HashMap<>();
-        
-        try {
-            // 데이터베이스 연결 테스트
-            empEncryptSchedulerService.testDatabaseConnection();
-            
-            response.put("success", true);
-            response.put("message", "암호화 데이터베이스 연결 테스트 완료");
-            response.put("timestamp", System.currentTimeMillis());
-            
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "데이터베이스 연결 테스트 실패: " + e.getMessage());
-            response.put("error", e.getClass().getSimpleName());
-            response.put("timestamp", System.currentTimeMillis());
-            
-            return ResponseEntity.internalServerError().body(response);
-        }
-    }
-
-    /**
-     * eri_db의 tb_emp_lst 테이블 연결 테스트
-     */
-    @PostMapping("/test-emp-lst-connection")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> testEmpLstTableConnection() {
-        Map<String, Object> response = new HashMap<>();
-        
-        try {
-            // TB_EMP_LST 테이블 연결 테스트
-            empEncryptSchedulerService.testEmpLstTableConnection();
-            
-            response.put("success", true);
-            response.put("message", "eri_db TB_EMP_LST 테이블 연결 테스트 완료");
-            response.put("timestamp", System.currentTimeMillis());
-            
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "TB_EMP_LST 테이블 연결 테스트 실패: " + e.getMessage());
-            response.put("error", e.getClass().getSimpleName());
-            response.put("timestamp", System.currentTimeMillis());
-            
-            return ResponseEntity.internalServerError().body(response);
-        }
-    }
-
-    /**
-     * 직원 정보 SHA256 해시 배치 수동 실행
-     */
-    @PostMapping("/manual-emp-encrypt")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> manualEmpEncryptBatch() {
+    public ResponseEntity<Map<String, Object>> manualEmpInfoBatch() {
         Map<String, Object> response = new HashMap<>();
         
         try {
             long startTime = System.currentTimeMillis();
             
             // 배치 실행
-            empEncryptSchedulerService.manualEmpEncryptBatch();
+            empLstService.manualBatchLoadEmpInfo();
             
             long endTime = System.currentTimeMillis();
             long processingTime = endTime - startTime;
             
+            // 처리된 직원 수 조회
+            int totalEmployees = empLstService.getEmployeeCount();
+            
             response.put("success", true);
-            response.put("message", "직원 정보 SHA256 해시 배치 실행 완료");
+            response.put("message", "empInfo.txt 파일 배치 적재 실행 완료");
             response.put("processingTime", processingTime + "ms");
             response.put("timestamp", System.currentTimeMillis());
-            response.put("details", "empInfo.txt 파일을 읽어서 직원 정보를 SHA256 해시하여 TB_EMP_ENCRYPT 테이블에 저장했습니다.");
+            response.put("totalEmployees", totalEmployees);
+            response.put("details", "empInfo.txt 파일을 읽어서 TB_EMP_LST 테이블에 직원 정보를 적재했습니다. ERI_EMP_ID는 E00000001 형식으로 자동 생성됩니다. TB_EMP_REF 동기화도 자동으로 실행되었습니다.");
             
             return ResponseEntity.ok(response);
             
@@ -114,6 +64,76 @@ public class SchedulerController {
             response.put("error", e.getClass().getSimpleName());
             response.put("timestamp", System.currentTimeMillis());
             response.put("details", "자세한 오류 정보는 서버 로그를 확인해주세요.");
+            
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
+     * TB_EMP_LST와 TB_EMP_REF 동기화 수동 실행
+     */
+    @PostMapping("/manual-emp-ref-sync")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> manualEmpRefSync() {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            long startTime = System.currentTimeMillis();
+            
+            // 동기화 실행
+            empLstService.syncEmpRefFromEmpLst();
+            
+            long endTime = System.currentTimeMillis();
+            long processingTime = endTime - startTime;
+            
+            // 처리된 직원 수 조회
+            int totalEmployees = empLstService.getEmployeeCount();
+            
+            response.put("success", true);
+            response.put("message", "TB_EMP_LST와 TB_EMP_REF 동기화 실행 완료");
+            response.put("processingTime", processingTime + "ms");
+            response.put("timestamp", System.currentTimeMillis());
+            response.put("totalEmployees", totalEmployees);
+            response.put("details", "TB_EMP_LST의 데이터를 TB_EMP_REF로 동기화했습니다. 새로운 직원은 삽입, 기존 직원은 업데이트, TB_EMP_LST에 없는 직원은 삭제됩니다.");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "동기화 실행 실패: " + e.getMessage());
+            response.put("error", e.getClass().getSimpleName());
+            response.put("timestamp", System.currentTimeMillis());
+            response.put("details", "자세한 오류 정보는 서버 로그를 확인해주세요.");
+            
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
+     * 직원 데이터베이스 연결 테스트
+     */
+    @PostMapping("/test-db-connection")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> testDatabaseConnection() {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // 간단한 데이터베이스 연결 테스트
+            // TB_EMP_LST 테이블의 레코드 수를 조회하여 연결 상태 확인
+            int recordCount = empLstService.getEmployeeCount();
+            
+            response.put("success", true);
+            response.put("message", "직원 데이터베이스 연결 테스트 성공");
+            response.put("recordCount", recordCount);
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "데이터베이스 연결 테스트 실패: " + e.getMessage());
+            response.put("error", e.getClass().getSimpleName());
+            response.put("timestamp", System.currentTimeMillis());
             
             return ResponseEntity.internalServerError().body(response);
         }
@@ -130,16 +150,22 @@ public class SchedulerController {
         try {
             Map<String, Object> status = new HashMap<>();
             
-            // 동적 스케줄 설정 조회
-            Map<String, String> scheduleConfig = dynamicSchedulerService.getScheduleConfig();
-            status.put("dynamicScheduleConfig", scheduleConfig);
-            
-            // 스케줄 설정 유효성 검증 결과
-            Map<String, Boolean> validationResults = dynamicSchedulerService.validateAllScheduleConfig();
-            status.put("validationResults", validationResults);
-            
             // 현재 시간
             status.put("currentTime", java.time.LocalDateTime.now().toString());
+            
+            // 직원 데이터베이스 연결 상태
+            boolean dbConnected = empLstService.testEmployeeDbConnection();
+            status.put("employeeDbConnected", dbConnected);
+            
+            // 전체 직원 수
+            int totalEmployees = empLstService.getEmployeeCount();
+            status.put("totalEmployees", totalEmployees);
+            
+            // empInfo.txt 파일 존재 여부
+            String filePath = "src/main/resources/templates/empInfo.txt";
+            boolean fileExists = java.nio.file.Files.exists(java.nio.file.Paths.get(filePath));
+            status.put("empInfoFileExists", fileExists);
+            status.put("empInfoFilePath", filePath);
             
             response.put("success", true);
             response.put("message", "스케줄링 상태 조회 완료");
@@ -159,32 +185,27 @@ public class SchedulerController {
     }
 
     /**
-     * 동적 스케줄 설정 재로드
+     * 직원 목록 조회 (배치 처리 결과 확인용)
      */
-    @PostMapping("/reload-config")
+    @GetMapping("/employee-list")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> reloadScheduleConfig() {
+    public ResponseEntity<Map<String, Object>> getEmployeeList() {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            // 스케줄 설정 재로드
-            dynamicSchedulerService.reloadScheduleConfig();
-            
-            // 재로드된 설정 조회
-            Map<String, String> scheduleConfig = dynamicSchedulerService.getScheduleConfig();
-            Map<String, Boolean> validationResults = dynamicSchedulerService.validateAllScheduleConfig();
+            List<com.ERI.demo.vo.employee.EmpLstVO> employees = empLstService.getAllEmployees();
             
             response.put("success", true);
-            response.put("message", "스케줄 설정 재로드 완료");
-            response.put("scheduleConfig", scheduleConfig);
-            response.put("validationResults", validationResults);
+            response.put("message", "직원 목록 조회 완료");
+            response.put("employees", employees);
+            response.put("totalCount", employees.size());
             response.put("timestamp", System.currentTimeMillis());
             
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
             response.put("success", false);
-            response.put("message", "스케줄 설정 재로드 실패: " + e.getMessage());
+            response.put("message", "직원 목록 조회 실패: " + e.getMessage());
             response.put("error", e.getClass().getSimpleName());
             response.put("timestamp", System.currentTimeMillis());
             
@@ -193,34 +214,144 @@ public class SchedulerController {
     }
 
     /**
-     * 특정 스케줄 메소드 수동 실행
+     * 스케줄 설정 파일 다시 로드
      */
-    @PostMapping("/execute-method")
+    @PostMapping("/reload-config")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> executeScheduledMethod(String methodName) {
+    public ResponseEntity<Map<String, Object>> reloadScheduleConfig() {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            long startTime = System.currentTimeMillis();
-            
-            // 스케줄된 메소드 실행
-            dynamicSchedulerService.executeScheduledMethod(methodName);
-            
-            long endTime = System.currentTimeMillis();
-            long processingTime = endTime - startTime;
+            schedulerConfigService.loadAndScheduleTasks();
             
             response.put("success", true);
-            response.put("message", "스케줄 메소드 실행 완료: " + methodName);
-            response.put("methodName", methodName);
-            response.put("processingTime", processingTime + "ms");
+            response.put("message", "스케줄 설정 파일 다시 로드 완료");
             response.put("timestamp", System.currentTimeMillis());
             
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
             response.put("success", false);
-            response.put("message", "스케줄 메소드 실행 실패: " + e.getMessage());
+            response.put("message", "스케줄 설정 로드 실패: " + e.getMessage());
+            response.put("error", e.getClass().getSimpleName());
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
+     * 특정 스케줄 취소
+     */
+    @PostMapping("/cancel-schedule")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> cancelSchedule(@RequestParam String methodName) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            boolean cancelled = schedulerConfigService.cancelSchedule(methodName);
+            
+            response.put("success", cancelled);
+            response.put("message", cancelled ? "스케줄 취소 완료" : "스케줄을 찾을 수 없습니다");
             response.put("methodName", methodName);
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "스케줄 취소 실패: " + e.getMessage());
+            response.put("error", e.getClass().getSimpleName());
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
+     * 모든 스케줄 취소
+     */
+    @PostMapping("/cancel-all-schedules")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> cancelAllSchedules() {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            schedulerConfigService.clearAllSchedules();
+            
+            response.put("success", true);
+            response.put("message", "모든 스케줄 취소 완료");
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "스케줄 취소 실패: " + e.getMessage());
+            response.put("error", e.getClass().getSimpleName());
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
+     * TB_EMP_REF 동기화 배치 수동 실행
+     */
+    @PostMapping("/manual-emp-ref-sync-batch")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> manualEmpRefSyncBatch() {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            long startTime = System.currentTimeMillis();
+            
+            // 동기화 배치 실행
+            schedulerConfigService.executeEmpRefSyncBatch();
+            
+            long endTime = System.currentTimeMillis();
+            long processingTime = endTime - startTime;
+            
+            response.put("success", true);
+            response.put("message", "TB_EMP_REF 동기화 배치 실행 완료");
+            response.put("processingTime", processingTime + "ms");
+            response.put("timestamp", System.currentTimeMillis());
+            response.put("details", "TB_EMP_LST의 데이터를 TB_EMP_REF로 동기화하는 배치가 실행되었습니다.");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "동기화 배치 실행 실패: " + e.getMessage());
+            response.put("error", e.getClass().getSimpleName());
+            response.put("timestamp", System.currentTimeMillis());
+            response.put("details", "자세한 오류 정보는 서버 로그를 확인해주세요.");
+            
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
+     * 현재 스케줄 상태 조회
+     */
+    @GetMapping("/schedule-status")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getScheduleStatus() {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            Map<String, Object> scheduleStatus = schedulerConfigService.getScheduleStatus();
+            
+            response.put("success", true);
+            response.put("message", "스케줄 상태 조회 완료");
+            response.put("scheduleStatus", scheduleStatus);
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "스케줄 상태 조회 실패: " + e.getMessage());
             response.put("error", e.getClass().getSimpleName());
             response.put("timestamp", System.currentTimeMillis());
             

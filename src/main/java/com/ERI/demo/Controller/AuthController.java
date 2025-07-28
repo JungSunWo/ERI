@@ -1,11 +1,8 @@
 package com.ERI.demo.Controller;
 
-import com.ERI.demo.dto.LoginRequestDto;
-import com.ERI.demo.dto.LoginResponseDto;
-import com.ERI.demo.dto.UserAuthDto;
-import com.ERI.demo.service.AuthService;
 import com.ERI.demo.service.EmpLstService;
-import com.ERI.demo.vo.EmpLstVO;
+import com.ERI.demo.mappers.AdminLstMapper;
+import com.ERI.demo.mappers.CounselorLstMapper;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 인증 관련 컨트롤러
@@ -27,62 +22,17 @@ public class AuthController {
 	
     
     @Autowired
-    private AuthService authService;
+    private EmpLstService empLstService;
     
     @Autowired
-    private EmpLstService empLstService;
+    private AdminLstMapper adminLstMapper;
+    
+    @Autowired
+    private CounselorLstMapper counselorLstMapper;
     
     private final Logger log = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
-    /**
-     * 로그인
-     * POST /api/auth/login
-     */
-    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequest, HttpSession session) {
-        log.info("로그인 시도: 사용자 ID = {}", loginRequest.getUserId());
-        
-        try {
-        	
-        	log.debug("loginRequest: {}", loginRequest);
-            
-            // 실제 구현에서는 비밀번호 검증 로직이 필요합니다.
-            // 여기서는 간단히 사용자 존재 여부만 확인합니다.
-            UserAuthDto userAuth = authService.getUserAuth(loginRequest.getUserId());
-            
-            if (userAuth == null) {
-                log.warn("존재하지 않는 사용자 로그인 시도: {}", loginRequest.getUserId());
-                return ResponseEntity.ok(LoginResponseDto.failure("존재하지 않는 사용자입니다."));
-            }
-            
-            // 세션에 사용자 권한 정보 저장
-            session.setAttribute("USER_AUTH", userAuth);
-            log.info("사용자 로그인 성공: {} ({})", userAuth.getUserName(), userAuth.getUserId());
-            
-            // 전체 직원 목록 조회 (ID와 이름만)
-            List<EmpLstVO> allEmployees = empLstService.getAllEmployeesForCache();
-            Map<String, String> employeeCache = allEmployees.stream()
-                .collect(Collectors.toMap(
-                    EmpLstVO::getEmpId,
-                    EmpLstVO::getEmpNm,
-                    (existing, replacement) -> existing // 중복 키가 있을 경우 기존 값 유지
-                ));
-            
-            // 로그인 응답 생성 (직원 캐시 포함)
-            LoginResponseDto response = LoginResponseDto.success(
-                userAuth.getUserId(),
-                userAuth.getUserName(),
-                userAuth.getAuthGroupCodes(),
-                employeeCache
-            );
-            
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            log.error("로그인 처리 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.ok(LoginResponseDto.failure("로그인 처리 중 오류가 발생했습니다."));
-        }
-    }
+
     
     /**
      * 로그아웃
@@ -90,9 +40,9 @@ public class AuthController {
      */
     @PostMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> logout(HttpSession session) {
-        UserAuthDto userAuth = (UserAuthDto) session.getAttribute("USER_AUTH");
-        if (userAuth != null) {
-            log.info("사용자 로그아웃: {} ({})", userAuth.getUserName(), userAuth.getUserId());
+        com.ERI.demo.vo.employee.EmpLstVO empInfo = (com.ERI.demo.vo.employee.EmpLstVO) session.getAttribute("EMP_INFO");
+        if (empInfo != null) {
+            log.info("사용자 로그아웃: {} ({})", empInfo.getEmpNm(), empInfo.getEriEmpId());
         }
         
         session.invalidate();
@@ -104,15 +54,15 @@ public class AuthController {
      * GET /api/auth/current-user
      */
     @GetMapping(value = "/current-user", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserAuthDto> getCurrentUser(HttpSession session) {
-        UserAuthDto userAuth = (UserAuthDto) session.getAttribute("USER_AUTH");
-        if (userAuth == null) {
+    public ResponseEntity<com.ERI.demo.vo.employee.EmpLstVO> getCurrentUser(HttpSession session) {
+        com.ERI.demo.vo.employee.EmpLstVO empInfo = (com.ERI.demo.vo.employee.EmpLstVO) session.getAttribute("EMP_INFO");
+        if (empInfo == null) {
             log.debug("인증되지 않은 사용자가 현재 사용자 정보 요청");
             return ResponseEntity.status(401).build();
         }
         
-        log.debug("현재 사용자 정보 조회: {} ({})", userAuth.getUserName(), userAuth.getUserId());
-        return ResponseEntity.ok(userAuth);
+        log.debug("현재 사용자 정보 조회: {} ({})", empInfo.getEmpNm(), empInfo.getEriEmpId());
+        return ResponseEntity.ok(empInfo);
     }
     
     /**
@@ -121,19 +71,19 @@ public class AuthController {
      */
     @GetMapping(value = "/check-auth", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> checkAuth(HttpSession session) {
-        UserAuthDto userAuth = (UserAuthDto) session.getAttribute("USER_AUTH");
-        if (userAuth == null) {
+        com.ERI.demo.vo.employee.EmpLstVO empInfo = (com.ERI.demo.vo.employee.EmpLstVO) session.getAttribute("EMP_INFO");
+        if (empInfo == null) {
             log.debug("인증되지 않은 사용자가 권한 체크 요청");
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
         }
         
-        log.debug("권한 체크 요청: {} ({})", userAuth.getUserName(), userAuth.getUserId());
+        log.debug("권한 체크 요청: {} ({})", empInfo.getEmpNm(), empInfo.getEriEmpId());
         
         StringBuilder result = new StringBuilder();
-        result.append("사용자: ").append(userAuth.getUserName()).append("\n");
-        result.append("권한 그룹: ").append(userAuth.getAuthGroupCodes()).append("\n");
-        result.append("관리자 여부: ").append(userAuth.isAdmin()).append("\n");
-        result.append("슈퍼 관리자 여부: ").append(userAuth.isSuperAdmin()).append("\n");
+        result.append("사용자: ").append(empInfo.getEmpNm()).append("\n");
+        result.append("ERI 직원ID: ").append(empInfo.getEriEmpId()).append("\n");
+        result.append("부서코드: ").append(empInfo.getBlngBrcd()).append("\n");
+        result.append("직급코드: ").append(empInfo.getJbttCd()).append("\n");
         
         return ResponseEntity.ok(result.toString());
     }
@@ -144,8 +94,8 @@ public class AuthController {
      */
     @GetMapping(value = "/session-status", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> sessionStatus(HttpSession session) {
-        UserAuthDto userAuth = (UserAuthDto) session.getAttribute("USER_AUTH");
-        if (userAuth == null) {
+        com.ERI.demo.vo.employee.EmpLstVO empInfo = (com.ERI.demo.vo.employee.EmpLstVO) session.getAttribute("EMP_INFO");
+        if (empInfo == null) {
             return ResponseEntity.ok(new java.util.HashMap<String, Object>() {{
                 put("loggedIn", false);
                 put("message", "로그인되어 있지 않습니다.");
@@ -153,41 +103,119 @@ public class AuthController {
         } else {
             return ResponseEntity.ok(new java.util.HashMap<String, Object>() {{
                 put("loggedIn", true);
-                put("userId", userAuth.getUserId());
-                put("userName", userAuth.getUserName());
-                put("authGroups", userAuth.getAuthGroupCodes());
+                put("userId", empInfo.getEriEmpId());
+                put("userName", empInfo.getEmpNm());
+                put("deptCd", empInfo.getBlngBrcd());
+                put("rankCd", empInfo.getJbttCd());
                 put("message", "로그인 상태입니다.");
             }});
         }
     }
 
     /**
-     * 전체 직원 목록 조회 (캐싱용)
-     * GET /api/auth/employee-cache
+     * 직원 로그인
+     * POST /api/auth/login
      */
-    @GetMapping(value = "/employee-cache", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, String>> getEmployeeCache(HttpSession session) {
-        UserAuthDto userAuth = (UserAuthDto) session.getAttribute("USER_AUTH");
-        if (userAuth == null) {
-            log.debug("인증되지 않은 사용자가 직원 캐시 요청");
-            return ResponseEntity.status(401).build();
-        }
+    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> login(@RequestBody Map<String, String> request, HttpSession session) {
+        String empNo = request.get("origEmpNo");
+        log.info("직원 로그인 시도: {}", empNo);
         
         try {
-            List<EmpLstVO> allEmployees = empLstService.getAllEmployeesForCache();
-            Map<String, String> employeeCache = allEmployees.stream()
-                .collect(Collectors.toMap(
-                    EmpLstVO::getEmpId,
-                    EmpLstVO::getEmpNm,
-                    (existing, replacement) -> existing
-                ));
+            // 직원 정보 조회 (employee 패키지의 EmpLstVO)
+            com.ERI.demo.vo.employee.EmpLstVO employeeEmpInfo = empLstService.getEmployeeById(empNo);
             
-            log.debug("직원 캐시 조회: {} 명의 직원 정보", employeeCache.size());
-            return ResponseEntity.ok(employeeCache);
+            if (employeeEmpInfo == null) {
+                log.warn("존재하지 않는 직원번호: {}", empNo);
+                return ResponseEntity.ok(new java.util.HashMap<String, Object>() {{
+                    put("success", false);
+                    put("message", "존재하지 않는 직원번호입니다.");
+                }});
+            }
+            
+            // 세션에 직원 정보 저장
+            session.setAttribute("EMP_INFO", employeeEmpInfo);
+            session.setAttribute("EMP_ID", employeeEmpInfo.getEriEmpId());
+            
+            // 관리자 여부 확인 및 세션에 저장
+            boolean isAdmin = checkAdminStatus(employeeEmpInfo.getEriEmpId());
+            session.setAttribute("isAdmin", isAdmin);
+            
+            // 상담사 여부 확인 및 세션에 저장
+            boolean isCounselor = checkCounselorStatus(employeeEmpInfo.getEriEmpId());
+            session.setAttribute("isCounselor", isCounselor);
+            
+            // 관리자 여부 로그 출력
+            log.info("로그인 사용자 권한 정보: {} ({}) - 관리자: {}, 상담사: {}", 
+                    employeeEmpInfo.getEmpNm(), employeeEmpInfo.getEriEmpId(), isAdmin, isCounselor);
+            
+            // 응답 데이터 생성
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("success", true);
+            response.put("message", "로그인 성공");
+            response.put("sessionId", session.getId());
+            response.put("empInfo", employeeEmpInfo);
+            response.put("userAuth", new java.util.HashMap<String, Object>() {{
+                put("userId", employeeEmpInfo.getEriEmpId());
+                put("userName", employeeEmpInfo.getEmpNm());
+                put("deptCd", employeeEmpInfo.getBlngBrcd());
+                put("rankCd", employeeEmpInfo.getJbttCd());
+                put("admin", isAdmin);
+                put("superAdmin", isAdmin); // 현재는 관리자면 슈퍼관리자로 처리
+                put("counselor", isCounselor);
+            }});
+            response.put("isAdmin", isAdmin);
+            response.put("isCounselor", isCounselor);
+            
+            log.info("직원 로그인 성공: {} ({})", employeeEmpInfo.getEmpNm(), employeeEmpInfo.getEriEmpId());
+            return ResponseEntity.ok(response);
             
         } catch (Exception e) {
-            log.error("직원 캐시 조회 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).build();
+            log.error("로그인 처리 중 오류 발생: {}", e.getMessage(), e);
+            return ResponseEntity.ok(new java.util.HashMap<String, Object>() {{
+                put("success", false);
+                put("message", "로그인 처리 중 오류가 발생했습니다.");
+            }});
+        }
+    }
+
+    /**
+     * 직원의 관리자 여부 확인
+     * @param eriEmpId ERI 직원ID
+     * @return 관리자 여부
+     */
+    private boolean checkAdminStatus(String eriEmpId) {
+        try {
+            // TB_ADMIN_LST 테이블에서 관리자 정보 조회
+            int adminCount = adminLstMapper.countByAdminId(eriEmpId);
+            boolean isAdmin = adminCount > 0;
+            
+            log.debug("관리자 여부 확인: {} -> {}", eriEmpId, isAdmin);
+            return isAdmin;
+            
+        } catch (Exception e) {
+            log.error("관리자 여부 확인 중 오류 발생: {}, 오류: {}", eriEmpId, e.getMessage(), e);
+            return false; // 오류 발생 시 관리자가 아닌 것으로 처리
+        }
+    }
+
+    /**
+     * 직원의 상담사 여부 확인
+     * @param eriEmpId ERI 직원ID
+     * @return 상담사 여부
+     */
+    private boolean checkCounselorStatus(String eriEmpId) {
+        try {
+            // TB_COUNSELOR_LST 테이블에서 상담사 정보 조회
+            int counselorCount = counselorLstMapper.countByCounselorEmpId(eriEmpId);
+            boolean isCounselor = counselorCount > 0;
+            
+            log.debug("상담사 여부 확인: {} -> {}", eriEmpId, isCounselor);
+            return isCounselor;
+            
+        } catch (Exception e) {
+            log.error("상담사 여부 확인 중 오류 발생: {}, 오류: {}", eriEmpId, e.getMessage(), e);
+            return false; // 오류 발생 시 상담사가 아닌 것으로 처리
         }
     }
 } 

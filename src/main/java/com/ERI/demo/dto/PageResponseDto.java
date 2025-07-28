@@ -1,50 +1,62 @@
 package com.ERI.demo.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * 페이징 응답 DTO
+ */
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class PageResponseDto<T> {
-    private List<T> content;           // 데이터 목록
-    private long totalElements;        // 전체 데이터 개수 (int에서 long으로 변경)
-    private int totalPages;            // 전체 페이지 개수
-    private int currentPage;           // 현재 페이지
-    private int size;                  // 페이지 크기
-    private boolean hasNext;           // 다음 페이지 존재 여부
-    private boolean hasPrevious;       // 이전 페이지 존재 여부
-    private int startPage;             // 시작 페이지 번호
-    private int endPage;               // 끝 페이지 번호
     
-    /**
-     * 생성자 (Builder 패턴 대신 사용)
-     */
-    public PageResponseDto(List<T> content, long totalElements, int currentPage, int size) {
+    private List<T> content;        // 데이터 목록
+    private int totalElements;      // 전체 데이터 개수
+    private int totalPages;         // 전체 페이지 개수
+    private int currentPage;        // 현재 페이지
+    private int size;               // 페이지 크기
+    private boolean hasNext;        // 다음 페이지 존재 여부
+    private boolean hasPrevious;    // 이전 페이지 존재 여부
+    private int startPage;          // 시작 페이지 번호
+    private int endPage;            // 끝 페이지 번호
+    
+    public PageResponseDto() {}
+    
+    public PageResponseDto(List<T> content, int totalElements, int totalPages, int currentPage, int size, 
+                          boolean hasNext, boolean hasPrevious, int startPage, int endPage) {
         this.content = content;
         this.totalElements = totalElements;
+        this.totalPages = totalPages;
+        this.currentPage = currentPage;
+        this.size = size;
+        this.hasNext = hasNext;
+        this.hasPrevious = hasPrevious;
+        this.startPage = startPage;
+        this.endPage = endPage;
+    }
+    
+    public PageResponseDto(List<T> content, long totalElements, int currentPage, int size) {
+        this.content = content;
+        this.totalElements = (int) totalElements;
         this.currentPage = currentPage;
         this.size = size;
         this.totalPages = (int) Math.ceil((double) totalElements / size);
-        this.hasNext = currentPage < totalPages;
+        this.hasNext = currentPage < this.totalPages;
         this.hasPrevious = currentPage > 1;
         this.startPage = Math.max(1, currentPage - 2);
-        this.endPage = Math.min(totalPages, currentPage + 2);
+        this.endPage = Math.min(this.totalPages, currentPage + 2);
     }
     
     /**
-     * 생성자 (서비스에서 사용하는 형태)
+     * 5개 매개변수를 받는 생성자 (기존 코드 호환성)
      */
-    public PageResponseDto(List<T> content, int currentPage, int size, int totalCount, int totalPages) {
+    public PageResponseDto(List<T> content, int currentPage, int size, int totalElements, int totalPages) {
         this.content = content;
-        this.totalElements = totalCount;
         this.currentPage = currentPage;
         this.size = size;
+        this.totalElements = totalElements;
         this.totalPages = totalPages;
         this.hasNext = currentPage < totalPages;
         this.hasPrevious = currentPage > 1;
@@ -61,7 +73,7 @@ public class PageResponseDto<T> {
     public static <T> PageResponseDto<T> empty(int page, int size) {
         return PageResponseDto.<T>builder()
                 .content(List.of())
-                .totalElements(0L)
+                .totalElements(0)
                 .totalPages(0)
                 .currentPage(page)
                 .size(size)
@@ -70,33 +82,5 @@ public class PageResponseDto<T> {
                 .startPage(1)
                 .endPage(1)
                 .build();
-    }
-    
-    /**
-     * 다음 페이지 존재 여부 계산
-     */
-    public boolean isHasNext() {
-        return currentPage < totalPages;
-    }
-    
-    /**
-     * 이전 페이지 존재 여부 계산
-     */
-    public boolean isHasPrevious() {
-        return currentPage > 1;
-    }
-    
-    /**
-     * 시작 페이지 번호 계산
-     */
-    public int getStartPage() {
-        return Math.max(1, currentPage - 2);
-    }
-    
-    /**
-     * 끝 페이지 번호 계산
-     */
-    public int getEndPage() {
-        return Math.min(totalPages, currentPage + 2);
     }
 } 

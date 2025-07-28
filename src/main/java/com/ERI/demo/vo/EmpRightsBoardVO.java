@@ -31,18 +31,16 @@ public class EmpRightsBoardVO {
     private String noticeYn;             // 공지글 여부
     
     // 작성자 정보
-    private String rgstEmpId;            // 등록직원ID
-    private String updtEmpId;            // 수정직원ID
-    private String rgstEmpNm;            // 등록직원명
-    private String updtEmpNm;            // 수정직원명
+    private String regEmpId;             // 등록직원ID
+    private String updEmpId;             // 수정직원ID
+    private String regEmpNm;             // 등록직원명
+    private String updEmpNm;             // 수정직원명
     
     // 삭제 정보
     private String delYn;                // 삭제여부
     private LocalDateTime delDate;       // 삭제일시
     
     // 등록/수정 정보
-    private String regEmpId;             // 등록직원ID
-    private String updEmpId;             // 수정직원ID
     private LocalDateTime regDate;       // 등록일시
     private LocalDateTime updDate;       // 수정일시
     

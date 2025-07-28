@@ -47,7 +47,7 @@ public class NtiLstService {
             ntiLstVO.setStsCd("STS001"); // 기본 상태코드
         }
         if (ntiLstVO.getRegEmpId() == null) {
-            ntiLstVO.setRegEmpId(ntiLstVO.getRgstEmpId());
+            ntiLstVO.setRegEmpId(ntiLstVO.getRegEmpId());
         }
         
         return ntiLstMapper.insertNtiLst(ntiLstVO);
@@ -61,7 +61,7 @@ public class NtiLstService {
     public int updateNtiLst(NtiLstVO ntiLstVO) {
         // 수정자 정보 설정
         if (ntiLstVO.getUpdEmpId() == null) {
-            ntiLstVO.setUpdEmpId(ntiLstVO.getUpdtEmpId());
+            ntiLstVO.setUpdEmpId(ntiLstVO.getUpdEmpId());
         }
         
         return ntiLstMapper.updateNtiLst(ntiLstVO);
@@ -85,8 +85,9 @@ public class NtiLstService {
         // 검색 조건을 VO로 변환
         NtiLstVO searchVO = new NtiLstVO();
         searchVO.setTtl(pageRequest.getTtl());
+        searchVO.setCntn(pageRequest.getCntn());
         searchVO.setStsCd(pageRequest.getStsCd());
-        searchVO.setRgstEmpId(pageRequest.getRgstEmpId());
+        searchVO.setRegEmpId(pageRequest.getRegEmpId());
         searchVO.setStartDate(pageRequest.getStartDate());
         searchVO.setEndDate(pageRequest.getEndDate());
         

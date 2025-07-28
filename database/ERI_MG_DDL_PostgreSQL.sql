@@ -13,8 +13,6 @@ CREATE TABLE TB_NTI_LST (
     CNTN        TEXT         NULL,
     STS_CD      VARCHAR(20)  NULL,
     FILE_ATTACH_YN CHAR(1)   NOT NULL DEFAULT 'N', -- 첨부파일 존재 여부
-    RGST_EMP_ID VARCHAR(255) NULL,
-    UPDT_EMP_ID VARCHAR(255) NULL,
     DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE    TIMESTAMP    NULL,
     REG_EMP_ID  VARCHAR(255) NULL,
@@ -31,8 +29,6 @@ CREATE TABLE TB_NTI_TRSM_RGST_DTL (
     SEQ          BIGINT      NOT NULL,
     NTI_SEQ      BIGINT      NULL,
     TRSM_MDI_CD  VARCHAR(20) NULL,
-    RGST_EMP_ID  VARCHAR(255) NULL,
-    UPDT_EMP_ID  VARCHAR(255) NULL,
     DEL_YN       CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE     TIMESTAMP     NULL,
     REG_DATE     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -45,8 +41,6 @@ CREATE INDEX IDX_NTI_TRSM_RGST_DTL_DEL_YN ON TB_NTI_TRSM_RGST_DTL (DEL_YN);
 CREATE TABLE TB_NTI_TRSM_TRGT_DTL (
     SEQ          BIGINT      NOT NULL,
     EMP_ID       VARCHAR(255) NOT NULL,
-    RGST_EMP_ID  VARCHAR(255) NULL,
-    UPDT_EMP_ID  VARCHAR(255) NULL,
     DEL_YN       CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE     TIMESTAMP     NULL,
     REG_DATE     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -76,8 +70,6 @@ CREATE TABLE TB_PGM_LST (
     PGM_CNT_LMT     INTEGER      NULL,
     PGM_STS_CD      VARCHAR(20)  NULL,
     FILE_ATTACH_YN  CHAR(1)      NOT NULL DEFAULT 'N', -- 첨부파일 존재 여부
-    RGST_EMP_ID     VARCHAR(255)  NULL,
-    UPDT_EMP_ID     VARCHAR(255)  NULL,
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE        TIMESTAMP     NULL,
     REG_EMP_ID      VARCHAR(255)  NULL,
@@ -96,8 +88,6 @@ CREATE TABLE TB_PGM_PRE_ASGN_DTL (
     PRE_ASGN_CNTN   TEXT         NULL,
     PRE_ASGN_DUE_DT DATE         NULL,
     PRE_ASGN_DUE_TM TIME         NULL,
-    RGST_EMP_ID     VARCHAR(255)  NULL,
-    UPDT_EMP_ID     VARCHAR(255)  NULL,
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE        TIMESTAMP     NULL,
     REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -114,8 +104,8 @@ CREATE TABLE TB_PGM_CNTN_TRSM_DTL (
     CNTN_CNTN       TEXT        NULL,
     CNTN_TRSM_DT    DATE        NULL,
     CNTN_TRSM_TM    TIME        NULL,
-    RGST_EMP_ID     VARCHAR(255)  NULL,
-    UPDT_EMP_ID     VARCHAR(255)  NULL,
+    REG_EMP_ID      VARCHAR(255)  NULL,
+    UPD_EMP_ID      VARCHAR(255)  NULL,
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE        TIMESTAMP     NULL,
     REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -129,8 +119,6 @@ CREATE TABLE TB_CNTN_TRSM_TRGT_DTL (
     PGM_ID          VARCHAR(20) NOT NULL,
     CNTN_SEQ        BIGINT      NOT NULL,
     EMP_ID          VARCHAR(255) NOT NULL,
-    RGST_EMP_ID     VARCHAR(255)  NULL,
-    UPDT_EMP_ID     VARCHAR(255)  NULL,
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE        TIMESTAMP     NULL,
     REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -156,8 +144,6 @@ CREATE TABLE TB_GNRL_CNSL (
     CNSL_CNTN       TEXT        NULL,
     CNSL_STS_CD     VARCHAR(20) NULL,
     FILE_ATTACH_YN  CHAR(1)      NOT NULL DEFAULT 'N', -- 첨부파일 존재 여부
-    RGST_EMP_ID     VARCHAR(255) NULL,
-    UPDT_EMP_ID     VARCHAR(255) NULL,
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE        TIMESTAMP     NULL,
     REG_EMP_ID      VARCHAR(255)  NULL,
@@ -176,8 +162,6 @@ CREATE TABLE TB_GNRL_CNSL_DTL (
     DTL_SEQ         BIGINT      NOT NULL,
     CNSL_DTL_CNTN   TEXT        NULL,
     CNSL_DTL_RCMD   TEXT        NULL,
-    RGST_EMP_ID     VARCHAR(255) NULL,
-    UPDT_EMP_ID     VARCHAR(255) NULL,
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE        TIMESTAMP     NULL,
     REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -194,8 +178,6 @@ CREATE TABLE TB_DSRD_PSY_TEST_DTL (
     PSY_TEST_CD     VARCHAR(20) NOT NULL,
     PSY_TEST_NM     VARCHAR(100) NULL,
     PSY_TEST_DESC   TEXT        NULL,
-    RGST_EMP_ID     VARCHAR(255) NULL,
-    UPDT_EMP_ID     VARCHAR(255) NULL,
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE        TIMESTAMP     NULL,
     REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -216,8 +198,6 @@ CREATE TABLE TB_RMT_CNSL (
     CMT_CNTN        TEXT        NULL,
     CMT_STS_CD      VARCHAR(20) NULL,
     FILE_ATTACH_YN  CHAR(1)      NOT NULL DEFAULT 'N', -- 첨부파일 존재 여부
-    RGST_EMP_ID     VARCHAR(255) NULL,
-    UPDT_EMP_ID     VARCHAR(255) NULL,
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE        TIMESTAMP     NULL,
     REG_EMP_ID      VARCHAR(255)  NULL,
@@ -236,8 +216,6 @@ CREATE TABLE TB_RMT_CNSL_DTL (
     DTL_SEQ         BIGINT      NOT NULL,
     CMT_DTL_CNTN    TEXT        NULL,
     CMT_DTL_RCMD    TEXT        NULL,
-    RGST_EMP_ID     VARCHAR(255) NULL,
-    UPDT_EMP_ID     VARCHAR(255) NULL,
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE        TIMESTAMP     NULL,
     REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -248,14 +226,12 @@ COMMENT ON TABLE TB_RMT_CNSL_DTL IS '비대면 상담 명세';
 CREATE INDEX IDX_RMT_CNSL_DTL_DEL_YN ON TB_RMT_CNSL_DTL (DEL_YN);
 
 -- =================================================================
--- 4. 권한관리 (Authority Management)
+-- 4. 관리자 관리 (Admin Management)
 -- =================================================================
 
 CREATE TABLE TB_ADMIN_LST (
     ADMIN_ID    VARCHAR(255) NOT NULL,
     ADMIN_STS_CD VARCHAR(20)  NULL,
-    RGST_EMP_ID VARCHAR(255)  NULL,
-    UPDT_EMP_ID VARCHAR(255)  NULL,
     DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE    TIMESTAMP     NULL,
     REG_EMP_ID  VARCHAR(255)  NULL,
@@ -269,6 +245,74 @@ COMMENT ON COLUMN TB_ADMIN_LST.ADMIN_ID IS '관리자 ID';
 COMMENT ON COLUMN TB_ADMIN_LST.ADMIN_STS_CD IS '관리자 상태코드';
 CREATE INDEX IDX_ADMIN_LST_DEL_YN ON TB_ADMIN_LST (DEL_YN);
 CREATE INDEX IDX_ADMIN_LST_STS_CD ON TB_ADMIN_LST (ADMIN_STS_CD);
+
+-- =================================================================
+-- 5. 직원 참조 정보 (ERI 시스템 내부용)
+-- =================================================================
+
+CREATE TABLE TB_EMP_REF (
+    ERI_EMP_ID      VARCHAR(20)  NOT NULL,           -- ERI 시스템 내부 식별번호 (E00000001 형식)
+    EMP_NM          VARCHAR(50)  NULL,               -- 직원명
+    GNDR_DCD        CHAR(1)      NULL,               -- 성별구분코드 (M:남성, F:여성)
+    HLOF_YN         CHAR(1)      NULL,               -- 재직여부 (Y:재직, N:퇴직)
+    ETBN_YMD        DATE         NULL,               -- 입행년월일 (은행 입행일자)
+    BLNG_BRCD       CHAR(4)      NULL,               -- 소속부점코드
+    BETEAM_CD       CHAR(4)      NULL,               -- 소속팀코드
+    EXIG_BLNG_YMD   DATE         NULL,               -- 현소속년월일 (현재 소속 발령일자)
+    TRTH_WORK_BRCD  CHAR(4)      NULL,               -- 실제근무부점코드
+    RSWR_BRCD       CHAR(4)      NULL,               -- 주재근무부점코드
+    JBTT_CD         CHAR(4)      NULL,               -- 직위코드
+    JBTT_YMD        DATE         NULL,               -- 직위년월일 (직위 발령일자)
+    NAME_NM         VARCHAR(30)  NULL,               -- 호칭명
+    JBCL_CD         CHAR(1)      NULL,               -- 직급코드 (1:11급, 2:22급, 3:33급, 4:44급, 5:55급, 6:66급, 9:99급)
+    TRTH_BIRT_YMD   DATE         NULL,               -- 실제생년월일
+    SLCN_UNCG_BIRT_YMD DATE      NULL,               -- 양력환산생년월일
+    INSL_DCD        CHAR(1)      NULL,               -- 음양구분코드 (S:양력, L:음력)
+    EMP_CPN         VARCHAR(50)  NULL,               -- 직원휴대폰번호
+    EMP_EXTI_NO     VARCHAR(50)  NULL,               -- 직원내선번호
+    EAD             VARCHAR(50)  NULL,               -- 이메일주소
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
+    DEL_DATE        TIMESTAMP    NULL,
+    REG_DATE        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPD_DATE        TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (ERI_EMP_ID)
+);
+
+COMMENT ON TABLE TB_EMP_REF IS '직원 참조 정보 (ERI 시스템 내부용)';
+COMMENT ON COLUMN TB_EMP_REF.ERI_EMP_ID IS 'ERI 시스템 내부 식별번호 (E00000001 형식)';
+COMMENT ON COLUMN TB_EMP_REF.EMP_NM IS '직원명';
+COMMENT ON COLUMN TB_EMP_REF.GNDR_DCD IS '성별구분코드 (M:남성, F:여성)';
+COMMENT ON COLUMN TB_EMP_REF.HLOF_YN IS '재직여부 (Y:재직, N:퇴직)';
+COMMENT ON COLUMN TB_EMP_REF.ETBN_YMD IS '입행년월일 (은행 입행일자)';
+COMMENT ON COLUMN TB_EMP_REF.BLNG_BRCD IS '소속부점코드';
+COMMENT ON COLUMN TB_EMP_REF.BETEAM_CD IS '소속팀코드';
+COMMENT ON COLUMN TB_EMP_REF.EXIG_BLNG_YMD IS '현소속년월일 (현재 소속 발령일자)';
+COMMENT ON COLUMN TB_EMP_REF.TRTH_WORK_BRCD IS '실제근무부점코드';
+COMMENT ON COLUMN TB_EMP_REF.RSWR_BRCD IS '주재근무부점코드';
+COMMENT ON COLUMN TB_EMP_REF.JBTT_CD IS '직위코드';
+COMMENT ON COLUMN TB_EMP_REF.JBTT_YMD IS '직위년월일 (직위 발령일자)';
+COMMENT ON COLUMN TB_EMP_REF.NAME_NM IS '호칭명';
+COMMENT ON COLUMN TB_EMP_REF.JBCL_CD IS '직급코드 (1:11급, 2:22급, 3:33급, 4:44급, 5:55급, 6:66급, 9:99급)';
+COMMENT ON COLUMN TB_EMP_REF.TRTH_BIRT_YMD IS '실제생년월일';
+COMMENT ON COLUMN TB_EMP_REF.SLCN_UNCG_BIRT_YMD IS '양력환산생년월일';
+COMMENT ON COLUMN TB_EMP_REF.INSL_DCD IS '음양구분코드 (S:양력, L:음력)';
+COMMENT ON COLUMN TB_EMP_REF.EMP_CPN IS '직원휴대폰번호';
+COMMENT ON COLUMN TB_EMP_REF.EMP_EXTI_NO IS '직원내선번호';
+COMMENT ON COLUMN TB_EMP_REF.EAD IS '이메일주소';
+
+-- 인덱스 생성
+CREATE INDEX IDX_EMP_REF_DEL_YN ON TB_EMP_REF (DEL_YN);
+CREATE INDEX IDX_EMP_REF_HLOF_YN ON TB_EMP_REF (HLOF_YN);
+CREATE INDEX IDX_EMP_REF_BLNG_BRCD ON TB_EMP_REF (BLNG_BRCD);
+CREATE INDEX IDX_EMP_REF_BETEAM_CD ON TB_EMP_REF (BETEAM_CD);
+CREATE INDEX IDX_EMP_REF_JBCL_CD ON TB_EMP_REF (JBCL_CD);
+CREATE INDEX IDX_EMP_REF_ETBN_YMD ON TB_EMP_REF (ETBN_YMD);
+CREATE INDEX IDX_EMP_REF_EAD ON TB_EMP_REF (EAD);
+CREATE INDEX IDX_EMP_REF_EMP_CPN ON TB_EMP_REF (EMP_CPN);
+
+-- =================================================================
+-- 6. 권한관리 (Authority Management)
+-- =================================================================
 
 CREATE TABLE TB_AUTH_LST (
     AUTH_CD     VARCHAR(20)  NOT NULL,
@@ -296,8 +340,6 @@ CREATE TABLE TB_MNU_LST (
     P_MNU_CD    VARCHAR(20)  NULL,             -- 상위 메뉴 코드 (2depth일 때만)
     MNU_USE_YN  CHAR(1)      NOT NULL DEFAULT 'Y', -- 사용여부
     MNU_ADMIN_YN CHAR(1)     NOT NULL DEFAULT 'N', -- 관리자전용여부
-    RGST_EMP_ID VARCHAR(255) NULL,
-    UPDT_EMP_ID VARCHAR(255) NULL,
     DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE    TIMESTAMP    NULL,
     REG_EMP_ID  VARCHAR(255) NULL,
@@ -328,17 +370,13 @@ CREATE INDEX IDX_MNU_LST_ADMIN ON TB_MNU_LST (MNU_ADMIN_YN);
 CREATE TABLE TB_AUTH_GRP_AUTH_MAP (
     AUTH_CD     VARCHAR(20)  NOT NULL,
     MNU_CD      VARCHAR(20)  NOT NULL,
-    RGST_EMP_ID VARCHAR(255) NULL,
-    UPDT_EMP_ID VARCHAR(255) NULL,
     DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE    TIMESTAMP    NULL,
     REG_EMP_ID  VARCHAR(255) NULL,
     UPD_EMP_ID  VARCHAR(255) NULL,
     REG_DATE    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UPD_DATE    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (AUTH_CD, MNU_CD),
-    FOREIGN KEY (AUTH_CD) REFERENCES TB_AUTH_LST(AUTH_CD),
-    FOREIGN KEY (MNU_CD) REFERENCES TB_MNU_LST(MNU_CD)
+    PRIMARY KEY (AUTH_CD, MNU_CD)
 );
 COMMENT ON TABLE TB_AUTH_GRP_AUTH_MAP IS '권한-메뉴 매핑';
 COMMENT ON COLUMN TB_AUTH_GRP_AUTH_MAP.AUTH_CD IS '권한 코드';
@@ -347,29 +385,6 @@ CREATE INDEX IDX_AUTH_GRP_AUTH_MAP_DEL_YN ON TB_AUTH_GRP_AUTH_MAP (DEL_YN);
 CREATE INDEX IDX_AUTH_GRP_AUTH_MAP_AUTH ON TB_AUTH_GRP_AUTH_MAP (AUTH_CD);
 CREATE INDEX IDX_AUTH_GRP_AUTH_MAP_MNU ON TB_AUTH_GRP_AUTH_MAP (MNU_CD);
 
--- =================================================================
--- 5. 직원 관리 (Employee Management)
--- =================================================================
-
-CREATE TABLE TB_EMP_LST (
-    EMP_ID      VARCHAR(255) NOT NULL,
-    EMP_NM      VARCHAR(100) NULL,
-    EMP_DEPT_CD VARCHAR(20)  NULL,
-    EMP_POS_CD  VARCHAR(20)  NULL,
-    EMP_STS_CD  VARCHAR(20)  NULL,
-    FILE_ATTACH_YN CHAR(1)   NOT NULL DEFAULT 'N', -- 첨부파일 존재 여부
-    RGST_EMP_ID VARCHAR(255)  NULL,
-    UPDT_EMP_ID VARCHAR(255)  NULL,
-    DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE    TIMESTAMP     NULL,
-    REG_EMP_ID  VARCHAR(255)  NULL,
-    UPD_EMP_ID  VARCHAR(255)  NULL,
-    REG_DATE    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (EMP_ID)
-);
-COMMENT ON TABLE TB_EMP_LST IS '직원 목록';
-CREATE INDEX IDX_EMP_LST_DEL_YN ON TB_EMP_LST (DEL_YN);
 
 CREATE TABLE TB_DEPT_LST (
     DEPT_CD     VARCHAR(20)  NOT NULL,
@@ -377,9 +392,7 @@ CREATE TABLE TB_DEPT_LST (
     DEPT_DESC   TEXT         NULL,
     DEPT_MGR_EMP_ID VARCHAR(255)  NULL,
     DEPT_STS_CD VARCHAR(20)  NULL,
-    FILE_ATTACH_YN CHAR(1)   NOT NULL DEFAULT 'N', -- 첨부파일 존재 여부
-    RGST_EMP_ID VARCHAR(255)  NULL,
-    UPDT_EMP_ID VARCHAR(255)  NULL,
+    FILE_ATTACH_YN CHAR(1)   NOT NULL DEFAULT 'N', -- 부파일 존재 여부
     DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE    TIMESTAMP     NULL,
     REG_EMP_ID  VARCHAR(255)  NULL,
@@ -393,14 +406,8 @@ CREATE INDEX IDX_DEPT_LST_DEL_YN ON TB_DEPT_LST (DEL_YN);
 
 CREATE TABLE TB_CNSLR_LST (
     CNSLR_EMP_ID VARCHAR(255) NOT NULL,
-    CNSLR_NM     VARCHAR(100) NULL,
-    CNSLR_DEPT_CD VARCHAR(20)  NULL,
-    CNSLR_POS_CD VARCHAR(20)  NULL,
-    CNSLR_STS_CD VARCHAR(20)  NULL,
-    CNSLR_SPEC_CD VARCHAR(20)  NULL,
-    FILE_ATTACH_YN CHAR(1)    NOT NULL DEFAULT 'N', -- 첨부파일 존재 여부
-    RGST_EMP_ID  VARCHAR(255)  NULL,
-    UPDT_EMP_ID  VARCHAR(255)  NULL,
+    CNSLR_INFO_CLSF_CD VARCHAR(20) NULL,  -- 상담자정보구분코드
+    
     DEL_YN       CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE     TIMESTAMP     NULL,
     REG_EMP_ID   VARCHAR(255)  NULL,
@@ -410,7 +417,9 @@ CREATE TABLE TB_CNSLR_LST (
     PRIMARY KEY (CNSLR_EMP_ID)
 );
 COMMENT ON TABLE TB_CNSLR_LST IS '상담사 목록';
+COMMENT ON COLUMN TB_CNSLR_LST.CNSLR_INFO_CLSF_CD IS '상담자정보구분코드';
 CREATE INDEX IDX_CNSLR_LST_DEL_YN ON TB_CNSLR_LST (DEL_YN);
+CREATE INDEX IDX_CNSLR_LST_INFO_CLSF ON TB_CNSLR_LST (CNSLR_INFO_CLSF_CD);
 
 -- =================================================================
 -- 6. 첨부파일 관리 (File Attachment Management)
@@ -432,8 +441,6 @@ CREATE TABLE TB_FILE_ATTACH (
     FILE_DESC       TEXT         NULL,         -- 파일 설명
     FILE_ORD        INTEGER      NOT NULL DEFAULT 1, -- 파일 순서
     DOWNLOAD_CNT    INTEGER      NOT NULL DEFAULT 0, -- 다운로드 횟수
-    RGST_EMP_ID     VARCHAR(255) NULL,
-    UPDT_EMP_ID     VARCHAR(255) NULL,
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE        TIMESTAMP    NULL,
     REG_EMP_ID      VARCHAR(255) NULL,
@@ -465,7 +472,7 @@ CREATE INDEX IDX_FILE_ATTACH_ORD ON TB_FILE_ATTACH (FILE_ORD);
 -- =================================================================
 
 -- 7.1. 관리자 목록 샘플 데이터
-INSERT INTO TB_ADMIN_LST (ADMIN_ID, ADMIN_STS_CD, RGST_EMP_ID) VALUES
+INSERT INTO TB_ADMIN_LST (ADMIN_ID, ADMIN_STS_CD, REG_EMP_ID) VALUES
 ('ADMIN001', 'STS001', 'ADMIN001'),
 ('ADMIN002', 'STS001', 'ADMIN001'),
 ('ADMIN003', 'STS001', 'ADMIN001'),
@@ -484,7 +491,7 @@ INSERT INTO TB_AUTH_LST (AUTH_CD, AUTH_NM, AUTH_DESC, AUTH_LVL) VALUES
 ('AUTH_008', '메뉴 관리', '메뉴 정보 조회/등록/수정/삭제', 9);
 
 -- TB_MNU_LST 샘플 데이터
-INSERT INTO TB_MNU_LST (MNU_CD, MNU_NM, MNU_URL, MNU_DESC, MNU_ORD, MNU_LVL, P_MNU_CD, MNU_USE_YN, MNU_ADMIN_YN, RGST_EMP_ID)
+INSERT INTO TB_MNU_LST (MNU_CD, MNU_NM, MNU_URL, MNU_DESC, MNU_ORD, MNU_LVL, P_MNU_CD, MNU_USE_YN, MNU_ADMIN_YN, REG_EMP_ID)
 VALUES
 ('MNU_001', '프로그램', NULL, NULL, 1, 1, NULL, 'Y', 'N', 'ADMIN001'),
 ('MNU_002', 'IBK마음건강검진', NULL, NULL, 2, 1, NULL, 'Y', 'N', 'ADMIN001'),
@@ -517,7 +524,7 @@ VALUES
 ('MNU_006_12', '백업관리', '/admin/backupMng', '시스템 데이터 백업을 관리하는 메뉴', 12, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001');
 
 -- 7.3. 권한-메뉴 매핑 샘플 데이터
-INSERT INTO TB_AUTH_GRP_AUTH_MAP (AUTH_CD, MNU_CD, RGST_EMP_ID) VALUES
+INSERT INTO TB_AUTH_GRP_AUTH_MAP (AUTH_CD, MNU_CD, REG_EMP_ID) VALUES
 -- 사용자 관리 권한
 ('AUTH_001', 'MNU_006_04', 'ADMIN001'),
 -- 부서 관리 권한
@@ -536,7 +543,7 @@ INSERT INTO TB_AUTH_GRP_AUTH_MAP (AUTH_CD, MNU_CD, RGST_EMP_ID) VALUES
 ('AUTH_008', 'MNU_006_03', 'ADMIN001');
 
 -- 7.4. 공지사항 목록 샘플 데이터
-INSERT INTO TB_NTI_LST (TTL, CNTN, STS_CD, RGST_EMP_ID) VALUES
+INSERT INTO TB_NTI_LST (TTL, CNTN, STS_CD, REG_EMP_ID) VALUES
 ('2024년 IBK마음건강검진 안내', '안녕하세요. 2024년 IBK마음건강검진이 시작됩니다. 모든 직원분들의 참여를 부탁드립니다. 검진 일정은 개별 안내드리겠습니다.', 'STS001', 'ADMIN001'),
 ('직원권익보호 프로그램 신청 안내', '직원권익보호 프로그램 신청이 시작되었습니다. 신청 기간은 2024년 3월 1일부터 3월 31일까지입니다. 많은 참여 부탁드립니다.', 'STS001', 'ADMIN001'),
 ('상담 서비스 이용 안내', '직원 상담 서비스 이용 방법을 안내드립니다. 오프라인 상담과 비대면 상담 모두 가능합니다. 상담 신청은 시스템을 통해 가능합니다.', 'STS001', 'ADMIN001'),
@@ -551,7 +558,7 @@ INSERT INTO TB_NTI_LST (TTL, CNTN, STS_CD, RGST_EMP_ID) VALUES
 
 
 -- 7.6. 첨부파일 샘플 데이터 (개선된 구조)
-INSERT INTO TB_FILE_ATTACH (REF_TBL_CD, REF_PK_VAL, FILE_NM, FILE_SAVE_NM, FILE_PATH, FILE_SIZE, FILE_EXT, FILE_MIME_TYPE, FILE_DESC, FILE_ORD, RGST_EMP_ID) VALUES
+INSERT INTO TB_FILE_ATTACH (REF_TBL_CD, REF_PK_VAL, FILE_NM, FILE_SAVE_NM, FILE_PATH, FILE_SIZE, FILE_EXT, FILE_MIME_TYPE, FILE_DESC, FILE_ORD, REG_EMP_ID) VALUES
 ('NTI', '1', '2024_IBK_마음건강검진_안내서.pdf', '2024_IBK_마음건강검진_안내서_20240301_001.pdf', '/uploads/notice/2024/03/', 2048576, 'pdf', 'application/pdf', '2024년 IBK마음건강검진 안내서', 1, 'ADMIN001'),
 ('NTI', '1', '마음건강검진_신청서.xlsx', '마음건강검진_신청서_20240301_002.xlsx', '/uploads/notice/2024/03/', 512000, 'xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '마음건강검진 신청서 양식', 2, 'ADMIN001'),
 ('NTI', '2', '직원권익보호_프로그램_신청_가이드.pdf', '직원권익보호_프로그램_신청_가이드_20240301_003.pdf', '/uploads/notice/2024/03/', 1536000, 'pdf', 'application/pdf', '직원권익보호 프로그램 신청 가이드', 1, 'ADMIN001'),
@@ -564,67 +571,15 @@ INSERT INTO TB_FILE_ATTACH (REF_TBL_CD, REF_PK_VAL, FILE_NM, FILE_SAVE_NM, FILE_
 -- 8. 첨부파일 관리 유틸리티 함수 (File Attachment Utility Functions)
 -- =================================================================
 
--- 특정 참조 테이블의 첨부파일 목록 조회 함수
-CREATE OR REPLACE FUNCTION GET_FILE_ATTACH_LIST(
-    p_ref_tbl_cd VARCHAR(20),
-    p_ref_pk_val VARCHAR(255)
-) RETURNS TABLE (
-    file_seq BIGINT,
-    file_nm VARCHAR(255),
-    file_save_nm VARCHAR(255),
-    file_path VARCHAR(500),
-    file_size BIGINT,
-    file_ext VARCHAR(20),
-    file_mime_type VARCHAR(100),
-    file_desc TEXT,
-    file_ord INTEGER,
-    download_cnt INTEGER,
-    reg_date TIMESTAMP
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        fa.FILE_SEQ,
-        fa.FILE_NM,
-        fa.FILE_SAVE_NM,
-        fa.FILE_PATH,
-        fa.FILE_SIZE,
-        fa.FILE_EXT,
-        fa.FILE_MIME_TYPE,
-        fa.FILE_DESC,
-        fa.FILE_ORD,
-        fa.DOWNLOAD_CNT,
-        fa.REG_DATE
-    FROM TB_FILE_ATTACH fa
-    WHERE fa.REF_TBL_CD = p_ref_tbl_cd
-      AND fa.REF_PK_VAL = p_ref_pk_val
-      AND fa.DEL_YN = 'N'
-    ORDER BY fa.FILE_ORD, fa.REG_DATE;
-END;
-$$ LANGUAGE plpgsql;
+-- 특정 참조 테이블의 첨부파일 목록 조회 함수 제거 - 자바에서 처리
+-- GET_FILE_ATTACH_LIST 함수는 자바 서비스에서 처리
+-- FileAttachService.getFileAttachList() 메서드로 대체
 
 
 
--- 첨부파일 다운로드 횟수 증가 함수
-CREATE OR REPLACE FUNCTION INCREMENT_FILE_DOWNLOAD_COUNT(
-    p_file_seq BIGINT
-) RETURNS INTEGER AS $$
-DECLARE
-    new_count INTEGER;
-BEGIN
-    UPDATE TB_FILE_ATTACH 
-    SET DOWNLOAD_CNT = DOWNLOAD_CNT + 1,
-        UPD_DATE = CURRENT_TIMESTAMP
-    WHERE FILE_SEQ = p_file_seq
-      AND DEL_YN = 'N';
-    
-    SELECT DOWNLOAD_CNT INTO new_count
-    FROM TB_FILE_ATTACH
-    WHERE FILE_SEQ = p_file_seq;
-    
-    RETURN new_count;
-END;
-$$ LANGUAGE plpgsql;
+-- 첨부파일 다운로드 횟수 증가 함수 제거 - 자바에서 처리
+-- INCREMENT_FILE_DOWNLOAD_COUNT 함수는 자바 서비스에서 처리
+-- FileAttachService.incrementDownloadCount() 메서드로 대체
 
 
 
@@ -726,6 +681,9 @@ FROM TB_FILE_ATTACH fa
 WHERE fa.DEL_YN = 'N'
 GROUP BY fa.REF_TBL_CD
 ORDER BY fa.REF_TBL_CD;
+
+
+
 
 
  

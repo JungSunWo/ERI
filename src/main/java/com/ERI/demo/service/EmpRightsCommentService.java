@@ -26,6 +26,13 @@ public class EmpRightsCommentService {
     }
 
     /**
+     * 댓글 상세 조회
+     */
+    public EmpRightsCommentVO getCommentBySeq(Long seq) {
+        return empRightsCommentMapper.selectCommentBySeq(seq);
+    }
+
+    /**
      * 댓글 등록
      */
     public EmpRightsCommentVO createComment(EmpRightsCommentVO comment) {
@@ -47,11 +54,11 @@ public class EmpRightsCommentService {
         }
 
         // 세션에서 가져온 직원번호 설정
-        if (comment.getRgstEmpId() != null) {
-            comment.setRegEmpId(comment.getRgstEmpId());
+        if (comment.getRegEmpId() != null) {
+            comment.setRegEmpId(comment.getRegEmpId());
         }
-        if (comment.getUpdtEmpId() != null) {
-            comment.setUpdEmpId(comment.getUpdtEmpId());
+        if (comment.getUpdEmpId() != null) {
+            comment.setUpdEmpId(comment.getUpdEmpId());
         }
 
         // 부모 댓글이 있는 경우 깊이 계산
@@ -80,8 +87,8 @@ public class EmpRightsCommentService {
         }
 
         // 세션에서 가져온 직원번호 설정
-        if (comment.getUpdtEmpId() != null) {
-            comment.setUpdEmpId(comment.getUpdtEmpId());
+        if (comment.getUpdEmpId() != null) {
+            comment.setUpdEmpId(comment.getUpdEmpId());
         }
 
         // 댓글 수정
@@ -92,7 +99,7 @@ public class EmpRightsCommentService {
     }
 
     /**
-     * 댓글 삭제 (논리 삭제)
+     * 댓글 삭제 (논리 삭제) - 하위 답글도 함께 삭제
      */
     public boolean deleteComment(Long seq, String empId) {
         // 기존 댓글 조회
@@ -101,9 +108,28 @@ public class EmpRightsCommentService {
             return false;
         }
 
+        // 하위 답글들 삭제 (재귀적으로 모든 하위 답글 삭제)
+        deleteChildCommentsRecursively(seq, empId);
+
         // 댓글 삭제 (세션에서 가져온 직원번호 사용)
         empRightsCommentMapper.deleteComment(seq, empId);
         return true;
+    }
+
+    /**
+     * 하위 답글들을 재귀적으로 삭제
+     */
+    private void deleteChildCommentsRecursively(Long parentSeq, String empId) {
+        // 직접적인 하위 답글들 조회
+        List<EmpRightsCommentVO> childComments = empRightsCommentMapper.selectChildComments(parentSeq);
+        
+        for (EmpRightsCommentVO childComment : childComments) {
+            // 각 하위 답글의 하위 답글들도 재귀적으로 삭제
+            deleteChildCommentsRecursively(childComment.getSeq(), empId);
+            
+            // 하위 답글 삭제
+            empRightsCommentMapper.deleteComment(childComment.getSeq(), empId);
+        }
     }
 
     /**
@@ -132,5 +158,13 @@ public class EmpRightsCommentService {
      */
     public void decrementCommentDislikeCount(Long seq) {
         empRightsCommentMapper.decrementCommentDislikeCount(seq);
+    }
+
+    /**
+     * 하위 답글이 있는지 확인
+     */
+    public boolean hasChildComments(Long parentSeq) {
+        List<EmpRightsCommentVO> childComments = empRightsCommentMapper.selectChildComments(parentSeq);
+        return childComments != null && !childComments.isEmpty();
     }
 } 

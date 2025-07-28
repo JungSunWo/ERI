@@ -15,9 +15,6 @@ public class EmpRightsLikeVO {
     private Long commentSeq;             // 댓글 일련번호 (NULL이면 게시글 좋아요)
     private String likeType;             // 좋아요 타입 (L: 좋아요, D: 싫어요)
     
-    // 작성자 정보
-    private String rgstEmpId;            // 등록직원ID
-    
     // 삭제 정보
     private String delYn;                // 삭제여부
     private LocalDateTime delDate;       // 삭제일시
