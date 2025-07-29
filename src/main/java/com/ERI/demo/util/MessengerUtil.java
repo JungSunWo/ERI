@@ -1,6 +1,7 @@
 package com.ERI.demo.util;
 
 import com.ERI.demo.dto.MessengerAlertDto;
+import com.ERI.demo.dto.MessengerMessageDto;
 import com.ERI.demo.service.MessengerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 메신저 알람 전송 유틸리티
+ * 메신저 알람/쪽지 전송 유틸리티
  */
 @Slf4j
 @Component
@@ -18,6 +19,8 @@ import java.util.concurrent.CompletableFuture;
 public class MessengerUtil {
     
     private final MessengerService messengerService;
+    
+    // ===== 알람 전송 메서드 =====
     
     /**
      * 단일 사용자에게 알람 전송
@@ -119,6 +122,104 @@ public class MessengerUtil {
         }
     }
     
+    // ===== 쪽지 전송 메서드 =====
+    
+    /**
+     * 단일 사용자에게 쪽지 전송
+     * 
+     * @param senderId 발신자 사번
+     * @param recipient 수신자 사번
+     * @param message 쪽지 내용
+     * @param messageType 메시지 타입 (1: 쪽지, 2: 공지)
+     * @return 전송 결과
+     */
+    public boolean sendMessageToUser(String senderId, String recipient, String message, String messageType) {
+        try {
+            MessengerMessageDto messageDto = MessengerMessageDto.builder()
+                .userId(senderId)
+                .rcvId(recipient)
+                .msg(message)
+                .msgType(messageType)
+                .build();
+            
+            var response = messengerService.sendMessage(messageDto);
+            return response.isSuccess();
+            
+        } catch (Exception e) {
+            log.error("사용자 쪽지 전송 실패: recipient={}, error={}", recipient, e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    /**
+     * 다중 사용자에게 쪽지 전송
+     * 
+     * @param senderId 발신자 사번
+     * @param recipients 수신자 사번 리스트
+     * @param message 쪽지 내용
+     * @param messageType 메시지 타입 (1: 쪽지, 2: 공지)
+     * @return 전송 결과
+     */
+    public boolean sendMessageToUsers(String senderId, List<String> recipients, String message, String messageType) {
+        try {
+            String recipientList = String.join(",", recipients);
+            
+            MessengerMessageDto messageDto = MessengerMessageDto.builder()
+                .userId(senderId)
+                .rcvId(recipientList)
+                .msg(message)
+                .msgType(messageType)
+                .build();
+            
+            var response = messengerService.sendMessage(messageDto);
+            return response.isSuccess();
+            
+        } catch (Exception e) {
+            log.error("다중 사용자 쪽지 전송 실패: recipients={}, error={}", recipients, e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    /**
+     * 비동기 쪽지 전송
+     * 
+     * @param senderId 발신자 사번
+     * @param recipient 수신자 사번
+     * @param message 쪽지 내용
+     * @param messageType 메시지 타입 (1: 쪽지, 2: 공지)
+     * @return CompletableFuture<Boolean>
+     */
+    public CompletableFuture<Boolean> sendMessageAsync(String senderId, String recipient, String message, String messageType) {
+        try {
+            MessengerMessageDto messageDto = MessengerMessageDto.builder()
+                .userId(senderId)
+                .rcvId(recipient)
+                .msg(message)
+                .msgType(messageType)
+                .build();
+            
+            return messengerService.sendMessageAsync(messageDto)
+                .thenApply(response -> {
+                    if (response.isSuccess()) {
+                        log.info("비동기 쪽지 전송 성공: recipient={}, messageType={}", recipient, messageType);
+                    } else {
+                        log.warn("비동기 쪽지 전송 실패: recipient={}, error={}", recipient, response.getMessage());
+                    }
+                    return response.isSuccess();
+                })
+                .exceptionally(throwable -> {
+                    log.error("비동기 쪽지 전송 중 예외 발생: recipient={}, error={}", recipient, throwable.getMessage(), throwable);
+                    return false;
+                });
+                
+        } catch (Exception e) {
+            log.error("비동기 쪽지 전송 준비 실패: recipient={}, error={}", recipient, e.getMessage(), e);
+            return CompletableFuture.completedFuture(false);
+        }
+    }
+    
+    // ===== 특정 기능별 메서드 =====
+    
     /**
      * 게시글 알람 전송
      * 
@@ -170,5 +271,48 @@ public class MessengerUtil {
         String linkTxt = "공지사항 보기";
         
         return sendAlertToUsers(recipients, title, body, linkUrl, linkTxt);
+    }
+    
+    /**
+     * 게시글 쪽지 전송
+     * 
+     * @param senderId 발신자 사번
+     * @param recipients 수신자 사번 리스트
+     * @param boardTitle 게시글 제목
+     * @param authorName 작성자명
+     * @param boardSeq 게시글 번호
+     * @return 전송 결과
+     */
+    public boolean sendBoardMessage(String senderId, List<String> recipients, String boardTitle, String authorName, Long boardSeq) {
+        String message = String.format("%s님이 '%s' 게시글을 작성했습니다. 확인해보세요.", authorName, boardTitle);
+        return sendMessageToUsers(senderId, recipients, message, "1"); // 1: 쪽지
+    }
+    
+    /**
+     * 댓글 쪽지 전송
+     * 
+     * @param senderId 발신자 사번
+     * @param recipients 수신자 사번 리스트
+     * @param boardTitle 게시글 제목
+     * @param commentAuthor 댓글 작성자명
+     * @param boardSeq 게시글 번호
+     * @return 전송 결과
+     */
+    public boolean sendCommentMessage(String senderId, List<String> recipients, String boardTitle, String commentAuthor, Long boardSeq) {
+        String message = String.format("%s님이 '%s' 게시글에 댓글을 작성했습니다.", commentAuthor, boardTitle);
+        return sendMessageToUsers(senderId, recipients, message, "1"); // 1: 쪽지
+    }
+    
+    /**
+     * 공지사항 쪽지 전송
+     * 
+     * @param senderId 발신자 사번
+     * @param recipients 수신자 사번 리스트
+     * @param noticeTitle 공지사항 제목
+     * @return 전송 결과
+     */
+    public boolean sendNoticeMessage(String senderId, List<String> recipients, String noticeTitle) {
+        String message = String.format("새로운 공지사항 '%s'이 등록되었습니다. 확인해보세요.", noticeTitle);
+        return sendMessageToUsers(senderId, recipients, message, "2"); // 2: 공지
     }
 }

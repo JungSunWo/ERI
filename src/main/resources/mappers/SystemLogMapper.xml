@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.SystemLogMapper">
+
+    <!-- 시스템 로그 삽입 -->
+    <insert id="insertSystemLog" parameterType="com.ERI.demo.vo.SystemLogVo" useGeneratedKeys="true" keyProperty="logSeq">
+        INSERT INTO TB_SYSTEM_LOG (
+            LOG_LEVEL,
+            LOG_TYPE,
+            LOG_MESSAGE,
+            LOG_DETAIL,
+            CLASS_NAME,
+            METHOD_NAME,
+            LINE_NUMBER,
+            STACK_TRACE,
+            EMP_ID,
+            SESSION_ID,
+            REQUEST_URI,
+            REQUEST_METHOD,
+            REQUEST_PARAMS,
+            RESPONSE_STATUS,
+            EXECUTION_TIME,
+            IP_ADDRESS,
+            USER_AGENT,
+            ERROR_CODE,
+            ERROR_CATEGORY,
+            CREATED_BY
+        ) VALUES (
+            #{logLevel},
+            #{logType},
+            #{logMessage},
+            #{logDetail},
+            #{className},
+            #{methodName},
+            #{lineNumber},
+            #{stackTrace},
+            #{empId},
+            #{sessionId},
+            #{requestUri},
+            #{requestMethod},
+            #{requestParams},
+            #{responseStatus},
+            #{executionTime},
+            #{ipAddress},
+            #{userAgent},
+            #{errorCode},
+            #{errorCategory},
+            #{createdBy}
+        )
+    </insert>
+
+    <!-- 시스템 로그 조회 (페이징) -->
+    <select id="selectSystemLogs" parameterType="com.ERI.demo.vo.SystemLogSearchVo" resultType="com.ERI.demo.vo.SystemLogVo">
+        SELECT 
+            LOG_SEQ,
+            LOG_LEVEL,
+            LOG_TYPE,
+            LOG_MESSAGE,
+            LOG_DETAIL,
+            CLASS_NAME,
+            METHOD_NAME,
+            LINE_NUMBER,
+            STACK_TRACE,
+            EMP_ID,
+            SESSION_ID,
+            REQUEST_URI,
+            REQUEST_METHOD,
+            REQUEST_PARAMS,
+            RESPONSE_STATUS,
+            EXECUTION_TIME,
+            IP_ADDRESS,
+            USER_AGENT,
+            ERROR_CODE,
+            ERROR_CATEGORY,
+            CREATED_DATE,
+            CREATED_BY
+        FROM TB_SYSTEM_LOG
+        <where>
+            <if test="logLevel != null and logLevel != ''">
+                AND LOG_LEVEL = #{logLevel}
+            </if>
+            <if test="logType != null and logType != ''">
+                AND LOG_TYPE = #{logType}
+            </if>
+            <if test="empId != null and empId != ''">
+                AND EMP_ID = #{empId}
+            </if>
+            <if test="errorCode != null and errorCode != ''">
+                AND ERROR_CODE = #{errorCode}
+            </if>
+            <if test="startDate != null">
+                AND CREATED_DATE >= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND CREATED_DATE &lt;= #{endDate}
+            </if>
+            <if test="searchKeyword != null and searchKeyword != ''">
+                AND (
+                    LOG_MESSAGE LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR LOG_DETAIL LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR CLASS_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY LOG_SEQ DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 시스템 로그 총 개수 조회 -->
+    <select id="countSystemLogs" parameterType="com.ERI.demo.vo.SystemLogSearchVo" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_SYSTEM_LOG
+        <where>
+            <if test="logLevel != null and logLevel != ''">
+                AND LOG_LEVEL = #{logLevel}
+            </if>
+            <if test="logType != null and logType != ''">
+                AND LOG_TYPE = #{logType}
+            </if>
+            <if test="empId != null and empId != ''">
+                AND EMP_ID = #{empId}
+            </if>
+            <if test="errorCode != null and errorCode != ''">
+                AND ERROR_CODE = #{errorCode}
+            </if>
+            <if test="startDate != null">
+                AND CREATED_DATE >= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND CREATED_DATE &lt;= #{endDate}
+            </if>
+            <if test="searchKeyword != null and searchKeyword != ''">
+                AND (
+                    LOG_MESSAGE LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR LOG_DETAIL LIKE CONCAT('%', #{searchKeyword}, '%')
+                    OR CLASS_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+                )
+            </if>
+        </where>
+    </select>
+
+    <!-- 에러 로그 통계 조회 -->
+    <select id="selectErrorLogStats" parameterType="map" resultType="map">
+        SELECT 
+            LOG_LEVEL,
+            LOG_TYPE,
+            ERROR_CODE,
+            COUNT(*) as ERROR_COUNT,
+            DATE(CREATED_DATE) as ERROR_DATE
+        FROM TB_SYSTEM_LOG
+        WHERE LOG_LEVEL = 'ERROR'
+        <if test="startDate != null">
+            AND CREATED_DATE >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND CREATED_DATE &lt;= #{endDate}
+        </if>
+        GROUP BY LOG_LEVEL, LOG_TYPE, ERROR_CODE, DATE(CREATED_DATE)
+        ORDER BY ERROR_COUNT DESC
+    </select>
+
+    <!-- 오래된 로그 삭제 (자동 정리) -->
+    <delete id="deleteOldLogs" parameterType="int">
+        DELETE FROM TB_SYSTEM_LOG 
+        WHERE CREATED_DATE &lt; CURRENT_DATE - INTERVAL '1 day' * #{days}
+    </delete>
+
+    <!-- 특정 로그 삭제 -->
+    <delete id="deleteSystemLog" parameterType="long">
+        DELETE FROM TB_SYSTEM_LOG WHERE LOG_SEQ = #{logSeq}
+    </delete>
+
+    <!-- 로그 레벨별 통계 -->
+    <select id="selectLogLevelStats" resultType="map">
+        SELECT 
+            LOG_LEVEL,
+            COUNT(*) as COUNT
+        FROM TB_SYSTEM_LOG
+        WHERE CREATED_DATE >= CURRENT_DATE - INTERVAL '1 day'
+        GROUP BY LOG_LEVEL
+        ORDER BY COUNT DESC
+    </select>
+
+    <!-- 로그 타입별 통계 -->
+    <select id="selectLogTypeStats" resultType="map">
+        SELECT 
+            LOG_TYPE,
+            COUNT(*) as COUNT
+        FROM TB_SYSTEM_LOG
+        WHERE CREATED_DATE >= CURRENT_DATE - INTERVAL '1 day'
+        GROUP BY LOG_TYPE
+        ORDER BY COUNT DESC
+    </select>
+
+    <!-- 시스템 로그 통계 뷰 조회 -->
+    <select id="selectSystemLogStatsView" resultType="map">
+        SELECT 
+            LOG_LEVEL,
+            LOG_TYPE,
+            ERROR_CODE,
+            ERROR_CATEGORY,
+            LOG_COUNT,
+            LOG_DATE
+        FROM V_SYSTEM_LOG_STATS
+        ORDER BY LOG_DATE DESC, LOG_COUNT DESC
+    </select>
+
+    <!-- 특정 기간 로그 통계 -->
+    <select id="selectLogStatsByPeriod" parameterType="map" resultType="map">
+        SELECT 
+            LOG_LEVEL,
+            LOG_TYPE,
+            ERROR_CATEGORY,
+            COUNT(*) as LOG_COUNT,
+            DATE(CREATED_DATE) as LOG_DATE
+        FROM TB_SYSTEM_LOG
+        WHERE CREATED_DATE >= #{startDate}
+          AND CREATED_DATE &lt;= #{endDate}
+        GROUP BY LOG_LEVEL, LOG_TYPE, ERROR_CATEGORY, DATE(CREATED_DATE)
+        ORDER BY LOG_DATE DESC, LOG_COUNT DESC
+    </select>
+
+</mapper>

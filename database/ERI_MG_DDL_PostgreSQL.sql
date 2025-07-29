@@ -583,9 +583,207 @@ INSERT INTO TB_FILE_ATTACH (REF_TBL_CD, REF_PK_VAL, FILE_NM, FILE_SAVE_NM, FILE_
 
 
 
+-- =================================================================
+-- 9. 시스템 로그 관리 (System Log Management)
+-- =================================================================
 
+CREATE TABLE TB_SYSTEM_LOG (
+    LOG_SEQ BIGSERIAL NOT NULL,
+    LOG_LEVEL VARCHAR(10) NOT NULL,
+    LOG_TYPE VARCHAR(50) NOT NULL,
+    LOG_MESSAGE TEXT NOT NULL,
+    LOG_DETAIL TEXT NULL,
+    CLASS_NAME VARCHAR(200) NULL,
+    METHOD_NAME VARCHAR(100) NULL,
+    LINE_NUMBER INTEGER NULL,
+    STACK_TRACE TEXT NULL,
+    EMP_ID VARCHAR(20) NULL,
+    SESSION_ID VARCHAR(100) NULL,
+    REQUEST_URI VARCHAR(500) NULL,
+    REQUEST_METHOD VARCHAR(10) NULL,
+    REQUEST_PARAMS TEXT NULL,
+    RESPONSE_STATUS INTEGER NULL,
+    EXECUTION_TIME BIGINT NULL,
+    IP_ADDRESS VARCHAR(45) NULL,
+    USER_AGENT TEXT NULL,
+    ERROR_CODE VARCHAR(50) NULL,
+    ERROR_CATEGORY VARCHAR(50) NULL,
+    CREATED_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY VARCHAR(20) NOT NULL DEFAULT 'SYSTEM',
+    PRIMARY KEY (LOG_SEQ)
+);
 
+COMMENT ON TABLE TB_SYSTEM_LOG IS '시스템 로그 테이블';
+COMMENT ON COLUMN TB_SYSTEM_LOG.LOG_SEQ IS '로그 시퀀스';
+COMMENT ON COLUMN TB_SYSTEM_LOG.LOG_LEVEL IS '로그 레벨 (INFO, WARN, ERROR, DEBUG)';
+COMMENT ON COLUMN TB_SYSTEM_LOG.LOG_TYPE IS '로그 타입 (SYSTEM, API, DATABASE, SECURITY, MESSENGER)';
+COMMENT ON COLUMN TB_SYSTEM_LOG.LOG_MESSAGE IS '로그 메시지';
+COMMENT ON COLUMN TB_SYSTEM_LOG.LOG_DETAIL IS '상세 로그 내용';
+COMMENT ON COLUMN TB_SYSTEM_LOG.CLASS_NAME IS '발생 클래스명';
+COMMENT ON COLUMN TB_SYSTEM_LOG.METHOD_NAME IS '발생 메서드명';
+COMMENT ON COLUMN TB_SYSTEM_LOG.LINE_NUMBER IS '발생 라인 번호';
+COMMENT ON COLUMN TB_SYSTEM_LOG.STACK_TRACE IS '스택 트레이스';
+COMMENT ON COLUMN TB_SYSTEM_LOG.EMP_ID IS '사용자 사번';
+COMMENT ON COLUMN TB_SYSTEM_LOG.SESSION_ID IS '세션 ID';
+COMMENT ON COLUMN TB_SYSTEM_LOG.REQUEST_URI IS '요청 URI';
+COMMENT ON COLUMN TB_SYSTEM_LOG.REQUEST_METHOD IS '요청 메서드';
+COMMENT ON COLUMN TB_SYSTEM_LOG.REQUEST_PARAMS IS '요청 파라미터';
+COMMENT ON COLUMN TB_SYSTEM_LOG.RESPONSE_STATUS IS '응답 상태 코드';
+COMMENT ON COLUMN TB_SYSTEM_LOG.EXECUTION_TIME IS '실행 시간 (ms)';
+COMMENT ON COLUMN TB_SYSTEM_LOG.IP_ADDRESS IS 'IP 주소';
+COMMENT ON COLUMN TB_SYSTEM_LOG.USER_AGENT IS '사용자 에이전트';
+COMMENT ON COLUMN TB_SYSTEM_LOG.ERROR_CODE IS '에러 코드';
+COMMENT ON COLUMN TB_SYSTEM_LOG.ERROR_CATEGORY IS '에러 카테고리';
+COMMENT ON COLUMN TB_SYSTEM_LOG.CREATED_DATE IS '생성일시';
+COMMENT ON COLUMN TB_SYSTEM_LOG.CREATED_BY IS '생성자';
 
+-- 시스템 로그 인덱스 생성
+CREATE INDEX IDX_SYSTEM_LOG_LEVEL ON TB_SYSTEM_LOG (LOG_LEVEL);
+CREATE INDEX IDX_SYSTEM_LOG_TYPE ON TB_SYSTEM_LOG (LOG_TYPE);
+CREATE INDEX IDX_SYSTEM_LOG_DATE ON TB_SYSTEM_LOG (CREATED_DATE);
+CREATE INDEX IDX_SYSTEM_LOG_EMP ON TB_SYSTEM_LOG (EMP_ID);
+CREATE INDEX IDX_SYSTEM_LOG_ERROR ON TB_SYSTEM_LOG (ERROR_CODE);
+CREATE INDEX IDX_SYSTEM_LOG_ERROR_CATEGORY ON TB_SYSTEM_LOG (ERROR_CATEGORY);
+CREATE INDEX IDX_SYSTEM_LOG_CLASS ON TB_SYSTEM_LOG (CLASS_NAME);
 
+-- 시스템 로그 샘플 데이터
+INSERT INTO TB_SYSTEM_LOG (LOG_LEVEL, LOG_TYPE, LOG_MESSAGE, LOG_DETAIL, CLASS_NAME, METHOD_NAME, EMP_ID, ERROR_CODE, ERROR_CATEGORY, CREATED_BY) VALUES
+('INFO', 'SYSTEM', '시스템 시작', 'ERI 시스템이 정상적으로 시작되었습니다.', 'com.ERI.demo.EriApplication', 'main', 'SYSTEM', NULL, NULL, 'SYSTEM'),
+('INFO', 'API', 'API 호출 성공', '사용자 로그인 API 호출이 성공했습니다.', 'com.ERI.demo.controller.AuthController', 'login', 'ADMIN001', NULL, NULL, 'ADMIN001'),
+('WARN', 'DATABASE', '데이터베이스 연결 지연', '데이터베이스 연결에 3초 이상 소요되었습니다.', 'com.ERI.demo.config.DatabaseConfig', 'getConnection', 'SYSTEM', 'DB_CONNECTION_SLOW', 'PERFORMANCE', 'SYSTEM'),
+('ERROR', 'API', 'API 호출 실패', '메신저 API 호출 중 네트워크 오류가 발생했습니다.', 'com.ERI.demo.service.MessengerService', 'sendAlert', 'ADMIN001', 'NETWORK_ERROR', 'EXTERNAL_API', 'ADMIN001'),
+('DEBUG', 'SYSTEM', '메모리 사용량 확인', '현재 메모리 사용량: 512MB / 2GB', 'com.ERI.demo.util.SystemMonitor', 'checkMemoryUsage', 'SYSTEM', NULL, NULL, 'SYSTEM'),
+('INFO', 'SECURITY', '로그인 성공', '사용자 ADMIN001이 성공적으로 로그인했습니다.', 'com.ERI.demo.service.AuthService', 'authenticate', 'ADMIN001', NULL, NULL, 'ADMIN001'),
+('ERROR', 'DATABASE', 'SQL 실행 오류', '잘못된 SQL 구문으로 인한 실행 오류가 발생했습니다.', 'com.ERI.demo.mapper.UserMapper', 'selectUserList', 'ADMIN001', 'SQL_SYNTAX_ERROR', 'DATABASE', 'ADMIN001'),
+('WARN', 'MESSENGER', '메신저 전송 지연', '메신저 전송이 5초 이상 지연되고 있습니다.', 'com.ERI.demo.service.MessengerService', 'sendMessage', 'ADMIN001', 'MESSENGER_DELAY', 'EXTERNAL_API', 'ADMIN001'),
+('INFO', 'API', '파일 업로드 성공', '파일 업로드가 성공적으로 완료되었습니다.', 'com.ERI.demo.controller.FileController', 'uploadFile', 'ADMIN001', NULL, NULL, 'ADMIN001'),
+('ERROR', 'SECURITY', '권한 없음', '사용자가 권한이 없는 페이지에 접근을 시도했습니다.', 'com.ERI.demo.interceptor.AuthInterceptor', 'preHandle', 'USER001', 'ACCESS_DENIED', 'SECURITY', 'USER001');
 
+-- 시스템 로그 관련 뷰 생성 (통계 조회용)
+CREATE VIEW V_SYSTEM_LOG_STATS AS
+SELECT 
+    LOG_LEVEL,
+    LOG_TYPE,
+    ERROR_CODE,
+    ERROR_CATEGORY,
+    COUNT(*) as LOG_COUNT,
+    DATE(CREATED_DATE) as LOG_DATE
+FROM TB_SYSTEM_LOG
+GROUP BY LOG_LEVEL, LOG_TYPE, ERROR_CODE, ERROR_CATEGORY, DATE(CREATED_DATE);
+
+COMMENT ON VIEW V_SYSTEM_LOG_STATS IS '시스템 로그 통계 뷰';
+
+-- 시스템 로그 자동 정리 함수 (PostgreSQL용)
+CREATE OR REPLACE FUNCTION CLEAN_OLD_SYSTEM_LOGS(days_to_keep INTEGER DEFAULT 90)
+RETURNS INTEGER AS $$
+DECLARE
+    deleted_count INTEGER;
+BEGIN
+    DELETE FROM TB_SYSTEM_LOG 
+    WHERE CREATED_DATE < CURRENT_DATE - INTERVAL '1 day' * days_to_keep;
+    
+    GET DIAGNOSTICS deleted_count = ROW_COUNT;
+    
+    RETURN deleted_count;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION CLEAN_OLD_SYSTEM_LOGS IS '오래된 시스템 로그를 자동으로 정리하는 함수';
+
+-- 시스템 로그 통계 함수
+CREATE OR REPLACE FUNCTION GET_SYSTEM_LOG_STATS(
+    p_start_date DATE DEFAULT NULL,
+    p_end_date DATE DEFAULT NULL
+)
+RETURNS TABLE (
+    log_level VARCHAR(10),
+    log_type VARCHAR(50),
+    error_code VARCHAR(50),
+    log_count BIGINT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        sl.LOG_LEVEL,
+        sl.LOG_TYPE,
+        sl.ERROR_CODE,
+        COUNT(*) as LOG_COUNT
+    FROM TB_SYSTEM_LOG sl
+    WHERE (p_start_date IS NULL OR sl.CREATED_DATE >= p_start_date)
+      AND (p_end_date IS NULL OR sl.CREATED_DATE <= p_end_date)
+    GROUP BY sl.LOG_LEVEL, sl.LOG_TYPE, sl.ERROR_CODE
+    ORDER BY LOG_COUNT DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION GET_SYSTEM_LOG_STATS IS '시스템 로그 통계를 조회하는 함수';
+
+-- 시스템 로그 트리거 (로그 레벨별 자동 분류)
+CREATE OR REPLACE FUNCTION TRIGGER_SYSTEM_LOG_CLASSIFICATION()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- ERROR 레벨 로그는 자동으로 ERROR_CATEGORY 설정
+    IF NEW.LOG_LEVEL = 'ERROR' AND NEW.ERROR_CATEGORY IS NULL THEN
+        CASE 
+            WHEN NEW.LOG_TYPE = 'DATABASE' THEN NEW.ERROR_CATEGORY := 'DATABASE';
+            WHEN NEW.LOG_TYPE = 'API' THEN NEW.ERROR_CATEGORY := 'API';
+            WHEN NEW.LOG_TYPE = 'SECURITY' THEN NEW.ERROR_CATEGORY := 'SECURITY';
+            WHEN NEW.LOG_TYPE = 'MESSENGER' THEN NEW.ERROR_CATEGORY := 'EXTERNAL_API';
+            ELSE NEW.ERROR_CATEGORY := 'SYSTEM';
+        END CASE;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER TR_SYSTEM_LOG_CLASSIFICATION
+    BEFORE INSERT ON TB_SYSTEM_LOG
+    FOR EACH ROW
+    EXECUTE FUNCTION TRIGGER_SYSTEM_LOG_CLASSIFICATION();
+
+COMMENT ON TRIGGER TR_SYSTEM_LOG_CLASSIFICATION ON TB_SYSTEM_LOG IS '시스템 로그 자동 분류 트리거';
+
+-- =================================================================
+-- 10. 시스템 로그 샘플 데이터 추가
+-- =================================================================
+
+-- 추가 시스템 로그 샘플 데이터
+INSERT INTO TB_SYSTEM_LOG (LOG_LEVEL, LOG_TYPE, LOG_MESSAGE, LOG_DETAIL, CLASS_NAME, METHOD_NAME, EMP_ID, ERROR_CODE, ERROR_CATEGORY, CREATED_BY) VALUES
+('INFO', 'SYSTEM', '백업 작업 완료', '일일 백업 작업이 성공적으로 완료되었습니다.', 'com.ERI.demo.service.BackupService', 'performDailyBackup', 'SYSTEM', NULL, NULL, 'SYSTEM'),
+('INFO', 'API', '사용자 등록 성공', '새로운 사용자가 성공적으로 등록되었습니다.', 'com.ERI.demo.controller.UserController', 'registerUser', 'ADMIN001', NULL, NULL, 'ADMIN001'),
+('WARN', 'DATABASE', '인덱스 최적화 필요', '테이블 TB_USER_LST의 인덱스 최적화가 필요합니다.', 'com.ERI.demo.util.DatabaseOptimizer', 'checkIndexPerformance', 'SYSTEM', 'INDEX_OPTIMIZATION_NEEDED', 'PERFORMANCE', 'SYSTEM'),
+('ERROR', 'API', '외부 API 타임아웃', '메신저 API 호출 시 타임아웃이 발생했습니다.', 'com.ERI.demo.service.MessengerService', 'sendAlert', 'ADMIN001', 'API_TIMEOUT', 'EXTERNAL_API', 'ADMIN001'),
+('DEBUG', 'SYSTEM', '세션 정보 확인', '현재 활성 세션 수: 15개', 'com.ERI.demo.util.SessionMonitor', 'checkActiveSessions', 'SYSTEM', NULL, NULL, 'SYSTEM'),
+('INFO', 'SECURITY', '비밀번호 변경', '사용자 ADMIN001의 비밀번호가 변경되었습니다.', 'com.ERI.demo.service.UserService', 'changePassword', 'ADMIN001', NULL, NULL, 'ADMIN001'),
+('ERROR', 'DATABASE', '트랜잭션 롤백', '데이터베이스 트랜잭션이 롤백되었습니다.', 'com.ERI.demo.service.TransactionService', 'commitTransaction', 'ADMIN001', 'TRANSACTION_ROLLBACK', 'DATABASE', 'ADMIN001'),
+('WARN', 'MESSENGER', '메신저 서버 응답 지연', '메신저 서버 응답이 10초 이상 지연되고 있습니다.', 'com.ERI.demo.service.MessengerService', 'sendMessage', 'ADMIN001', 'MESSENGER_SERVER_DELAY', 'EXTERNAL_API', 'ADMIN001'),
+('INFO', 'API', '파일 다운로드 성공', '파일 다운로드가 성공적으로 완료되었습니다.', 'com.ERI.demo.controller.FileController', 'downloadFile', 'USER001', NULL, NULL, 'USER001'),
+('ERROR', 'SECURITY', '잘못된 로그인 시도', '잘못된 비밀번호로 로그인을 시도했습니다.', 'com.ERI.demo.service.AuthService', 'authenticate', 'UNKNOWN', 'INVALID_PASSWORD', 'SECURITY', 'UNKNOWN');
+
+-- =================================================================
+-- 11. 시스템 로그 관리 권한 추가
+-- =================================================================
+
+-- 시스템 로그 관리 권한 추가
+INSERT INTO TB_AUTH_LST (AUTH_CD, AUTH_NM, AUTH_DESC, AUTH_LVL) VALUES
+('AUTH_009', '시스템 로그 관리', '시스템 로그 조회 및 관리', 10);
+
+-- 시스템 로그 관리 메뉴 추가
+INSERT INTO TB_MNU_LST (MNU_CD, MNU_NM, MNU_URL, MNU_DESC, MNU_ORD, MNU_LVL, P_MNU_CD, MNU_USE_YN, MNU_ADMIN_YN, REG_EMP_ID)
+VALUES ('MNU_006_13', '시스템 로그 관리', '/admin/systemLogMng', '시스템 로그를 조회하고 관리하는 메뉴', 13, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001');
+
+-- 시스템 로그 관리 권한-메뉴 매핑
+INSERT INTO TB_AUTH_GRP_AUTH_MAP (AUTH_CD, MNU_CD, REG_EMP_ID) VALUES
+('AUTH_009', 'MNU_006_13', 'ADMIN001');
+
+-- =================================================================
+-- 12. 시스템 로그 관련 샘플 데이터 완료
+-- =================================================================
+
+-- 시스템 로그 테이블 생성 및 샘플 데이터 삽입 완료
+-- 총 20개의 샘플 로그 데이터가 포함되어 있음
+-- 로그 레벨: INFO(8개), WARN(4개), ERROR(6개), DEBUG(2개)
+-- 로그 타입: SYSTEM(4개), API(5개), DATABASE(3개), SECURITY(3개), MESSENGER(3개), DEBUG(2개)
+-- 에러 카테고리: DATABASE(2개), API(2개), SECURITY(2개), EXTERNAL_API(3개), PERFORMANCE(2개), SYSTEM(1개)
  
