@@ -17,7 +17,7 @@ public class MnuLstVO {
     private String pMnuCd;          // 상위 메뉴 코드 (2depth일 때만)
     
     private String mnuUseYn;        // 사용여부
-    private String mnuAdminYn;      // 관리자전용여부
+    private String mnuAuthType;     // 메뉴권한구분 (USER: 일반사용자, COUNSELOR: 상담사, ADMIN: 관리자)
     private String delYn;           // 삭제 여부
     private LocalDateTime delDate;  // 삭제 일시
     private String regEmpId;        // 등록자 ID
@@ -30,7 +30,7 @@ public class MnuLstVO {
     private List<MnuLstVO> subMenus; // 하위 메뉴 목록
     private String mnuLvlText;      // 메뉴 레벨 텍스트
     private String mnuUseYnText;    // 사용여부 텍스트
-    private String mnuAdminYnText;  // 관리자전용여부 텍스트
+    private String mnuAuthTypeText; // 메뉴권한구분 텍스트
     private String regDateText;     // 등록일 텍스트
     private String updDateText;     // 수정일 텍스트
 } 

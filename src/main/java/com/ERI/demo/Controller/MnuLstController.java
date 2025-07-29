@@ -2,13 +2,13 @@ package com.ERI.demo.Controller;
 
 import com.ERI.demo.service.MnuLstService;
 import com.ERI.demo.vo.MnuLstVO;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,38 +48,65 @@ public class MnuLstController {
     }
 
     /**
-     * 전체 메뉴 목록 조회 (계층 구조)
+     * 전체 메뉴 목록 조회 (사용자 권한에 따른 필터링)
      */
     @GetMapping("/all")
     public ResponseEntity<Map<String, Object>> getAllMenus(HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            // AuthInterceptor에서 전달받은 관리자 여부와 상담사 여부 사용
+            // AuthInterceptor에서 전달받은 사용자 정보 사용
+            String empId = (String) request.getAttribute("EMP_ID");
             Boolean isAdmin = (Boolean) request.getAttribute("isAdmin");
             Boolean isCounselor = (Boolean) request.getAttribute("isCounselor");
-            if (isAdmin == null) isAdmin = false; // 기본값은 일반 사용자
-            if (isCounselor == null) isCounselor = false; // 기본값은 일반 사용자
             
-            log.info("전체 메뉴 목록 조회: 관리자 여부 = {}, 상담사 여부 = {}", isAdmin, isCounselor);
+            if (empId == null) {
+                response.put("success", false);
+                response.put("message", "인증 정보를 찾을 수 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
             
-            List<MnuLstVO> menuList = mnuLstService.getAllMenus(isAdmin, isCounselor);
+            // 사용자 권한 타입 결정
+            String userAuthType = determineUserAuthType(isAdmin, isCounselor);
+            
+            log.info("메뉴 목록 조회 - 사용자: {}, 관리자여부: {}, 상담사여부: {}, 권한타입: {}", 
+                    empId, isAdmin, isCounselor, userAuthType);
+            
+            List<MnuLstVO> menuList = mnuLstService.getAllMenus(userAuthType);
             
             response.put("success", true);
             response.put("data", menuList);
-            response.put("message", "전체 메뉴 목록을 조회했습니다.");
-            response.put("isAdmin", isAdmin); // 응답에 관리자 여부 포함
-            response.put("isCounselor", isCounselor); // 응답에 상담사 여부 포함
             
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
-            log.error("전체 메뉴 목록 조회 실패", e);
+            log.error("메뉴 목록 조회 실패", e);
             
             response.put("success", false);
-            response.put("message", "전체 메뉴 목록 조회에 실패했습니다: " + e.getMessage());
+            response.put("message", "메뉴 목록 조회에 실패했습니다: " + e.getMessage());
             
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * 사용자 권한 타입 결정
+     * @param isAdmin 관리자 여부
+     * @param isCounselor 상담사 여부
+     * @return 권한 타입 (USER, COUNSELOR, ADMIN)
+     */
+    private String determineUserAuthType(Boolean isAdmin, Boolean isCounselor) {
+        // null 체크 및 기본값 설정
+        if (isAdmin == null) isAdmin = false;
+        if (isCounselor == null) isCounselor = false;
+        
+        // 권한 우선순위: 관리자 > 상담사 > 일반사용자
+        if (isAdmin) {
+            return "ADMIN";
+        } else if (isCounselor) {
+            return "COUNSELOR";
+        } else {
+            return "USER";
         }
     }
 
@@ -93,13 +120,13 @@ public class MnuLstController {
             @RequestParam(required = false) String searchKeyword,
             @RequestParam(required = false) Integer mnuLvl,
             @RequestParam(required = false) String mnuUseYn,
-            @RequestParam(required = false) String mnuAdminYn) {
+            @RequestParam(required = false) String mnuAuthType) {
         
         Map<String, Object> response = new HashMap<>();
         
         try {
-            List<MnuLstVO> menuList = mnuLstService.getMenuListWithPaging(page, size, searchKeyword, mnuLvl, mnuUseYn, mnuAdminYn);
-            int totalCount = mnuLstService.getMenuCount(searchKeyword, mnuLvl, mnuUseYn, mnuAdminYn);
+            List<MnuLstVO> menuList = mnuLstService.getMenuListWithPaging(page, size, searchKeyword, mnuLvl, mnuUseYn, mnuAuthType);
+            int totalCount = mnuLstService.getMenuCount(searchKeyword, mnuLvl, mnuUseYn, mnuAuthType);
             
             response.put("success", true);
             response.put("data", menuList);
@@ -405,11 +432,28 @@ public class MnuLstController {
      */
     @GetMapping("/user/{empId}")
     public ResponseEntity<Map<String, Object>> getUserAccessibleMenus(@PathVariable String empId,
-                                                                     @RequestParam(defaultValue = "false") boolean isAdmin) {
+                                                                     HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
         
         try {
-            List<MnuLstVO> menuList = mnuLstService.getUserAccessibleMenus(empId, isAdmin);
+            // AuthInterceptor에서 전달받은 사용자 정보 사용
+            String currentEmpId = (String) request.getAttribute("EMP_ID");
+            Boolean isAdmin = (Boolean) request.getAttribute("isAdmin");
+            Boolean isCounselor = (Boolean) request.getAttribute("isCounselor");
+            
+            if (currentEmpId == null) {
+                response.put("success", false);
+                response.put("message", "인증 정보를 찾을 수 없습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+            
+            // 사용자 권한 타입 결정
+            String userAuthType = determineUserAuthType(isAdmin, isCounselor);
+            
+            log.info("사용자 메뉴 목록 조회 - 요청사용자: {}, 대상사용자: {}, 권한타입: {}", 
+                    currentEmpId, empId, userAuthType);
+            
+            List<MnuLstVO> menuList = mnuLstService.getAllMenus(userAuthType);
             
             response.put("success", true);
             response.put("data", menuList);

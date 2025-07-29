@@ -12,7 +12,7 @@
         <result property="mnuLvl" column="MNU_LVL"/>
         <result property="pMnuCd" column="P_MNU_CD"/>
         <result property="mnuUseYn" column="MNU_USE_YN"/>
-        <result property="mnuAdminYn" column="MNU_ADMIN_YN"/>
+        <result property="mnuAuthType" column="MNU_AUTH_TYPE"/>
         <result property="regEmpId" column="REG_EMP_ID"/>
         <result property="updEmpId" column="UPD_EMP_ID"/>
         <result property="delYn" column="DEL_YN"/>
@@ -25,7 +25,7 @@
     <!-- 기본 컬럼 -->
     <sql id="BaseColumns">
         MNU_CD, MNU_NM, MNU_URL, MNU_DESC, MNU_ORD, MNU_LVL, P_MNU_CD, 
-        MNU_USE_YN, MNU_ADMIN_YN, REG_EMP_ID, UPD_EMP_ID, DEL_YN, DEL_DATE, 
+        MNU_USE_YN, MNU_AUTH_TYPE, REG_EMP_ID, UPD_EMP_ID, DEL_YN, DEL_DATE, 
         REG_DATE, UPD_DATE
     </sql>
 
@@ -33,7 +33,7 @@
     <select id="selectMenuList" resultMap="MnuLstResultMap">
         SELECT 
             m1.MNU_CD, m1.MNU_NM, m1.MNU_URL, m1.MNU_DESC, m1.MNU_ORD, m1.MNU_LVL, m1.P_MNU_CD,
-            m1.MNU_USE_YN, m1.MNU_ADMIN_YN, m1.REG_EMP_ID, m1.UPD_EMP_ID, m1.DEL_YN, m1.DEL_DATE,
+            m1.MNU_USE_YN, m1.MNU_AUTH_TYPE, m1.REG_EMP_ID, m1.UPD_EMP_ID, m1.DEL_YN, m1.DEL_DATE,
             m1.REG_DATE, m1.UPD_DATE,
             m2.MNU_NM as P_MNU_NM
         FROM TB_MNU_LST m1
@@ -46,23 +46,23 @@
     <select id="selectAllMenus" resultMap="MnuLstResultMap">
         SELECT 
             m1.MNU_CD, m1.MNU_NM, m1.MNU_URL, m1.MNU_DESC, m1.MNU_ORD, m1.MNU_LVL, m1.P_MNU_CD,
-            m1.MNU_USE_YN, m1.MNU_ADMIN_YN, m1.REG_EMP_ID, m1.UPD_EMP_ID, m1.DEL_YN, m1.DEL_DATE,
+            m1.MNU_USE_YN, m1.MNU_AUTH_TYPE, m1.REG_EMP_ID, m1.UPD_EMP_ID, m1.DEL_YN, m1.DEL_DATE,
             m1.REG_DATE, m1.UPD_DATE,
             m2.MNU_NM as P_MNU_NM
         FROM TB_MNU_LST m1
         LEFT JOIN TB_MNU_LST m2 ON m1.P_MNU_CD = m2.MNU_CD
         WHERE m1.DEL_YN = 'N'
         <choose>
-            <when test="isAdmin != null and isAdmin">
+            <when test="userAuthType == 'ADMIN'">
                 <!-- 관리자인 경우 모든 메뉴 표시 -->
             </when>
-            <when test="isCounselor != null and isCounselor and !isAdmin">
-                <!-- 상담사이지만 관리자가 아닌 경우: 일반 메뉴 + 관리자 페이지 + 상담관리 메뉴 -->
-                AND (m1.MNU_ADMIN_YN = 'N' OR m1.MNU_CD = 'MNU_006' OR m1.MNU_CD = 'MNU_006_07')
+            <when test="userAuthType == 'COUNSELOR'">
+                <!-- 상담사인 경우: 일반사용자 + 상담사 메뉴 -->
+                AND (m1.MNU_AUTH_TYPE = 'USER' OR m1.MNU_AUTH_TYPE = 'COUNSELOR')
             </when>
             <otherwise>
-                <!-- 일반 사용자인 경우 관리자 메뉴 제외 -->
-                AND m1.MNU_ADMIN_YN = 'N'
+                <!-- 일반 사용자인 경우 일반사용자 메뉴만 -->
+                AND m1.MNU_AUTH_TYPE = 'USER'
             </otherwise>
         </choose>
         ORDER BY m1.MNU_LVL ASC, m1.MNU_ORD ASC
@@ -72,7 +72,7 @@
     <select id="selectMenuListWithPaging" resultMap="MnuLstResultMap">
         SELECT 
             m1.MNU_CD, m1.MNU_NM, m1.MNU_URL, m1.MNU_DESC, m1.MNU_ORD, m1.MNU_LVL, m1.P_MNU_CD,
-            m1.MNU_USE_YN, m1.MNU_ADMIN_YN, m1.REG_EMP_ID, m1.UPD_EMP_ID, m1.DEL_YN, m1.DEL_DATE,
+            m1.MNU_USE_YN, m1.MNU_AUTH_TYPE, m1.REG_EMP_ID, m1.UPD_EMP_ID, m1.DEL_YN, m1.DEL_DATE,
             m1.REG_DATE, m1.UPD_DATE,
             m2.MNU_NM as P_MNU_NM
         FROM TB_MNU_LST m1
@@ -88,8 +88,8 @@
         <if test="mnuUseYn != null and mnuUseYn != ''">
             AND m1.MNU_USE_YN = #{mnuUseYn}
         </if>
-        <if test="mnuAdminYn != null and mnuAdminYn != ''">
-            AND m1.MNU_ADMIN_YN = #{mnuAdminYn}
+        <if test="mnuAuthType != null and mnuAuthType != ''">
+            AND m1.MNU_AUTH_TYPE = #{mnuAuthType}
         </if>
         ORDER BY m1.MNU_LVL ASC, m1.MNU_ORD ASC
         LIMIT #{limit} OFFSET #{offset}
@@ -110,8 +110,8 @@
         <if test="mnuUseYn != null and mnuUseYn != ''">
             AND m1.MNU_USE_YN = #{mnuUseYn}
         </if>
-        <if test="mnuAdminYn != null and mnuAdminYn != ''">
-            AND m1.MNU_ADMIN_YN = #{mnuAdminYn}
+        <if test="mnuAuthType != null and mnuAuthType != ''">
+            AND m1.MNU_AUTH_TYPE = #{mnuAuthType}
         </if>
     </select>
 
@@ -119,7 +119,7 @@
     <select id="selectMenuByCd" resultMap="MnuLstResultMap">
         SELECT 
             m1.MNU_CD, m1.MNU_NM, m1.MNU_URL, m1.MNU_DESC, m1.MNU_ORD, m1.MNU_LVL, m1.P_MNU_CD,
-            m1.MNU_USE_YN, m1.MNU_ADMIN_YN, m1.REG_EMP_ID, m1.UPD_EMP_ID, m1.DEL_YN, m1.DEL_DATE,
+            m1.MNU_USE_YN, m1.MNU_AUTH_TYPE, m1.REG_EMP_ID, m1.UPD_EMP_ID, m1.DEL_YN, m1.DEL_DATE,
             m1.REG_DATE, m1.UPD_DATE,
             m2.MNU_NM as P_MNU_NM
         FROM TB_MNU_LST m1
@@ -150,11 +150,11 @@
     <insert id="insertMenu" parameterType="com.ERI.demo.vo.MnuLstVO">
         INSERT INTO TB_MNU_LST (
             MNU_CD, MNU_NM, MNU_URL, MNU_DESC, MNU_ORD, MNU_LVL, P_MNU_CD,
-            MNU_USE_YN, MNU_ADMIN_YN, REG_EMP_ID, UPD_EMP_ID, DEL_YN,
+            MNU_USE_YN, MNU_AUTH_TYPE, REG_EMP_ID, UPD_EMP_ID, DEL_YN,
             REG_DATE, UPD_DATE
         ) VALUES (
             #{mnuCd}, #{mnuNm}, #{mnuUrl}, #{mnuDesc}, #{mnuOrd}, #{mnuLvl}, #{pMnuCd,jdbcType=VARCHAR},
-            #{mnuUseYn}, #{mnuAdminYn}, #{regEmpId}, #{updEmpId}, 'N',
+            #{mnuUseYn}, #{mnuAuthType}, #{regEmpId}, #{updEmpId}, 'N',
             CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
         )
     </insert>
@@ -169,7 +169,7 @@
             MNU_LVL = #{mnuLvl},
             P_MNU_CD = #{pMnuCd,jdbcType=VARCHAR},
             MNU_USE_YN = #{mnuUseYn},
-            MNU_ADMIN_YN = #{mnuAdminYn},
+            MNU_AUTH_TYPE = #{mnuAuthType},
             UPD_EMP_ID = #{updEmpId},
             UPD_DATE = CURRENT_TIMESTAMP
         WHERE MNU_CD = #{mnuCd}
@@ -203,21 +203,6 @@
         FROM TB_MNU_LST
         WHERE MNU_CD = #{mnuCd}
           AND DEL_YN = 'N'
-    </select>
-
-    <!-- 사용자별 접근 가능한 메뉴 목록 조회 -->
-    <select id="selectUserAccessibleMenus" resultMap="MnuLstResultMap">
-        SELECT 
-            m1.MNU_CD, m1.MNU_NM, m1.MNU_URL, m1.MNU_DESC, m1.MNU_ORD, m1.MNU_LVL, m1.P_MNU_CD,
-            m1.MNU_USE_YN, m1.MNU_ADMIN_YN, m1.REG_EMP_ID, m1.UPD_EMP_ID, m1.DEL_YN, m1.DEL_DATE,
-            m1.REG_DATE, m1.UPD_DATE
-        FROM TB_MNU_LST m1
-        WHERE m1.DEL_YN = 'N'
-          AND m1.MNU_USE_YN = 'Y'
-        <if test="!isAdmin">
-          AND m1.MNU_ADMIN_YN = 'N'
-        </if>
-        ORDER BY m1.MNU_LVL ASC, m1.MNU_ORD ASC
     </select>
 
 </mapper> 

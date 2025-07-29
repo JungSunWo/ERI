@@ -27,10 +27,10 @@ public class MnuLstService {
     }
 
     /**
-     * 전체 메뉴 목록 조회 (계층 구조)
+     * 전체 메뉴 목록 조회 (사용자 권한에 따른 필터링)
      */
-    public List<MnuLstVO> getAllMenus(boolean isAdmin, boolean isCounselor) {
-        List<MnuLstVO> menuList = mnuLstMapper.selectAllMenus(isAdmin, isCounselor);
+    public List<MnuLstVO> getAllMenus(String userAuthType) {
+        List<MnuLstVO> menuList = mnuLstMapper.selectAllMenus(userAuthType);
         return formatMenuList(menuList);
     }
 
@@ -38,17 +38,17 @@ public class MnuLstService {
      * 메뉴 목록 조회 (페이징)
      */
     public List<MnuLstVO> getMenuListWithPaging(int page, int size, String searchKeyword, 
-                                               Integer mnuLvl, String mnuUseYn, String mnuAdminYn) {
+                                               Integer mnuLvl, String mnuUseYn, String mnuAuthType) {
         int offset = (page - 1) * size;
-        List<MnuLstVO> menuList = mnuLstMapper.selectMenuListWithPaging(offset, size, searchKeyword, mnuLvl, mnuUseYn, mnuAdminYn);
+        List<MnuLstVO> menuList = mnuLstMapper.selectMenuListWithPaging(offset, size, searchKeyword, mnuLvl, mnuUseYn, mnuAuthType);
         return formatMenuList(menuList);
     }
 
     /**
      * 메뉴 총 개수 조회
      */
-    public int getMenuCount(String searchKeyword, Integer mnuLvl, String mnuUseYn, String mnuAdminYn) {
-        return mnuLstMapper.selectMenuCount(searchKeyword, mnuLvl, mnuUseYn, mnuAdminYn);
+    public int getMenuCount(String searchKeyword, Integer mnuLvl, String mnuUseYn, String mnuAuthType) {
+        return mnuLstMapper.selectMenuCount(searchKeyword, mnuLvl, mnuUseYn, mnuAuthType);
     }
 
     /**
@@ -232,14 +232,6 @@ public class MnuLstService {
     }
 
     /**
-     * 사용자별 접근 가능한 메뉴 목록 조회
-     */
-    public List<MnuLstVO> getUserAccessibleMenus(String empId, boolean isAdmin) {
-        List<MnuLstVO> menuList = mnuLstMapper.selectUserAccessibleMenus(empId, isAdmin);
-        return formatMenuList(menuList);
-    }
-
-    /**
      * 메뉴 목록 포맷팅
      */
     private List<MnuLstVO> formatMenuList(List<MnuLstVO> menuList) {
@@ -262,9 +254,22 @@ public class MnuLstService {
             menu.setMnuUseYnText("Y".equals(menu.getMnuUseYn()) ? "사용" : "미사용");
         }
 
-        // 관리자전용여부 텍스트
-        if (menu.getMnuAdminYn() != null) {
-            menu.setMnuAdminYnText("Y".equals(menu.getMnuAdminYn()) ? "관리자전용" : "일반사용자");
+        // 메뉴권한구분 텍스트
+        if (menu.getMnuAuthType() != null) {
+            switch (menu.getMnuAuthType()) {
+                case "USER":
+                    menu.setMnuAuthTypeText("일반사용자");
+                    break;
+                case "COUNSELOR":
+                    menu.setMnuAuthTypeText("상담사");
+                    break;
+                case "ADMIN":
+                    menu.setMnuAuthTypeText("관리자");
+                    break;
+                default:
+                    menu.setMnuAuthTypeText("일반사용자");
+                    break;
+            }
         }
 
         // 등록일 텍스트

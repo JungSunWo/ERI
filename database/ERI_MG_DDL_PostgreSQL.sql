@@ -339,7 +339,7 @@ CREATE TABLE TB_MNU_LST (
     MNU_LVL     INTEGER      NOT NULL DEFAULT 1, -- 메뉴 레벨 (1: 대메뉴, 2: 서브메뉴)
     P_MNU_CD    VARCHAR(20)  NULL,             -- 상위 메뉴 코드 (2depth일 때만)
     MNU_USE_YN  CHAR(1)      NOT NULL DEFAULT 'Y', -- 사용여부
-    MNU_ADMIN_YN CHAR(1)     NOT NULL DEFAULT 'N', -- 관리자전용여부
+    MNU_AUTH_TYPE VARCHAR(20) NOT NULL DEFAULT 'USER', -- 메뉴권한구분 (USER: 일반사용자, COUNSELOR: 상담사, ADMIN: 관리자)
     DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
     DEL_DATE    TIMESTAMP    NULL,
     REG_EMP_ID  VARCHAR(255) NULL,
@@ -355,13 +355,13 @@ COMMENT ON COLUMN TB_MNU_LST.MNU_URL IS '메뉴 URL';
 COMMENT ON COLUMN TB_MNU_LST.MNU_DESC IS '메뉴 설명';
 COMMENT ON COLUMN TB_MNU_LST.MNU_ORD IS '메뉴 순서';
 COMMENT ON COLUMN TB_MNU_LST.MNU_USE_YN IS '메뉴 사용여부';
-COMMENT ON COLUMN TB_MNU_LST.MNU_ADMIN_YN IS '관리자전용메뉴 여부 (Y: 관리자전용, N: 일반사용자도 접근가능)';
+COMMENT ON COLUMN TB_MNU_LST.MNU_AUTH_TYPE IS '메뉴권한구분 (USER: 일반사용자, COUNSELOR: 상담사, ADMIN: 관리자)';
 COMMENT ON COLUMN TB_MNU_LST.MNU_LVL IS '메뉴 레벨 (1: 대메뉴, 2: 서브메뉴)';
 COMMENT ON COLUMN TB_MNU_LST.P_MNU_CD IS '상위 메뉴 코드 (2depth일 때만)';
 CREATE INDEX IDX_MNU_LST_DEL_YN ON TB_MNU_LST (DEL_YN);
 CREATE INDEX IDX_MNU_LST_ORD ON TB_MNU_LST (MNU_ORD);
 CREATE INDEX IDX_MNU_LST_USE ON TB_MNU_LST (MNU_USE_YN);
-CREATE INDEX IDX_MNU_LST_ADMIN ON TB_MNU_LST (MNU_ADMIN_YN);
+CREATE INDEX IDX_MNU_LST_AUTH ON TB_MNU_LST (MNU_AUTH_TYPE);
 
 -- =================================================================
 -- 4.1. 권한-메뉴 매핑 (Authority-Menu Mapping)
@@ -491,37 +491,37 @@ INSERT INTO TB_AUTH_LST (AUTH_CD, AUTH_NM, AUTH_DESC, AUTH_LVL) VALUES
 ('AUTH_008', '메뉴 관리', '메뉴 정보 조회/등록/수정/삭제', 9);
 
 -- TB_MNU_LST 샘플 데이터
-INSERT INTO TB_MNU_LST (MNU_CD, MNU_NM, MNU_URL, MNU_DESC, MNU_ORD, MNU_LVL, P_MNU_CD, MNU_USE_YN, MNU_ADMIN_YN, REG_EMP_ID)
+INSERT INTO TB_MNU_LST (MNU_CD, MNU_NM, MNU_URL, MNU_DESC, MNU_ORD, MNU_LVL, P_MNU_CD, MNU_USE_YN, MNU_AUTH_TYPE, REG_EMP_ID)
 VALUES
-('MNU_001', '프로그램', NULL, NULL, 1, 1, NULL, 'Y', 'N', 'ADMIN001'),
-('MNU_002', 'IBK마음건강검진', NULL, NULL, 2, 1, NULL, 'Y', 'N', 'ADMIN001'),
-('MNU_003', '상담신청', NULL, NULL, 3, 1, NULL, 'Y', 'N', 'ADMIN001'),
-('MNU_004', '자료실', NULL, NULL, 4, 1, NULL, 'Y', 'N', 'ADMIN001'),
-('MNU_005', '설정하기', NULL, NULL, 5, 1, NULL, 'Y', 'N', 'ADMIN001'),
-('MNU_006', '관리자 페이지', NULL, NULL, 6, 1, NULL, 'Y', 'Y', 'ADMIN001'),
+('MNU_001', '프로그램', NULL, NULL, 1, 1, NULL, 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_002', 'IBK마음건강검진', NULL, NULL, 2, 1, NULL, 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_003', '상담신청', NULL, NULL, 3, 1, NULL, 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_004', '자료실', NULL, NULL, 4, 1, NULL, 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_005', '설정하기', NULL, NULL, 5, 1, NULL, 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006', '관리자 페이지', NULL, NULL, 6, 1, NULL, 'Y', 'ADMIN', 'ADMIN001'),
 
-('MNU_005_01', '설정하기', NULL, NULL, 1, 2, 'MNU_005', 'Y', 'N', 'ADMIN001'),
-('MNU_001_01', '프로그램 조회', '/program/inquiry', NULL, 1, 2, 'MNU_001', 'Y', 'N', 'ADMIN001'),
-('MNU_001_02', '프로그램 신청', '/program/apply', NULL, 2, 2, 'MNU_001', 'Y', 'N', 'ADMIN001'),
-('MNU_002_01', 'IBK마음건강검진', '/health-check/ibk', NULL, 1, 2, 'MNU_002', 'Y', 'N', 'ADMIN001'),
-('MNU_003_01', '오프라인 상담신청', '/consultation/offline', NULL, 1, 2, 'MNU_003', 'Y', 'N', 'ADMIN001'),
-('MNU_003_02', '비대면 상담신청', '/consultation/online', NULL, 2, 2, 'MNU_003', 'Y', 'N', 'ADMIN001'),
-('MNU_003_03', '상담 신청 현황', '/consultation/status', NULL, 3, 2, 'MNU_003', 'Y', 'N', 'ADMIN001'),
-('MNU_004_01', '공지사항', '/resources/notice', NULL, 1, 2, 'MNU_004', 'Y', 'N', 'ADMIN001'),
-('MNU_004_02', '직원권익보호 게시판', '/resources/board', NULL, 2, 2, 'MNU_004', 'Y', 'N', 'ADMIN001'),
-('MNU_004_03', '마음챙김레터', '/resources/letter', NULL, 3, 2, 'MNU_004', 'Y', 'N', 'ADMIN001'),
-('MNU_006_01', '공통코드관리', '/admin/comCdMng', '시스템에서 사용되는 공통코드(그룹코드, 상세코드)를 관리하는 메뉴', 1, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001'),
-('MNU_006_02', '권한관리', '/admin/authMng', '시스템 사용자의 권한을 관리하는 메뉴', 2, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001'),
-('MNU_006_03', '메뉴관리', '/admin/menuMng', '시스템 메뉴 구조를 관리하는 메뉴', 3, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001'),
-('MNU_006_04', '사용자관리', '/admin/userMng', '시스템 사용자 정보를 관리하는 메뉴', 4, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001'),
-('MNU_006_05', '부서관리', '/admin/deptMng', '조직 부서 정보를 관리하는 메뉴', 5, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001'),
-('MNU_006_06', '프로그램관리', '/admin/programMng', '시스템 프로그램 정보를 관리하는 메뉴', 6, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001'),
-('MNU_006_07', '상담관리', '/admin/consultationMng', '상담 관련 정보를 관리하는 메뉴', 7, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001'),
-('MNU_006_08', '공지사항관리', '/admin/noticeMng', '공지사항을 관리하는 메뉴', 8, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001'),
-('MNU_006_09', '통계관리', '/admin/statisticsMng', '시스템 통계 정보를 관리하는 메뉴', 9, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001'),
-('MNU_006_10', '시스템설정', '/admin/systemConfig', '시스템 전반적인 설정을 관리하는 메뉴', 10, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001'),
-('MNU_006_11', '로그관리', '/admin/logMng', '시스템 로그를 조회하고 관리하는 메뉴', 11, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001'),
-('MNU_006_12', '백업관리', '/admin/backupMng', '시스템 데이터 백업을 관리하는 메뉴', 12, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001');
+('MNU_005_01', '설정하기', NULL, NULL, 1, 2, 'MNU_005', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_001_01', '프로그램 조회', '/program/inquiry', NULL, 1, 2, 'MNU_001', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_001_02', '프로그램 신청', '/program/apply', NULL, 2, 2, 'MNU_001', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_002_01', 'IBK마음건강검진', '/health-check/ibk', NULL, 1, 2, 'MNU_002', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_003_01', '오프라인 상담신청', '/consultation/offline', NULL, 1, 2, 'MNU_003', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_003_02', '비대면 상담신청', '/consultation/online', NULL, 2, 2, 'MNU_003', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_003_03', '상담 신청 현황', '/consultation/status', NULL, 3, 2, 'MNU_003', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_004_01', '공지사항', '/resources/notice', NULL, 1, 2, 'MNU_004', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_004_02', '직원권익보호 게시판', '/resources/board', NULL, 2, 2, 'MNU_004', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_004_03', '마음챙김레터', '/resources/letter', NULL, 3, 2, 'MNU_004', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_01', '공통코드관리', '/admin/comCdMng', '시스템에서 사용되는 공통코드(그룹코드, 상세코드)를 관리하는 메뉴', 1, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_02', '권한관리', '/admin/authMng', '시스템 사용자의 권한을 관리하는 메뉴', 2, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_03', '메뉴관리', '/admin/menuMng', '시스템 메뉴 구조를 관리하는 메뉴', 3, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_04', '사용자관리', '/admin/userMng', '시스템 사용자 정보를 관리하는 메뉴', 4, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_05', '부서관리', '/admin/deptMng', '조직 부서 정보를 관리하는 메뉴', 5, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_06', '프로그램관리', '/admin/programMng', '시스템 프로그램 정보를 관리하는 메뉴', 6, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_07', '상담관리', '/admin/consultationMng', '상담 관련 정보를 관리하는 메뉴', 7, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_08', '공지사항관리', '/admin/noticeMng', '공지사항을 관리하는 메뉴', 8, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_09', '통계관리', '/admin/statisticsMng', '시스템 통계 정보를 관리하는 메뉴', 9, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_10', '시스템설정', '/admin/systemConfig', '시스템 전반적인 설정을 관리하는 메뉴', 10, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_11', '로그관리', '/admin/logMng', '시스템 로그를 조회하고 관리하는 메뉴', 11, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001'),
+('MNU_006_12', '백업관리', '/admin/backupMng', '시스템 데이터 백업을 관리하는 메뉴', 12, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001');
 
 -- 7.3. 권한-메뉴 매핑 샘플 데이터
 INSERT INTO TB_AUTH_GRP_AUTH_MAP (AUTH_CD, MNU_CD, REG_EMP_ID) VALUES
@@ -770,8 +770,8 @@ INSERT INTO TB_AUTH_LST (AUTH_CD, AUTH_NM, AUTH_DESC, AUTH_LVL) VALUES
 ('AUTH_009', '시스템 로그 관리', '시스템 로그 조회 및 관리', 10);
 
 -- 시스템 로그 관리 메뉴 추가
-INSERT INTO TB_MNU_LST (MNU_CD, MNU_NM, MNU_URL, MNU_DESC, MNU_ORD, MNU_LVL, P_MNU_CD, MNU_USE_YN, MNU_ADMIN_YN, REG_EMP_ID)
-VALUES ('MNU_006_13', '시스템 로그 관리', '/admin/systemLogMng', '시스템 로그를 조회하고 관리하는 메뉴', 13, 2, 'MNU_006', 'Y', 'Y', 'ADMIN001');
+INSERT INTO TB_MNU_LST (MNU_CD, MNU_NM, MNU_URL, MNU_DESC, MNU_ORD, MNU_LVL, P_MNU_CD, MNU_USE_YN, MNU_AUTH_TYPE, REG_EMP_ID)
+VALUES ('MNU_006_13', '시스템 로그 관리', '/admin/systemLogMng', '시스템 로그를 조회하고 관리하는 메뉴', 13, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001');
 
 -- 시스템 로그 관리 권한-메뉴 매핑
 INSERT INTO TB_AUTH_GRP_AUTH_MAP (AUTH_CD, MNU_CD, REG_EMP_ID) VALUES

@@ -17,7 +17,7 @@ public interface MnuLstMapper {
     /**
      * 전체 메뉴 목록 조회 (계층 구조)
      */
-    List<MnuLstVO> selectAllMenus(@Param("isAdmin") boolean isAdmin, @Param("isCounselor") boolean isCounselor);
+    List<MnuLstVO> selectAllMenus(@Param("userAuthType") String userAuthType);
     
     /**
      * 메뉴 목록 조회 (페이징)
@@ -27,7 +27,7 @@ public interface MnuLstMapper {
                                            @Param("searchKeyword") String searchKeyword,
                                            @Param("mnuLvl") Integer mnuLvl,
                                            @Param("mnuUseYn") String mnuUseYn,
-                                           @Param("mnuAdminYn") String mnuAdminYn);
+                                           @Param("mnuAuthType") String mnuAuthType);
     
     /**
      * 메뉴 총 개수 조회
@@ -35,7 +35,7 @@ public interface MnuLstMapper {
     int selectMenuCount(@Param("searchKeyword") String searchKeyword,
                        @Param("mnuLvl") Integer mnuLvl,
                        @Param("mnuUseYn") String mnuUseYn,
-                       @Param("mnuAdminYn") String mnuAdminYn);
+                       @Param("mnuAuthType") String mnuAuthType);
     
     /**
      * 메뉴 상세 조회
@@ -79,10 +79,4 @@ public interface MnuLstMapper {
      * 메뉴 코드 중복 확인
      */
     int checkMenuCdExists(@Param("mnuCd") String mnuCd);
-    
-    /**
-     * 사용자별 접근 가능한 메뉴 목록 조회
-     */
-    List<MnuLstVO> selectUserAccessibleMenus(@Param("empId") String empId,
-                                            @Param("isAdmin") boolean isAdmin);
 } 

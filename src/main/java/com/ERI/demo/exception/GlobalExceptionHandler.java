@@ -340,20 +340,26 @@ public class GlobalExceptionHandler {
      */
     private String getEmpIdFromRequest(HttpServletRequest request) {
         try {
-            // 세션에서 사용자 정보 추출
+            // AuthInterceptor에서 설정한 EMP_ID 속성에서 추출
+            String empId = (String) request.getAttribute("EMP_ID");
+            if (empId != null && !empId.isEmpty()) {
+                return empId;
+            }
+            
+            // 세션에서 사용자 정보 추출 (백업)
             Object sessionUser = request.getSession().getAttribute("user");
             if (sessionUser != null && sessionUser instanceof Map) {
                 Map<String, Object> userMap = (Map<String, Object>) sessionUser;
                 return (String) userMap.get("empId");
             }
             
-            // 헤더에서 사용자 정보 추출
-            String empId = request.getHeader("X-User-Id");
-            if (empId != null && !empId.isEmpty()) {
-                return empId;
+            // 헤더에서 사용자 정보 추출 (백업)
+            String headerEmpId = request.getHeader("X-User-Id");
+            if (headerEmpId != null && !headerEmpId.isEmpty()) {
+                return headerEmpId;
             }
             
-            // Authorization 헤더에서 추출 (Bearer 토큰 등)
+            // Authorization 헤더에서 추출 (백업)
             String authHeader = request.getHeader("Authorization");
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 // 토큰에서 사용자 정보 추출 로직 (실제 구현에 따라 다름)

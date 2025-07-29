@@ -1,4 +1,4 @@
-package com.ERI.demo.controller;
+package com.ERI.demo.Controller;
 
 import com.ERI.demo.service.SystemLogService;
 import com.ERI.demo.vo.SystemLogSearchVo;
@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
