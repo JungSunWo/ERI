@@ -26,26 +26,26 @@
             ERROR_CATEGORY,
             CREATED_BY
         ) VALUES (
-            #{logLevel},
-            #{logType},
-            #{logMessage},
-            #{logDetail},
-            #{className},
-            #{methodName},
-            #{lineNumber},
-            #{stackTrace},
-            #{empId},
-            #{sessionId},
-            #{requestUri},
-            #{requestMethod},
-            #{requestParams},
-            #{responseStatus},
-            #{executionTime},
-            #{ipAddress},
-            #{userAgent},
-            #{errorCode},
-            #{errorCategory},
-            #{createdBy}
+            #{logLevel,jdbcType=VARCHAR},
+            #{logType,jdbcType=VARCHAR},
+            #{logMessage,jdbcType=VARCHAR},
+            #{logDetail,jdbcType=VARCHAR},
+            #{className,jdbcType=VARCHAR},
+            #{methodName,jdbcType=VARCHAR},
+            #{lineNumber,jdbcType=INTEGER},
+            #{stackTrace,jdbcType=VARCHAR},
+            #{empId,jdbcType=VARCHAR},
+            #{sessionId,jdbcType=VARCHAR},
+            #{requestUri,jdbcType=VARCHAR},
+            #{requestMethod,jdbcType=VARCHAR},
+            #{requestParams,jdbcType=VARCHAR},
+            #{responseStatus,jdbcType=INTEGER},
+            #{executionTime,jdbcType=BIGINT},
+            #{ipAddress,jdbcType=VARCHAR},
+            #{userAgent,jdbcType=VARCHAR},
+            #{errorCode,jdbcType=VARCHAR},
+            #{errorCategory,jdbcType=VARCHAR},
+            #{createdBy,jdbcType=VARCHAR}
         )
     </insert>
 
@@ -89,10 +89,10 @@
                 AND ERROR_CODE = #{errorCode}
             </if>
             <if test="startDate != null">
-                AND CREATED_DATE >= #{startDate}
+                AND CREATED_DATE >= #{startDate}::date
             </if>
             <if test="endDate != null">
-                AND CREATED_DATE &lt;= #{endDate}
+                AND CREATED_DATE &lt;= (#{endDate}::date + INTERVAL '1 day' - INTERVAL '1 second')
             </if>
             <if test="searchKeyword != null and searchKeyword != ''">
                 AND (
@@ -102,7 +102,27 @@
                 )
             </if>
         </where>
-        ORDER BY LOG_SEQ DESC
+        ORDER BY 
+        <choose>
+            <when test="sortKey != null and sortKey != ''">
+                <choose>
+                    <when test="sortKey == 'logSeq'">LOG_SEQ</when>
+                    <when test="sortKey == 'logLevel'">LOG_LEVEL</when>
+                    <when test="sortKey == 'logType'">LOG_TYPE</when>
+                    <when test="sortKey == 'logMessage'">LOG_MESSAGE</when>
+                    <when test="sortKey == 'empId'">EMP_ID</when>
+                    <when test="sortKey == 'className'">CLASS_NAME</when>
+                    <when test="sortKey == 'ipAddress'">IP_ADDRESS</when>
+                    <when test="sortKey == 'createdDate'">CREATED_DATE</when>
+                    <otherwise>LOG_SEQ</otherwise>
+                </choose>
+            </when>
+            <otherwise>LOG_SEQ</otherwise>
+        </choose>
+        <choose>
+            <when test="sortOrder != null and sortOrder == 'asc'">ASC</when>
+            <otherwise>DESC</otherwise>
+        </choose>
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
@@ -124,10 +144,10 @@
                 AND ERROR_CODE = #{errorCode}
             </if>
             <if test="startDate != null">
-                AND CREATED_DATE >= #{startDate}
+                AND CREATED_DATE >= #{startDate}::date
             </if>
             <if test="endDate != null">
-                AND CREATED_DATE &lt;= #{endDate}
+                AND CREATED_DATE &lt;= (#{endDate}::date + INTERVAL '1 day' - INTERVAL '1 second')
             </if>
             <if test="searchKeyword != null and searchKeyword != ''">
                 AND (
@@ -150,10 +170,10 @@
         FROM TB_SYSTEM_LOG
         WHERE LOG_LEVEL = 'ERROR'
         <if test="startDate != null">
-            AND CREATED_DATE >= #{startDate}
+            AND CREATED_DATE >= #{startDate}::date
         </if>
         <if test="endDate != null">
-            AND CREATED_DATE &lt;= #{endDate}
+            AND CREATED_DATE &lt;= (#{endDate}::date + INTERVAL '1 day' - INTERVAL '1 second')
         </if>
         GROUP BY LOG_LEVEL, LOG_TYPE, ERROR_CODE, DATE(CREATED_DATE)
         ORDER BY ERROR_COUNT DESC
@@ -214,8 +234,8 @@
             COUNT(*) as LOG_COUNT,
             DATE(CREATED_DATE) as LOG_DATE
         FROM TB_SYSTEM_LOG
-        WHERE CREATED_DATE >= #{startDate}
-          AND CREATED_DATE &lt;= #{endDate}
+        WHERE CREATED_DATE >= #{startDate}::date
+          AND CREATED_DATE &lt;= (#{endDate}::date + INTERVAL '1 day' - INTERVAL '1 second')
         GROUP BY LOG_LEVEL, LOG_TYPE, ERROR_CATEGORY, DATE(CREATED_DATE)
         ORDER BY LOG_DATE DESC, LOG_COUNT DESC
     </select>

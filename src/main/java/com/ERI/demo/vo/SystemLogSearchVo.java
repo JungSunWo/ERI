@@ -72,6 +72,16 @@ public class SystemLogSearchVo {
     private Integer limit;
     
     /**
+     * 정렬 키
+     */
+    private String sortKey = "logSeq";
+    
+    /**
+     * 정렬 순서 (asc, desc)
+     */
+    private String sortOrder = "desc";
+    
+    /**
      * 페이징 정보 계산
      */
     public void calculatePaging() {

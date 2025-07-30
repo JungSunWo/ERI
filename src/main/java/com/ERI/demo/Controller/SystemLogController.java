@@ -2,182 +2,342 @@ package com.ERI.demo.Controller;
 
 import com.ERI.demo.service.SystemLogService;
 import com.ERI.demo.vo.SystemLogSearchVo;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 시스템 로그 컨트롤러
+ * 시스템 로그 관리 컨트롤러
  */
 @Slf4j
 @RestController
 @RequestMapping("/api/system-log")
 @RequiredArgsConstructor
 public class SystemLogController {
-    
+
     private final SystemLogService systemLogService;
-    
+
     /**
-     * 시스템 로그 조회 (페이징)
+     * 시스템 로그 목록 조회 (페이징)
      */
-    @GetMapping("/list")
+    @GetMapping
     public ResponseEntity<Map<String, Object>> getSystemLogs(
-            @ModelAttribute SystemLogSearchVo searchVo,
-            HttpServletRequest request) {
-        try {
-            Map<String, Object> result = systemLogService.getSystemLogs(searchVo);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.error("시스템 로그 조회 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("error", "시스템 로그 조회 중 오류가 발생했습니다."));
-        }
-    }
-    
-    /**
-     * 에러 로그 통계 조회
-     */
-    @GetMapping("/error-stats")
-    public ResponseEntity<List<Map<String, Object>>> getErrorLogStats(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String logLevel,
+            @RequestParam(required = false) String logType,
+            @RequestParam(required = false) String empId,
+            @RequestParam(required = false) String errorCode,
             @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate) {
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String searchKeyword,
+            @RequestParam(defaultValue = "logSeq") String sortKey,
+            @RequestParam(defaultValue = "desc") String sortOrder) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
         try {
-            List<Map<String, Object>> stats = systemLogService.getErrorLogStats(startDate, endDate);
-            return ResponseEntity.ok(stats);
+            // String 날짜를 LocalDate로 변환
+            LocalDate startLocalDate = null;
+            LocalDate endLocalDate = null;
+            
+            if (startDate != null && !startDate.trim().isEmpty()) {
+                try {
+                    startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_LOCAL_DATE);
+                } catch (Exception e) {
+                    log.warn("Invalid startDate format: {}", startDate);
+                }
+            }
+            
+            if (endDate != null && !endDate.trim().isEmpty()) {
+                try {
+                    endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_LOCAL_DATE);
+                } catch (Exception e) {
+                    log.warn("Invalid endDate format: {}", endDate);
+                }
+            }
+            
+            SystemLogSearchVo searchVo = SystemLogSearchVo.builder()
+                    .page(page)
+                    .pageSize(size)
+                    .logLevel(logLevel)
+                    .logType(logType)
+                    .empId(empId)
+                    .errorCode(errorCode)
+                    .startDate(startLocalDate)
+                    .endDate(endLocalDate)
+                    .searchKeyword(searchKeyword)
+                    .sortKey(sortKey)
+                    .sortOrder(sortOrder)
+                    .build();
+
+            Map<String, Object> result = systemLogService.getSystemLogs(searchVo);
+            
+            response.put("success", true);
+            response.put("data", result);
+            response.put("message", "시스템 로그 목록을 조회했습니다.");
+            
+            return ResponseEntity.ok(response);
+            
         } catch (Exception e) {
-            log.error("에러 로그 통계 조회 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+            log.error("시스템 로그 목록 조회 실패", e);
+            
+            response.put("success", false);
+            response.put("message", "시스템 로그 목록 조회에 실패했습니다: " + e.getMessage());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     /**
      * 로그 레벨별 통계 조회
      */
-    @GetMapping("/level-stats")
-    public ResponseEntity<List<Map<String, Object>>> getLogLevelStats() {
+    @GetMapping("/stats/level")
+    public ResponseEntity<Map<String, Object>> getLogLevelStats() {
+        Map<String, Object> response = new HashMap<>();
+        
         try {
-            List<Map<String, Object>> stats = systemLogService.getLogLevelStats();
-            return ResponseEntity.ok(stats);
+            var stats = systemLogService.getLogLevelStats();
+            
+            response.put("success", true);
+            response.put("data", stats);
+            response.put("message", "로그 레벨별 통계를 조회했습니다.");
+            
+            return ResponseEntity.ok(response);
+            
         } catch (Exception e) {
-            log.error("로그 레벨별 통계 조회 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+            log.error("로그 레벨별 통계 조회 실패", e);
+            
+            response.put("success", false);
+            response.put("message", "로그 레벨별 통계 조회에 실패했습니다: " + e.getMessage());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     /**
      * 로그 타입별 통계 조회
      */
-    @GetMapping("/type-stats")
-    public ResponseEntity<List<Map<String, Object>>> getLogTypeStats() {
+    @GetMapping("/stats/type")
+    public ResponseEntity<Map<String, Object>> getLogTypeStats() {
+        Map<String, Object> response = new HashMap<>();
+        
         try {
-            List<Map<String, Object>> stats = systemLogService.getLogTypeStats();
-            return ResponseEntity.ok(stats);
+            var stats = systemLogService.getLogTypeStats();
+            
+            response.put("success", true);
+            response.put("data", stats);
+            response.put("message", "로그 타입별 통계를 조회했습니다.");
+            
+            return ResponseEntity.ok(response);
+            
         } catch (Exception e) {
-            log.error("로그 타입별 통계 조회 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+            log.error("로그 타입별 통계 조회 실패", e);
+            
+            response.put("success", false);
+            response.put("message", "로그 타입별 통계 조회에 실패했습니다: " + e.getMessage());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     /**
-     * 시스템 로그 통계 뷰 조회
+     * 에러 로그 통계 조회
      */
-    @GetMapping("/stats-view")
-    public ResponseEntity<List<Map<String, Object>>> getSystemLogStatsView() {
+    @GetMapping("/stats/error")
+    public ResponseEntity<Map<String, Object>> getErrorLogStats(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
         try {
-            List<Map<String, Object>> stats = systemLogService.getSystemLogStatsView();
-            return ResponseEntity.ok(stats);
+            // String 날짜를 LocalDate로 변환
+            LocalDate startLocalDate = null;
+            LocalDate endLocalDate = null;
+            
+            if (startDate != null && !startDate.trim().isEmpty()) {
+                try {
+                    startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_LOCAL_DATE);
+                } catch (Exception e) {
+                    log.warn("Invalid startDate format: {}", startDate);
+                }
+            }
+            
+            if (endDate != null && !endDate.trim().isEmpty()) {
+                try {
+                    endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_LOCAL_DATE);
+                } catch (Exception e) {
+                    log.warn("Invalid endDate format: {}", endDate);
+                }
+            }
+            
+            var stats = systemLogService.getErrorLogStats(startLocalDate, endLocalDate);
+            
+            response.put("success", true);
+            response.put("data", stats);
+            response.put("message", "에러 로그 통계를 조회했습니다.");
+            
+            return ResponseEntity.ok(response);
+            
         } catch (Exception e) {
-            log.error("시스템 로그 통계 뷰 조회 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+            log.error("에러 로그 통계 조회 실패", e);
+            
+            response.put("success", false);
+            response.put("message", "에러 로그 통계 조회에 실패했습니다: " + e.getMessage());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     /**
      * 특정 기간 로그 통계 조회
      */
-    @GetMapping("/period-stats")
-    public ResponseEntity<List<Map<String, Object>>> getLogStatsByPeriod(
-            @RequestParam String startDate,
-            @RequestParam String endDate) {
+    @GetMapping("/stats/period")
+    public ResponseEntity<Map<String, Object>> getLogStatsByPeriod(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
         try {
-            List<Map<String, Object>> stats = systemLogService.getLogStatsByPeriod(startDate, endDate);
-            return ResponseEntity.ok(stats);
+            // String 날짜를 LocalDate로 변환
+            LocalDate startLocalDate = null;
+            LocalDate endLocalDate = null;
+            
+            if (startDate != null && !startDate.trim().isEmpty()) {
+                try {
+                    startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ISO_LOCAL_DATE);
+                } catch (Exception e) {
+                    log.warn("Invalid startDate format: {}", startDate);
+                }
+            }
+            
+            if (endDate != null && !endDate.trim().isEmpty()) {
+                try {
+                    endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ISO_LOCAL_DATE);
+                } catch (Exception e) {
+                    log.warn("Invalid endDate format: {}", endDate);
+                }
+            }
+            
+            var stats = systemLogService.getLogStatsByPeriod(startLocalDate, endLocalDate);
+            
+            response.put("success", true);
+            response.put("data", stats);
+            response.put("message", "기간별 로그 통계를 조회했습니다.");
+            
+            return ResponseEntity.ok(response);
+            
         } catch (Exception e) {
-            log.error("특정 기간 로그 통계 조회 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+            log.error("기간별 로그 통계 조회 실패", e);
+            
+            response.put("success", false);
+            response.put("message", "기간별 로그 통계 조회에 실패했습니다: " + e.getMessage());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
-    /**
-     * 오래된 로그 삭제
-     */
-    @DeleteMapping("/clean-old")
-    public ResponseEntity<Map<String, Object>> deleteOldLogs(
-            @RequestParam(defaultValue = "90") int days) {
-        try {
-            int deletedCount = systemLogService.deleteOldLogs(days);
-            return ResponseEntity.ok(Map.of(
-                "message", "오래된 로그가 성공적으로 삭제되었습니다.",
-                "deletedCount", deletedCount
-            ));
-        } catch (Exception e) {
-            log.error("오래된 로그 삭제 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("error", "오래된 로그 삭제 중 오류가 발생했습니다."));
-        }
-    }
-    
+
     /**
      * 특정 로그 삭제
      */
     @DeleteMapping("/{logSeq}")
     public ResponseEntity<Map<String, Object>> deleteSystemLog(@PathVariable Long logSeq) {
+        Map<String, Object> response = new HashMap<>();
+        
         try {
-            int deletedCount = systemLogService.deleteSystemLog(logSeq);
-            if (deletedCount > 0) {
-                return ResponseEntity.ok(Map.of(
-                    "message", "로그가 성공적으로 삭제되었습니다.",
-                    "deletedCount", deletedCount
-                ));
+            int result = systemLogService.deleteSystemLog(logSeq);
+            
+            if (result > 0) {
+                response.put("success", true);
+                response.put("message", "로그가 삭제되었습니다.");
+                return ResponseEntity.ok(response);
             } else {
-                return ResponseEntity.notFound().build();
+                response.put("success", false);
+                response.put("message", "로그 삭제에 실패했습니다.");
+                return ResponseEntity.badRequest().body(response);
             }
+            
         } catch (Exception e) {
-            log.error("로그 삭제 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of("error", "로그 삭제 중 오류가 발생했습니다."));
+            log.error("로그 삭제 실패", e);
+            
+            response.put("success", false);
+            response.put("message", "로그 삭제에 실패했습니다: " + e.getMessage());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     /**
-     * 시스템 로그 상태 확인
+     * 오래된 로그 삭제
      */
-    @GetMapping("/status")
-    public ResponseEntity<Map<String, Object>> getSystemLogStatus() {
+    @DeleteMapping("/old")
+    public ResponseEntity<Map<String, Object>> deleteOldLogs(@RequestParam(defaultValue = "90") int days) {
+        Map<String, Object> response = new HashMap<>();
+        
         try {
-            // 최근 24시간 로그 통계
-            List<Map<String, Object>> levelStats = systemLogService.getLogLevelStats();
-            List<Map<String, Object>> typeStats = systemLogService.getLogTypeStats();
+            int result = systemLogService.deleteOldLogs(days);
             
-            return ResponseEntity.ok(Map.of(
-                "status", "OK",
-                "message", "시스템 로그 서비스가 정상적으로 동작하고 있습니다.",
-                "levelStats", levelStats,
-                "typeStats", typeStats
-            ));
+            response.put("success", true);
+            response.put("message", days + "일 이전의 로그 " + result + "건이 삭제되었습니다.");
+            
+            return ResponseEntity.ok(response);
+            
         } catch (Exception e) {
-            log.error("시스템 로그 상태 확인 중 오류 발생: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError()
-                    .body(Map.of(
-                        "status", "ERROR",
-                        "message", "시스템 로그 서비스에 문제가 있습니다.",
-                        "error", e.getMessage()
-                    ));
+            log.error("오래된 로그 삭제 실패", e);
+            
+            response.put("success", false);
+            response.put("message", "오래된 로그 삭제에 실패했습니다: " + e.getMessage());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * 로그 상세 조회
+     */
+    @GetMapping("/{logSeq}")
+    public ResponseEntity<Map<String, Object>> getLogDetail(@PathVariable Long logSeq) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // SystemLogService에 상세 조회 메서드가 있다면 사용
+            // 현재는 목록 조회에서 필터링하여 사용
+            SystemLogSearchVo searchVo = SystemLogSearchVo.builder()
+                    .page(1)
+                    .pageSize(1)
+                    .build();
+            
+            Map<String, Object> result = systemLogService.getSystemLogs(searchVo);
+            var logs = (java.util.List<?>) result.get("logs");
+            
+            if (logs != null && !logs.isEmpty()) {
+                response.put("success", true);
+                response.put("data", logs.get(0));
+                response.put("message", "로그 상세 정보를 조회했습니다.");
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "로그를 찾을 수 없습니다.");
+                return ResponseEntity.notFound().build();
+            }
+            
+        } catch (Exception e) {
+            log.error("로그 상세 조회 실패", e);
+            
+            response.put("success", false);
+            response.put("message", "로그 상세 조회에 실패했습니다: " + e.getMessage());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

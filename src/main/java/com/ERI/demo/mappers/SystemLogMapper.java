@@ -5,6 +5,7 @@ import com.ERI.demo.vo.SystemLogSearchVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +33,8 @@ public interface SystemLogMapper {
     /**
      * 에러 로그 통계 조회
      */
-    List<Map<String, Object>> selectErrorLogStats(@Param("startDate") String startDate, 
-                                                  @Param("endDate") String endDate);
+    List<Map<String, Object>> selectErrorLogStats(@Param("startDate") LocalDate startDate, 
+                                                  @Param("endDate") LocalDate endDate);
     
     /**
      * 오래된 로그 삭제 (자동 정리)
@@ -63,6 +64,6 @@ public interface SystemLogMapper {
     /**
      * 특정 기간 로그 통계
      */
-    List<Map<String, Object>> selectLogStatsByPeriod(@Param("startDate") String startDate, 
-                                                     @Param("endDate") String endDate);
+    List<Map<String, Object>> selectLogStatsByPeriod(@Param("startDate") LocalDate startDate, 
+                                                     @Param("endDate") LocalDate endDate);
 }

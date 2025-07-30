@@ -1,6 +1,7 @@
 package com.ERI.demo.Controller;
 
 import com.ERI.demo.service.MnuLstService;
+import com.ERI.demo.util.SystemLogUtil;
 import com.ERI.demo.vo.MnuLstVO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.Map;
 public class MnuLstController {
 
     private final MnuLstService mnuLstService;
+    private final SystemLogUtil systemLogUtil;
 
     /**
      * 메뉴 목록 조회 (계층 구조)
@@ -237,10 +239,11 @@ public class MnuLstController {
     public ResponseEntity<Map<String, Object>> insertMenu(@RequestBody MnuLstVO mnuLstVO,
                                                          HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
+        String empId = null;
         
         try {
             // AuthInterceptor에서 전달받은 사용자 정보 사용
-            String empId = (String) request.getAttribute("EMP_ID");
+            empId = (String) request.getAttribute("EMP_ID");
             if (empId == null) {
                 response.put("success", false);
                 response.put("message", "인증 정보를 찾을 수 없습니다.");
@@ -258,10 +261,21 @@ public class MnuLstController {
             boolean result = mnuLstService.insertMenu(mnuLstVO, empId);
             
             if (result) {
+                // 성공 로그 적재
+                systemLogUtil.logApiSuccess("메뉴 등록", 
+                    String.format("메뉴 코드: %s, 메뉴명: %s", mnuLstVO.getMnuCd(), mnuLstVO.getMnuNm()),
+                    this.getClass().getName(), "insertMenu", empId, request);
+                
                 response.put("success", true);
                 response.put("message", "메뉴가 성공적으로 등록되었습니다.");
                 return ResponseEntity.ok(response);
             } else {
+                // 실패 로그 적재
+                systemLogUtil.logApiError("메뉴 등록", 
+                    String.format("메뉴 등록 실패 - 메뉴 코드: %s", mnuLstVO.getMnuCd()),
+                    this.getClass().getName(), "insertMenu", empId, "MENU_INSERT_FAILED",
+                    new Exception("메뉴 등록 처리 실패"), request);
+                
                 response.put("success", false);
                 response.put("message", "메뉴 등록에 실패했습니다.");
                 return ResponseEntity.badRequest().body(response);
@@ -270,6 +284,12 @@ public class MnuLstController {
         } catch (IllegalArgumentException e) {
             log.warn("메뉴 등록 유효성 검사 실패: {}", e.getMessage());
             
+            // 유효성 검사 실패 로그 적재
+            systemLogUtil.logApiError("메뉴 등록", 
+                String.format("유효성 검사 실패 - 메뉴 코드: %s, 오류: %s", 
+                    mnuLstVO != null ? mnuLstVO.getMnuCd() : "UNKNOWN", e.getMessage()),
+                this.getClass().getName(), "insertMenu", empId, "VALIDATION_ERROR", e, request);
+            
             response.put("success", false);
             response.put("message", e.getMessage());
             
@@ -277,6 +297,12 @@ public class MnuLstController {
             
         } catch (Exception e) {
             log.error("메뉴 등록 실패", e);
+            
+            // 예외 발생 로그 적재
+            systemLogUtil.logApiError("메뉴 등록", 
+                String.format("예외 발생 - 메뉴 코드: %s, 오류: %s", 
+                    mnuLstVO != null ? mnuLstVO.getMnuCd() : "UNKNOWN", e.getMessage()),
+                this.getClass().getName(), "insertMenu", empId, "EXCEPTION_ERROR", e, request);
             
             response.put("success", false);
             response.put("message", "메뉴 등록에 실패했습니다: " + e.getMessage());
@@ -293,10 +319,11 @@ public class MnuLstController {
                                                          @RequestBody MnuLstVO mnuLstVO,
                                                          HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
+        String empId = null;
         
         try {
             // AuthInterceptor에서 전달받은 사용자 정보 사용
-            String empId = (String) request.getAttribute("EMP_ID");
+            empId = (String) request.getAttribute("EMP_ID");
             if (empId == null) {
                 response.put("success", false);
                 response.put("message", "인증 정보를 찾을 수 없습니다.");
@@ -313,10 +340,21 @@ public class MnuLstController {
             boolean result = mnuLstService.updateMenu(mnuLstVO, empId);
             
             if (result) {
+                // 성공 로그 적재
+                systemLogUtil.logApiSuccess("메뉴 수정", 
+                    String.format("메뉴 코드: %s, 메뉴명: %s", mnuLstVO.getMnuCd(), mnuLstVO.getMnuNm()),
+                    this.getClass().getName(), "updateMenu", empId, request);
+                
                 response.put("success", true);
                 response.put("message", "메뉴가 성공적으로 수정되었습니다.");
                 return ResponseEntity.ok(response);
             } else {
+                // 실패 로그 적재
+                systemLogUtil.logApiError("메뉴 수정", 
+                    String.format("메뉴 수정 실패 - 메뉴 코드: %s", mnuLstVO.getMnuCd()),
+                    this.getClass().getName(), "updateMenu", empId, "MENU_UPDATE_FAILED",
+                    new Exception("메뉴 수정 처리 실패"), request);
+                
                 response.put("success", false);
                 response.put("message", "메뉴 수정에 실패했습니다.");
                 return ResponseEntity.badRequest().body(response);
@@ -325,6 +363,11 @@ public class MnuLstController {
         } catch (IllegalArgumentException e) {
             log.warn("메뉴 수정 유효성 검사 실패: {}", e.getMessage());
             
+            // 유효성 검사 실패 로그 적재
+            systemLogUtil.logApiError("메뉴 수정", 
+                String.format("유효성 검사 실패 - 메뉴 코드: %s, 오류: %s", mnuCd, e.getMessage()),
+                this.getClass().getName(), "updateMenu", empId, "VALIDATION_ERROR", e, request);
+            
             response.put("success", false);
             response.put("message", e.getMessage());
             
@@ -332,6 +375,11 @@ public class MnuLstController {
             
         } catch (Exception e) {
             log.error("메뉴 수정 실패", e);
+            
+            // 예외 발생 로그 적재
+            systemLogUtil.logApiError("메뉴 수정", 
+                String.format("예외 발생 - 메뉴 코드: %s, 오류: %s", mnuCd, e.getMessage()),
+                this.getClass().getName(), "updateMenu", empId, "EXCEPTION_ERROR", e, request);
             
             response.put("success", false);
             response.put("message", "메뉴 수정에 실패했습니다: " + e.getMessage());
@@ -347,10 +395,11 @@ public class MnuLstController {
     public ResponseEntity<Map<String, Object>> deleteMenu(@PathVariable String mnuCd,
                                                          HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
+        String empId = null;
         
         try {
             // AuthInterceptor에서 전달받은 사용자 정보 사용
-            String empId = (String) request.getAttribute("EMP_ID");
+            empId = (String) request.getAttribute("EMP_ID");
             if (empId == null) {
                 response.put("success", false);
                 response.put("message", "인증 정보를 찾을 수 없습니다.");
@@ -360,10 +409,21 @@ public class MnuLstController {
             boolean result = mnuLstService.deleteMenu(mnuCd, empId);
             
             if (result) {
+                // 성공 로그 적재
+                systemLogUtil.logApiSuccess("메뉴 삭제", 
+                    String.format("메뉴 코드: %s", mnuCd),
+                    this.getClass().getName(), "deleteMenu", empId, request);
+                
                 response.put("success", true);
                 response.put("message", "메뉴가 성공적으로 삭제되었습니다.");
                 return ResponseEntity.ok(response);
             } else {
+                // 실패 로그 적재
+                systemLogUtil.logApiError("메뉴 삭제", 
+                    String.format("메뉴 삭제 실패 - 메뉴 코드: %s", mnuCd),
+                    this.getClass().getName(), "deleteMenu", empId, "MENU_DELETE_FAILED",
+                    new Exception("메뉴 삭제 처리 실패"), request);
+                
                 response.put("success", false);
                 response.put("message", "메뉴 삭제에 실패했습니다.");
                 return ResponseEntity.badRequest().body(response);
@@ -372,6 +432,11 @@ public class MnuLstController {
         } catch (IllegalArgumentException e) {
             log.warn("메뉴 삭제 유효성 검사 실패: {}", e.getMessage());
             
+            // 유효성 검사 실패 로그 적재
+            systemLogUtil.logApiError("메뉴 삭제", 
+                String.format("유효성 검사 실패 - 메뉴 코드: %s, 오류: %s", mnuCd, e.getMessage()),
+                this.getClass().getName(), "deleteMenu", empId, "VALIDATION_ERROR", e, request);
+            
             response.put("success", false);
             response.put("message", e.getMessage());
             
@@ -379,6 +444,11 @@ public class MnuLstController {
             
         } catch (Exception e) {
             log.error("메뉴 삭제 실패", e);
+            
+            // 예외 발생 로그 적재
+            systemLogUtil.logApiError("메뉴 삭제", 
+                String.format("예외 발생 - 메뉴 코드: %s, 오류: %s", mnuCd, e.getMessage()),
+                this.getClass().getName(), "deleteMenu", empId, "EXCEPTION_ERROR", e, request);
             
             response.put("success", false);
             response.put("message", "메뉴 삭제에 실패했습니다: " + e.getMessage());
@@ -395,10 +465,11 @@ public class MnuLstController {
                                                               @RequestParam Integer mnuOrd,
                                                               HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
+        String empId = null;
         
         try {
             // AuthInterceptor에서 전달받은 사용자 정보 사용
-            String empId = (String) request.getAttribute("EMP_ID");
+            empId = (String) request.getAttribute("EMP_ID");
             if (empId == null) {
                 response.put("success", false);
                 response.put("message", "인증 정보를 찾을 수 없습니다.");
@@ -408,10 +479,21 @@ public class MnuLstController {
             boolean result = mnuLstService.updateMenuOrder(mnuCd, mnuOrd, empId);
             
             if (result) {
+                // 성공 로그 적재
+                systemLogUtil.logApiSuccess("메뉴 순서 변경", 
+                    String.format("메뉴 코드: %s, 순서: %d", mnuCd, mnuOrd),
+                    this.getClass().getName(), "updateMenuOrder", empId, request);
+                
                 response.put("success", true);
                 response.put("message", "메뉴 순서가 성공적으로 변경되었습니다.");
                 return ResponseEntity.ok(response);
             } else {
+                // 실패 로그 적재
+                systemLogUtil.logApiError("메뉴 순서 변경", 
+                    String.format("메뉴 순서 변경 실패 - 메뉴 코드: %s, 순서: %d", mnuCd, mnuOrd),
+                    this.getClass().getName(), "updateMenuOrder", empId, "MENU_ORDER_UPDATE_FAILED",
+                    new Exception("메뉴 순서 변경 처리 실패"), request);
+                
                 response.put("success", false);
                 response.put("message", "메뉴 순서 변경에 실패했습니다.");
                 return ResponseEntity.badRequest().body(response);
@@ -419,6 +501,11 @@ public class MnuLstController {
             
         } catch (Exception e) {
             log.error("메뉴 순서 변경 실패", e);
+            
+            // 예외 발생 로그 적재
+            systemLogUtil.logApiError("메뉴 순서 변경", 
+                String.format("예외 발생 - 메뉴 코드: %s, 순서: %d, 오류: %s", mnuCd, mnuOrd, e.getMessage()),
+                this.getClass().getName(), "updateMenuOrder", empId, "EXCEPTION_ERROR", e, request);
             
             response.put("success", false);
             response.put("message", "메뉴 순서 변경에 실패했습니다: " + e.getMessage());

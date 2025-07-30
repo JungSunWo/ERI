@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +28,7 @@ public class SystemLogService {
     /**
      * 시스템 로그 기록
      */
-    @Transactional
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void logSystemEvent(String logLevel, String logType, String message, String detail, 
                               String className, String methodName, Integer lineNumber, 
                               String stackTrace, String empId, String errorCode, 
@@ -57,7 +58,9 @@ public class SystemLogService {
             
             systemLogMapper.insertSystemLog(logVo);
         } catch (Exception e) {
+            // 로그 적재 실패 시에도 애플리케이션이 중단되지 않도록 처리
             log.error("시스템 로그 기록 중 오류 발생: {}", e.getMessage(), e);
+            // 추가적인 오류 처리 로직 (예: 파일 로그, 외부 모니터링 등)
         }
     }
     
@@ -128,7 +131,7 @@ public class SystemLogService {
     /**
      * 에러 로그 통계 조회
      */
-    public List<Map<String, Object>> getErrorLogStats(String startDate, String endDate) {
+    public List<Map<String, Object>> getErrorLogStats(LocalDate startDate, LocalDate endDate) {
         return systemLogMapper.selectErrorLogStats(startDate, endDate);
     }
     
@@ -156,7 +159,7 @@ public class SystemLogService {
     /**
      * 특정 기간 로그 통계
      */
-    public List<Map<String, Object>> getLogStatsByPeriod(String startDate, String endDate) {
+    public List<Map<String, Object>> getLogStatsByPeriod(LocalDate startDate, LocalDate endDate) {
         return systemLogMapper.selectLogStatsByPeriod(startDate, endDate);
     }
     

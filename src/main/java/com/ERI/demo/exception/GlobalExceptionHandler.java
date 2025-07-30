@@ -20,6 +20,8 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.apache.catalina.connector.ClientAbortException;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -333,6 +335,158 @@ public class GlobalExceptionHandler {
         ErrorResponseDto errorResponse = ErrorResponseDto.internalServerError(request.getRequestURI());
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+    
+    /**
+     * IOException 처리 (파일 입출력 관련)
+     */
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<ErrorResponseDto> handleIOException(IOException ex, HttpServletRequest request) {
+        String errorCode = "IO_ERROR";
+        String message = "파일 입출력 중 오류가 발생했습니다.";
+        
+        // 시스템 로그 기록
+        systemLogService.logError("SYSTEM", message, ex.getMessage(), 
+                                this.getClass().getName(), "handleIOException", 
+                                getEmpIdFromRequest(request), errorCode, "SYSTEM", ex, request);
+        
+        ErrorResponseDto errorResponse = new ErrorResponseDto(errorCode, message, 500, request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(errorResponse);
+    }
+    
+    /**
+     * SQLException 처리 (데이터베이스 관련)
+     */
+    @ExceptionHandler(SQLException.class)
+    public ResponseEntity<ErrorResponseDto> handleSQLException(SQLException ex, HttpServletRequest request) {
+        String errorCode = "DATABASE_ERROR";
+        String message = "데이터베이스 쿼리 실행 중 오류가 발생했습니다.";
+        
+        // 시스템 로그 기록
+        systemLogService.logError("DATABASE", message, ex.getMessage(), 
+                                this.getClass().getName(), "handleSQLException", 
+                                getEmpIdFromRequest(request), errorCode, "DATABASE", ex, request);
+        
+        ErrorResponseDto errorResponse = new ErrorResponseDto(errorCode, message, 500, request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(errorResponse);
+    }
+    
+    /**
+     * NumberFormatException 처리
+     */
+    @ExceptionHandler(NumberFormatException.class)
+    public ResponseEntity<ErrorResponseDto> handleNumberFormatException(NumberFormatException ex, HttpServletRequest request) {
+        String errorCode = "NUMBER_FORMAT_ERROR";
+        String message = "숫자 형식이 올바르지 않습니다.";
+        
+        // 시스템 로그 기록
+        systemLogService.logError("API", message, ex.getMessage(), 
+                                this.getClass().getName(), "handleNumberFormatException", 
+                                getEmpIdFromRequest(request), errorCode, "API", ex, request);
+        
+        ErrorResponseDto errorResponse = ErrorResponseDto.badRequest(message, request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(errorResponse);
+    }
+    
+    /**
+     * ArrayIndexOutOfBoundsException 처리
+     */
+    @ExceptionHandler(ArrayIndexOutOfBoundsException.class)
+    public ResponseEntity<ErrorResponseDto> handleArrayIndexOutOfBoundsException(ArrayIndexOutOfBoundsException ex, HttpServletRequest request) {
+        String errorCode = "ARRAY_INDEX_ERROR";
+        String message = "배열 인덱스가 범위를 벗어났습니다.";
+        
+        // 시스템 로그 기록
+        systemLogService.logError("SYSTEM", message, ex.getMessage(), 
+                                this.getClass().getName(), "handleArrayIndexOutOfBoundsException", 
+                                getEmpIdFromRequest(request), errorCode, "SYSTEM", ex, request);
+        
+        ErrorResponseDto errorResponse = new ErrorResponseDto(errorCode, message, 500, request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(errorResponse);
+    }
+    
+    /**
+     * ClassCastException 처리
+     */
+    @ExceptionHandler(ClassCastException.class)
+    public ResponseEntity<ErrorResponseDto> handleClassCastException(ClassCastException ex, HttpServletRequest request) {
+        String errorCode = "CLASS_CAST_ERROR";
+        String message = "타입 변환 중 오류가 발생했습니다.";
+        
+        // 시스템 로그 기록
+        systemLogService.logError("SYSTEM", message, ex.getMessage(), 
+                                this.getClass().getName(), "handleClassCastException", 
+                                getEmpIdFromRequest(request), errorCode, "SYSTEM", ex, request);
+        
+        ErrorResponseDto errorResponse = new ErrorResponseDto(errorCode, message, 500, request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(errorResponse);
+    }
+    
+    /**
+     * SecurityException 처리
+     */
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ErrorResponseDto> handleSecurityException(SecurityException ex, HttpServletRequest request) {
+        String errorCode = "SECURITY_ERROR";
+        String message = "보안 관련 오류가 발생했습니다.";
+        
+        // 시스템 로그 기록
+        systemLogService.logError("SECURITY", message, ex.getMessage(), 
+                                this.getClass().getName(), "handleSecurityException", 
+                                getEmpIdFromRequest(request), errorCode, "SECURITY", ex, request);
+        
+        ErrorResponseDto errorResponse = new ErrorResponseDto(errorCode, message, 403, request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(errorResponse);
+    }
+    
+    /**
+     * OutOfMemoryError 처리
+     */
+    @ExceptionHandler(OutOfMemoryError.class)
+    public ResponseEntity<ErrorResponseDto> handleOutOfMemoryError(OutOfMemoryError ex, HttpServletRequest request) {
+        String errorCode = "OUT_OF_MEMORY_ERROR";
+        String message = "메모리 부족으로 인한 오류가 발생했습니다.";
+        
+        // 시스템 로그 기록
+        systemLogService.logError("SYSTEM", message, ex.getMessage(), 
+                                this.getClass().getName(), "handleOutOfMemoryError", 
+                                getEmpIdFromRequest(request), errorCode, "SYSTEM", ex, request);
+        
+        ErrorResponseDto errorResponse = new ErrorResponseDto(errorCode, message, 500, request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(errorResponse);
+    }
+    
+    /**
+     * StackOverflowError 처리
+     */
+    @ExceptionHandler(StackOverflowError.class)
+    public ResponseEntity<ErrorResponseDto> handleStackOverflowError(StackOverflowError ex, HttpServletRequest request) {
+        String errorCode = "STACK_OVERFLOW_ERROR";
+        String message = "스택 오버플로우 오류가 발생했습니다.";
+        
+        // 시스템 로그 기록
+        systemLogService.logError("SYSTEM", message, ex.getMessage(), 
+                                this.getClass().getName(), "handleStackOverflowError", 
+                                getEmpIdFromRequest(request), errorCode, "SYSTEM", ex, request);
+        
+        ErrorResponseDto errorResponse = new ErrorResponseDto(errorCode, message, 500, request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(errorResponse);
     }
     
     /**
