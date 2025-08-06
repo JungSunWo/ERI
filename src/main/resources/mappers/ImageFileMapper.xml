@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mapper.ImageFileMapper">
+
+    <!-- 결과 맵 -->
+    <resultMap id="ImageFileResultMap" type="com.ERI.demo.vo.ImageFileVO">
+        <id property="imgFileSeq" column="IMG_FILE_SEQ"/>
+        <result property="imgBrdSeq" column="IMG_BRD_SEQ"/>
+        <result property="imgFileNm" column="IMG_FILE_NM"/>
+        <result property="imgFilePath" column="IMG_FILE_PATH"/>
+        <result property="imgFileSize" column="IMG_FILE_SIZE"/>
+        <result property="imgFileExt" column="IMG_FILE_EXT"/>
+        <result property="imgText" column="IMG_TEXT"/>
+        <result property="imgOrd" column="IMG_ORD"/>
+        <result property="regEmpId" column="REG_EMP_ID"/>
+        <result property="updEmpId" column="UPD_EMP_ID"/>
+        <result property="delYn" column="DEL_YN"/>
+        <result property="delDt" column="DEL_DT"/>
+        <result property="regDt" column="REG_DT"/>
+        <result property="updDt" column="UPD_DT"/>
+    </resultMap>
+
+    <!-- 기본 조회 컬럼 -->
+    <sql id="Base_Column_List">
+        IMG_FILE_SEQ,
+        IMG_BRD_SEQ,
+        IMG_FILE_NM,
+        IMG_FILE_PATH,
+        IMG_FILE_SIZE,
+        IMG_FILE_EXT,
+        IMG_TEXT,
+        IMG_ORD,
+        REG_EMP_ID,
+        UPD_EMP_ID,
+        DEL_YN,
+        DEL_DT,
+        REG_DT,
+        UPD_DT
+    </sql>
+
+    <!-- 기본 WHERE 조건 -->
+    <sql id="Base_Where_Clause">
+        WHERE DEL_YN = 'N'
+        <if test="imgBrdSeq != null">
+            AND IMG_BRD_SEQ = #{imgBrdSeq}
+        </if>
+        <if test="imgFileNm != null and imgFileNm != ''">
+            AND IMG_FILE_NM LIKE '%' || #{imgFileNm} || '%'
+        </if>
+        <if test="imgFileExt != null and imgFileExt != ''">
+            AND IMG_FILE_EXT = #{imgFileExt}
+        </if>
+        <if test="imgText != null and imgText != ''">
+            AND IMG_TEXT LIKE '%' || #{imgText} || '%'
+        </if>
+        <if test="regEmpId != null and regEmpId != ''">
+            AND REG_EMP_ID = #{regEmpId}
+        </if>
+        <if test="searchType != null and searchKeyword != null and searchKeyword != ''">
+            <choose>
+                <when test="searchType == 'fileName'">
+                    AND IMG_FILE_NM LIKE '%' || #{searchKeyword} || '%'
+                </when>
+                <when test="searchType == 'imgText'">
+                    AND IMG_TEXT LIKE '%' || #{searchKeyword} || '%'
+                </when>
+                <when test="searchType == 'regEmpId'">
+                    AND REG_EMP_ID LIKE '%' || #{searchKeyword} || '%'
+                </when>
+            </choose>
+        </if>
+    </sql>
+
+    <!-- 이미지 파일 목록 조회 -->
+    <select id="selectImageFileList" parameterType="com.ERI.demo.vo.ImageFileVO" resultMap="ImageFileResultMap">
+        SELECT 
+            <include refid="Base_Column_List"/>
+        FROM TB_IMG_FILE_LST
+        <include refid="Base_Where_Clause"/>
+        <choose>
+            <when test="sortBy != null and sortBy != ''">
+                ORDER BY ${sortBy} ${sortDirection}
+            </when>
+            <otherwise>
+                ORDER BY IMG_ORD ASC, IMG_FILE_SEQ ASC
+            </otherwise>
+        </choose>
+        <if test="page != null and size != null">
+            LIMIT #{size} OFFSET (#{page} - 1) * #{size}
+        </if>
+    </select>
+
+    <!-- 이미지 파일 목록 개수 조회 -->
+    <select id="selectImageFileCount" parameterType="com.ERI.demo.vo.ImageFileVO" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_IMG_FILE_LST
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 이미지 파일 상세 조회 -->
+    <select id="selectImageFileBySeq" parameterType="long" resultMap="ImageFileResultMap">
+        SELECT 
+            <include refid="Base_Column_List"/>
+        FROM TB_IMG_FILE_LST
+        WHERE IMG_FILE_SEQ = #{imgFileSeq}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 이미지 게시판별 이미지 파일 목록 조회 -->
+    <select id="selectImageFileByBrdSeq" parameterType="long" resultMap="ImageFileResultMap">
+        SELECT 
+            <include refid="Base_Column_List"/>
+        FROM TB_IMG_FILE_LST
+        WHERE IMG_BRD_SEQ = #{imgBrdSeq}
+        AND DEL_YN = 'N'
+        ORDER BY IMG_ORD ASC, IMG_FILE_SEQ ASC
+    </select>
+
+    <!-- 이미지 파일 등록 -->
+    <insert id="insertImageFile" parameterType="com.ERI.demo.vo.ImageFileVO" useGeneratedKeys="true" keyProperty="imgFileSeq">
+        INSERT INTO TB_IMG_FILE_LST (
+            IMG_BRD_SEQ,
+            IMG_FILE_NM,
+            IMG_FILE_PATH,
+            IMG_FILE_SIZE,
+            IMG_FILE_EXT,
+            IMG_TEXT,
+            IMG_ORD,
+            REG_EMP_ID,
+            REG_DT,
+            DEL_YN
+        ) VALUES (
+            #{imgBrdSeq},
+            #{imgFileNm},
+            #{imgFilePath},
+            #{imgFileSize},
+            #{imgFileExt},
+            #{imgText},
+            COALESCE(#{imgOrd}, 0),
+            #{regEmpId},
+            CURRENT_TIMESTAMP,
+            'N'
+        )
+    </insert>
+
+    <!-- 이미지 파일 수정 -->
+    <update id="updateImageFile" parameterType="com.ERI.demo.vo.ImageFileVO">
+        UPDATE TB_IMG_FILE_LST
+        SET 
+            IMG_FILE_NM = #{imgFileNm},
+            IMG_FILE_PATH = #{imgFilePath},
+            IMG_FILE_SIZE = #{imgFileSize},
+            IMG_FILE_EXT = #{imgFileExt},
+            IMG_TEXT = #{imgText},
+            IMG_ORD = #{imgOrd},
+            UPD_EMP_ID = #{updEmpId},
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE IMG_FILE_SEQ = #{imgFileSeq}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 이미지 파일 삭제 (논리 삭제) -->
+    <update id="deleteImageFile" parameterType="long">
+        UPDATE TB_IMG_FILE_LST
+        SET 
+            DEL_YN = 'Y',
+            DEL_DT = CURRENT_TIMESTAMP
+        WHERE IMG_FILE_SEQ = #{imgFileSeq}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 이미지 게시판별 이미지 파일 삭제 (논리 삭제) -->
+    <update id="deleteImageFileByBrdSeq" parameterType="long">
+        UPDATE TB_IMG_FILE_LST
+        SET 
+            DEL_YN = 'Y',
+            DEL_DT = CURRENT_TIMESTAMP
+        WHERE IMG_BRD_SEQ = #{imgBrdSeq}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 이미지 순서 업데이트 -->
+    <update id="updateImageOrder" parameterType="map">
+        UPDATE TB_IMG_FILE_LST
+        SET 
+            IMG_ORD = #{imgOrd},
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE IMG_FILE_SEQ = #{imgFileSeq}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 이미지 텍스트 업데이트 -->
+    <update id="updateImageText" parameterType="map">
+        UPDATE TB_IMG_FILE_LST
+        SET 
+            IMG_TEXT = #{imgText},
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE IMG_FILE_SEQ = #{imgFileSeq}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 이미지 파일명으로 조회 -->
+    <select id="selectImageFileByName" parameterType="map" resultMap="ImageFileResultMap">
+        SELECT 
+            <include refid="Base_Column_List"/>
+        FROM TB_IMG_FILE_LST
+        WHERE IMG_FILE_NM = #{imgFileNm}
+        AND IMG_BRD_SEQ = #{imgBrdSeq}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 최대 순서 조회 -->
+    <select id="selectMaxOrderByBrdSeq" parameterType="long" resultType="int">
+        SELECT COALESCE(MAX(IMG_ORD), 0)
+        FROM TB_IMG_FILE_LST
+        WHERE IMG_BRD_SEQ = #{imgBrdSeq}
+        AND DEL_YN = 'N'
+    </select>
+
+</mapper> 

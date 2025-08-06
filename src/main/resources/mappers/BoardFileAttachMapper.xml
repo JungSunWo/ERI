@@ -1,137 +1,200 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ERI.demo.mappers.BoardFileAttachMapper">
+<mapper namespace="com.ERI.demo.mapper.BoardFileAttachMapper">
 
-    <!-- 파일 첨부 등록 -->
-    <insert id="insertFileAttach" parameterType="com.ERI.demo.vo.FileAttachVO" useGeneratedKeys="true" keyProperty="fileSeq">
-        INSERT INTO TB_BOARD_FILE_ATTACH (
-            BOARD_SEQ,
-            ORIGINAL_FILE_NAME,
-            STORED_FILE_NAME,
-            FILE_PATH,
-            FILE_SIZE,
-            FILE_EXT,
-            FILE_TYPE,
-            DOWNLOAD_CNT,
-            REG_ID,
-            REG_DT,
-            UPD_ID,
-            UPD_DT,
-            DEL_YN
-        ) VALUES (
-            #{boardSeq,jdbcType=BIGINT},
-            #{originalFileName,jdbcType=VARCHAR},
-            #{storedFileName,jdbcType=VARCHAR},
-            #{filePath,jdbcType=VARCHAR},
-            #{fileSize,jdbcType=BIGINT},
-            #{fileExt,jdbcType=VARCHAR},
-            #{fileType,jdbcType=VARCHAR},
-            0,
-            #{regId,jdbcType=VARCHAR},
-            NOW(),
-            #{updId,jdbcType=VARCHAR},
-            NOW(),
-            'N'
-        )
-    </insert>
+    <!-- 결과 맵 -->
+    <resultMap id="BoardFileAttachResultMap" type="com.ERI.demo.vo.BoardFileAttachVO">
+        <id property="fileSeq" column="FILE_SEQ"/>
+        <result property="brdSeq" column="BRD_SEQ"/>
+        <result property="origFileNm" column="ORIG_FILE_NM"/>
+        <result property="storFileNm" column="STOR_FILE_NM"/>
+        <result property="filePath" column="FILE_PATH"/>
+        <result property="fileSize" column="FILE_SIZE"/>
+        <result property="fileExt" column="FILE_EXT"/>
+        <result property="fileTyp" column="FILE_TYP"/>
+        <result property="downCnt" column="DOWN_CNT"/>
+        <result property="imgLinks" column="IMG_LINKS"/>
+        <result property="regId" column="REG_ID"/>
+        <result property="regDt" column="REG_DT"/>
+        <result property="updId" column="UPD_ID"/>
+        <result property="updDt" column="UPD_DT"/>
+        <result property="delYn" column="DEL_YN"/>
+    </resultMap>
+
+    <!-- 기본 조회 컬럼 -->
+    <sql id="Base_Column_List">
+        FILE_SEQ,
+        BRD_SEQ,
+        ORIG_FILE_NM,
+        STOR_FILE_NM,
+        FILE_PATH,
+        FILE_SIZE,
+        FILE_EXT,
+        FILE_TYP,
+        DOWN_CNT,
+        IMG_LINKS,
+        REG_ID,
+        REG_DT,
+        UPD_ID,
+        UPD_DT,
+        DEL_YN
+    </sql>
+
+    <!-- 기본 WHERE 조건 -->
+    <sql id="Base_Where_Clause">
+        WHERE DEL_YN = 'N'
+        <if test="brdSeq != null">
+            AND BRD_SEQ = #{brdSeq}
+        </if>
+        <if test="fileExt != null and fileExt != ''">
+            AND FILE_EXT = #{fileExt}
+        </if>
+        <if test="fileTyp != null and fileTyp != ''">
+            AND FILE_TYP LIKE '%' || #{fileTyp} || '%'
+        </if>
+        <if test="searchType != null and searchKeyword != null and searchKeyword != ''">
+            <choose>
+                <when test="searchType == 'fileName'">
+                    AND ORIG_FILE_NM LIKE '%' || #{searchKeyword} || '%'
+                </when>
+                <when test="searchType == 'regId'">
+                    AND REG_ID LIKE '%' || #{searchKeyword} || '%'
+                </when>
+            </choose>
+        </if>
+    </sql>
+
+    <!-- 파일 첨부 목록 조회 -->
+    <select id="selectBoardFileAttachList" parameterType="com.ERI.demo.vo.BoardFileAttachVO" resultMap="BoardFileAttachResultMap">
+        SELECT 
+            <include refid="Base_Column_List"/>
+        FROM TB_BRD_FILE_ATT
+        <include refid="Base_Where_Clause"/>
+        <choose>
+            <when test="sortBy != null and sortBy != ''">
+                ORDER BY ${sortBy} ${sortDirection}
+            </when>
+            <otherwise>
+                ORDER BY FILE_SEQ DESC
+            </otherwise>
+        </choose>
+        <if test="page != null and size != null">
+            LIMIT #{size} OFFSET (#{page} - 1) * #{size}
+        </if>
+    </select>
+
+    <!-- 파일 첨부 목록 개수 조회 -->
+    <select id="selectBoardFileAttachCount" parameterType="com.ERI.demo.vo.BoardFileAttachVO" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_BRD_FILE_ATT
+        <include refid="Base_Where_Clause"/>
+    </select>
+
+    <!-- 파일 첨부 상세 조회 -->
+    <select id="selectBoardFileAttachBySeq" parameterType="long" resultMap="BoardFileAttachResultMap">
+        SELECT 
+            <include refid="Base_Column_List"/>
+        FROM TB_BRD_FILE_ATT
+        WHERE FILE_SEQ = #{fileSeq}
+        AND DEL_YN = 'N'
+    </select>
 
     <!-- 게시글별 파일 첨부 목록 조회 -->
-    <select id="selectFileAttachByBoardSeq" parameterType="long" resultType="com.ERI.demo.vo.FileAttachVO">
+    <select id="selectBoardFileAttachByBrdSeq" parameterType="long" resultMap="BoardFileAttachResultMap">
         SELECT 
-            FILE_SEQ,
-            BOARD_SEQ,
-            ORIGINAL_FILE_NAME,
-            STORED_FILE_NAME,
-            FILE_PATH,
-            FILE_SIZE,
-            FILE_EXT,
-            FILE_TYPE,
-            DOWNLOAD_CNT,
-            REG_ID,
-            REG_DT,
-            UPD_ID,
-            UPD_DT,
-            DEL_YN,
-            IMAGE_LINKS
-        FROM TB_BOARD_FILE_ATTACH
-        WHERE BOARD_SEQ = #{boardSeq,jdbcType=BIGINT}
+            <include refid="Base_Column_List"/>
+        FROM TB_BRD_FILE_ATT
+        WHERE BRD_SEQ = #{brdSeq}
         AND DEL_YN = 'N'
         ORDER BY FILE_SEQ ASC
     </select>
 
-    <!-- 파일 첨부 상세 조회 -->
-    <select id="selectFileAttachBySeq" parameterType="long" resultType="com.ERI.demo.vo.FileAttachVO">
-        SELECT 
-            FILE_SEQ,
-            BOARD_SEQ,
-            ORIGINAL_FILE_NAME,
-            STORED_FILE_NAME,
+    <!-- 파일 첨부 등록 -->
+    <insert id="insertBoardFileAttach" parameterType="com.ERI.demo.vo.BoardFileAttachVO" useGeneratedKeys="true" keyProperty="fileSeq">
+        INSERT INTO TB_BRD_FILE_ATT (
+            BRD_SEQ,
+            ORIG_FILE_NM,
+            STOR_FILE_NM,
             FILE_PATH,
             FILE_SIZE,
             FILE_EXT,
-            FILE_TYPE,
-            DOWNLOAD_CNT,
+            FILE_TYP,
+            DOWN_CNT,
+            IMG_LINKS,
             REG_ID,
             REG_DT,
-            UPD_ID,
-            UPD_DT,
-            DEL_YN,
-            IMAGE_LINKS
-        FROM TB_BOARD_FILE_ATTACH
-        WHERE FILE_SEQ = #{fileSeq,jdbcType=BIGINT}
-        AND DEL_YN = 'N'
-    </select>
+            DEL_YN
+        ) VALUES (
+            #{brdSeq},
+            #{origFileNm},
+            #{storFileNm},
+            #{filePath},
+            #{fileSize},
+            #{fileExt},
+            #{fileTyp},
+            COALESCE(#{downCnt}, 0),
+            #{imgLinks},
+            #{regId},
+            CURRENT_TIMESTAMP,
+            'N'
+        )
+    </insert>
 
-    <!-- 파일 첨부 삭제 (논리 삭제) -->
-    <update id="deleteFileAttach">
-        UPDATE TB_BOARD_FILE_ATTACH
-        SET DEL_YN = 'Y',
-            UPD_ID = #{empId,jdbcType=VARCHAR},
-            UPD_DT = NOW()
-        WHERE FILE_SEQ = #{fileSeq,jdbcType=BIGINT}
+    <!-- 파일 첨부 수정 -->
+    <update id="updateBoardFileAttach" parameterType="com.ERI.demo.vo.BoardFileAttachVO">
+        UPDATE TB_BRD_FILE_ATT
+        SET 
+            ORIG_FILE_NM = #{origFileNm},
+            STOR_FILE_NM = #{storFileNm},
+            FILE_PATH = #{filePath},
+            FILE_SIZE = #{fileSize},
+            FILE_EXT = #{fileExt},
+            FILE_TYP = #{fileTyp},
+            IMG_LINKS = #{imgLinks},
+            UPD_ID = #{updId},
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE FILE_SEQ = #{fileSeq}
+        AND DEL_YN = 'N'
     </update>
 
-    <!-- 게시글별 파일 첨부 전체 삭제 (논리 삭제) -->
-    <update id="deleteFileAttachByBoardSeq">
-        UPDATE TB_BOARD_FILE_ATTACH
-        SET DEL_YN = 'Y',
-            UPD_ID = #{empId,jdbcType=VARCHAR},
-            UPD_DT = NOW()
-        WHERE BOARD_SEQ = #{boardSeq,jdbcType=BIGINT}
+    <!-- 파일 첨부 삭제 (논리 삭제) -->
+    <update id="deleteBoardFileAttach" parameterType="long">
+        UPDATE TB_BRD_FILE_ATT
+        SET 
+            DEL_YN = 'Y',
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE FILE_SEQ = #{fileSeq}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 게시글별 파일 첨부 삭제 (논리 삭제) -->
+    <update id="deleteBoardFileAttachByBrdSeq" parameterType="long">
+        UPDATE TB_BRD_FILE_ATT
+        SET 
+            DEL_YN = 'Y',
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE BRD_SEQ = #{brdSeq}
+        AND DEL_YN = 'N'
     </update>
 
     <!-- 다운로드 횟수 증가 -->
-    <update id="incrementDownloadCnt" parameterType="long">
-        UPDATE TB_BOARD_FILE_ATTACH
-        SET DOWNLOAD_CNT = DOWNLOAD_CNT + 1,
-            UPD_DT = NOW()
-        WHERE FILE_SEQ = #{fileSeq,jdbcType=BIGINT}
-    </update>
-
-    <!-- 다운로드 횟수 증가 (서비스에서 사용) -->
-    <update id="updateDownloadCount" parameterType="long">
-        UPDATE TB_BOARD_FILE_ATTACH
-        SET DOWNLOAD_CNT = DOWNLOAD_CNT + 1,
-            UPD_DT = NOW()
-        WHERE FILE_SEQ = #{fileSeq,jdbcType=BIGINT}
-    </update>
-
-    <!-- 파일 링크 정보 업데이트 -->
-    <update id="updateFileLinks">
-        UPDATE TB_BOARD_FILE_ATTACH
-        SET IMAGE_LINKS = #{imageLinks},
-            UPD_DT = NOW()
-        WHERE FILE_SEQ = #{fileSeq,jdbcType=BIGINT}
-    </update>
-
-    <!-- 파일 링크 정보 조회 -->
-    <select id="selectFileLinks" parameterType="long" resultType="com.ERI.demo.vo.FileAttachVO">
-        SELECT 
-            FILE_SEQ,
-            IMAGE_LINKS
-        FROM TB_BOARD_FILE_ATTACH
-        WHERE FILE_SEQ = #{fileSeq,jdbcType=BIGINT}
+    <update id="incrementDownloadCount" parameterType="long">
+        UPDATE TB_BRD_FILE_ATT
+        SET 
+            DOWN_CNT = DOWN_CNT + 1,
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE FILE_SEQ = #{fileSeq}
         AND DEL_YN = 'N'
-    </select>
+    </update>
+
+    <!-- 이미지 링크 정보 업데이트 -->
+    <update id="updateImgLinks" parameterType="map">
+        UPDATE TB_BRD_FILE_ATT
+        SET 
+            IMG_LINKS = #{imgLinks},
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE FILE_SEQ = #{fileSeq}
+        AND DEL_YN = 'N'
+    </update>
 
 </mapper> 
