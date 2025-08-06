@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.ExpertConsultationDiaryMapper">
+
+    <!-- 전문가 상담 일지 목록 조회 (페이징) -->
+    <select id="selectExpertConsultationDiaryList" resultType="com.ERI.demo.vo.ExpertConsultationDiaryVO">
+        SELECT 
+            DRY_SEQ,
+            APP_SEQ,
+            CNSL_DT,
+            CNSL_TM,
+            CNSLR_EMP_ID,
+            CNSL_CNTN,
+            CNSL_RES,
+            CNSL_RCMD,
+            CNSL_DUR,
+            CNSL_STS_CD,
+            DEL_YN,
+            DEL_DT,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DT,
+            UPD_DT
+        FROM TB_EXP_CNSL_DRY
+        WHERE DEL_YN = 'N'
+        <if test="searchCondition != null">
+            <if test="searchCondition.appSeq != null">
+                AND APP_SEQ = #{searchCondition.appSeq}
+            </if>
+            <if test="searchCondition.cnslrEmpId != null and searchCondition.cnslrEmpId != ''">
+                AND CNSLR_EMP_ID = #{searchCondition.cnslrEmpId}
+            </if>
+            <if test="searchCondition.cnslStsCd != null and searchCondition.cnslStsCd != ''">
+                AND CNSL_STS_CD = #{searchCondition.cnslStsCd}
+            </if>
+            <if test="searchCondition.startDate != null and searchCondition.startDate != ''">
+                AND CNSL_DT >= #{searchCondition.startDate}::date
+            </if>
+            <if test="searchCondition.endDate != null and searchCondition.endDate != ''">
+                AND CNSL_DT &lt;= #{searchCondition.endDate}::date
+            </if>
+        </if>
+        ORDER BY REG_DT DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 전문가 상담 일지 총 개수 조회 -->
+    <select id="selectExpertConsultationDiaryCount" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_EXP_CNSL_DRY
+        WHERE DEL_YN = 'N'
+        <if test="searchCondition != null">
+            <if test="searchCondition.appSeq != null">
+                AND APP_SEQ = #{searchCondition.appSeq}
+            </if>
+            <if test="searchCondition.cnslrEmpId != null and searchCondition.cnslrEmpId != ''">
+                AND CNSLR_EMP_ID = #{searchCondition.cnslrEmpId}
+            </if>
+            <if test="searchCondition.cnslStsCd != null and searchCondition.cnslStsCd != ''">
+                AND CNSL_STS_CD = #{searchCondition.cnslStsCd}
+            </if>
+            <if test="searchCondition.startDate != null and searchCondition.startDate != ''">
+                AND CNSL_DT >= #{searchCondition.startDate}::date
+            </if>
+            <if test="searchCondition.endDate != null and searchCondition.endDate != ''">
+                AND CNSL_DT &lt;= #{searchCondition.endDate}::date
+            </if>
+        </if>
+    </select>
+
+    <!-- 전문가 상담 일지 상세 조회 -->
+    <select id="selectExpertConsultationDiaryBySeq" resultType="com.ERI.demo.vo.ExpertConsultationDiaryVO">
+        SELECT 
+            DRY_SEQ,
+            APP_SEQ,
+            CNSL_DT,
+            CNSL_TM,
+            CNSLR_EMP_ID,
+            CNSL_CNTN,
+            CNSL_RES,
+            CNSL_RCMD,
+            CNSL_DUR,
+            CNSL_STS_CD,
+            DEL_YN,
+            DEL_DT,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DT,
+            UPD_DT
+        FROM TB_EXP_CNSL_DRY
+        WHERE DRY_SEQ = #{drySeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 신청별 전문가 상담 일지 조회 -->
+    <select id="selectExpertConsultationDiaryByAppSeq" resultType="com.ERI.demo.vo.ExpertConsultationDiaryVO">
+        SELECT 
+            DRY_SEQ,
+            APP_SEQ,
+            CNSL_DT,
+            CNSL_TM,
+            CNSLR_EMP_ID,
+            CNSL_CNTN,
+            CNSL_RES,
+            CNSL_RCMD,
+            CNSL_DUR,
+            CNSL_STS_CD,
+            DEL_YN,
+            DEL_DT,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DT,
+            UPD_DT
+        FROM TB_EXP_CNSL_DRY
+        WHERE APP_SEQ = #{appSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 전문가 상담 일지 등록 -->
+    <insert id="insertExpertConsultationDiary" parameterType="com.ERI.demo.vo.ExpertConsultationDiaryVO" useGeneratedKeys="true" keyProperty="drySeq">
+        INSERT INTO TB_EXP_CNSL_DRY (
+            APP_SEQ,
+            CNSL_DT,
+            CNSL_TM,
+            CNSLR_EMP_ID,
+            CNSL_CNTN,
+            CNSL_RES,
+            CNSL_RCMD,
+            CNSL_DUR,
+            CNSL_STS_CD,
+            DEL_YN,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DT,
+            UPD_DT
+        ) VALUES (
+            #{appSeq,jdbcType=BIGINT},
+            #{cnslDt,jdbcType=DATE},
+            #{cnslTm,jdbcType=TIME},
+            #{cnslrEmpId,jdbcType=VARCHAR},
+            #{cnslCntn,jdbcType=VARCHAR},
+            #{cnslRes,jdbcType=VARCHAR},
+            #{cnslRcmd,jdbcType=VARCHAR},
+            #{cnslDur,jdbcType=INTEGER},
+            #{cnslStsCd,jdbcType=VARCHAR},
+            'N',
+            #{regEmpId,jdbcType=VARCHAR},
+            #{updEmpId,jdbcType=VARCHAR},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 전문가 상담 일지 수정 -->
+    <update id="updateExpertConsultationDiary" parameterType="com.ERI.demo.vo.ExpertConsultationDiaryVO">
+        UPDATE TB_EXP_CNSL_DRY
+        SET 
+            CNSL_DT = #{cnslDt,jdbcType=DATE},
+            CNSL_TM = #{cnslTm,jdbcType=TIME},
+            CNSLR_EMP_ID = #{cnslrEmpId,jdbcType=VARCHAR},
+            CNSL_CNTN = #{cnslCntn,jdbcType=VARCHAR},
+            CNSL_RES = #{cnslRes,jdbcType=VARCHAR},
+            CNSL_RCMD = #{cnslRcmd,jdbcType=VARCHAR},
+            CNSL_DUR = #{cnslDur,jdbcType=INTEGER},
+            CNSL_STS_CD = #{cnslStsCd,jdbcType=VARCHAR},
+            UPD_EMP_ID = #{updEmpId,jdbcType=VARCHAR},
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE DRY_SEQ = #{drySeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 전문가 상담 일지 삭제 (논리 삭제) -->
+    <update id="deleteExpertConsultationDiary">
+        UPDATE TB_EXP_CNSL_DRY
+        SET 
+            DEL_YN = 'Y',
+            DEL_DT = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE DRY_SEQ = #{drySeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+</mapper> 

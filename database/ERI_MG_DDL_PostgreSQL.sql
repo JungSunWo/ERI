@@ -8,46 +8,69 @@
 -- =================================================================
 
 CREATE TABLE TB_NTI_LST (
-    SEQ         BIGSERIAL    NOT NULL,
-    TTL         VARCHAR(255) NULL,
-    CNTN        TEXT         NULL,
-    STS_CD      VARCHAR(20)  NULL,
-    FILE_ATTACH_YN CHAR(1)   NOT NULL DEFAULT 'N', -- 첨부파일 존재 여부
-    DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE    TIMESTAMP    NULL,
-    REG_EMP_ID  VARCHAR(255) NULL,
-    UPD_EMP_ID  VARCHAR(255) NULL,
-    REG_DATE    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    SEQ         BIGSERIAL    NOT NULL,                    -- 일련번호 (PK)
+    TTL         VARCHAR(255) NULL,                        -- 제목
+    CNTN        TEXT         NULL,                        -- 내용
+    STS_CD      VARCHAR(20)  NULL,                        -- 상태코드
+    FILE_ATT_YN CHAR(1)      NOT NULL DEFAULT 'N',        -- 첨부파일 존재 여부
+    DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT      TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_EMP_ID  VARCHAR(255) NULL,                        -- 등록 직원 ID
+    UPD_EMP_ID  VARCHAR(255) NULL,                        -- 수정 직원 ID
+    REG_DT      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (SEQ)
 );
 COMMENT ON TABLE TB_NTI_LST IS '공지사항 목록';
 COMMENT ON COLUMN TB_NTI_LST.SEQ IS '일련번호';
+COMMENT ON COLUMN TB_NTI_LST.TTL IS '제목';
+COMMENT ON COLUMN TB_NTI_LST.CNTN IS '내용';
+COMMENT ON COLUMN TB_NTI_LST.STS_CD IS '상태코드';
+COMMENT ON COLUMN TB_NTI_LST.FILE_ATT_YN IS '첨부파일 존재 여부';
+COMMENT ON COLUMN TB_NTI_LST.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_NTI_LST.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_NTI_LST.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_NTI_LST.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_NTI_LST.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_NTI_LST.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_NTI_LST_DEL_YN ON TB_NTI_LST (DEL_YN);
 
 CREATE TABLE TB_NTI_TRSM_RGST_DTL (
-    SEQ          BIGINT      NOT NULL,
-    NTI_SEQ      BIGINT      NULL,
-    TRSM_MDI_CD  VARCHAR(20) NULL,
-    DEL_YN       CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE     TIMESTAMP     NULL,
-    REG_DATE     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    SEQ          BIGINT      NOT NULL,                    -- 일련번호 (PK)
+    NTI_SEQ      BIGINT      NULL,                        -- 공지사항 일련번호
+    TRSM_MDI_CD  VARCHAR(20) NULL,                        -- 발송매체코드
+    DEL_YN       CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT       TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_DT       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (SEQ)
 );
 COMMENT ON TABLE TB_NTI_TRSM_RGST_DTL IS '공지사항 발송등록 명세';
+COMMENT ON COLUMN TB_NTI_TRSM_RGST_DTL.SEQ IS '일련번호';
+COMMENT ON COLUMN TB_NTI_TRSM_RGST_DTL.NTI_SEQ IS '공지사항 일련번호';
+COMMENT ON COLUMN TB_NTI_TRSM_RGST_DTL.TRSM_MDI_CD IS '발송매체코드';
+COMMENT ON COLUMN TB_NTI_TRSM_RGST_DTL.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_NTI_TRSM_RGST_DTL.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_NTI_TRSM_RGST_DTL.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_NTI_TRSM_RGST_DTL.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_NTI_TRSM_RGST_DTL_DEL_YN ON TB_NTI_TRSM_RGST_DTL (DEL_YN);
 
 CREATE TABLE TB_NTI_TRSM_TRGT_DTL (
-    SEQ          BIGINT      NOT NULL,
-    EMP_ID       VARCHAR(255) NOT NULL,
-    DEL_YN       CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE     TIMESTAMP     NULL,
-    REG_DATE     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    SEQ          BIGINT      NOT NULL,                    -- 일련번호 (PK)
+    EMP_ID       VARCHAR(255) NOT NULL,                   -- 직원 ID (PK)
+    DEL_YN       CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT       TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_DT       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (SEQ, EMP_ID)
 );
 COMMENT ON TABLE TB_NTI_TRSM_TRGT_DTL IS '공지사항 발송대상자 명세';
+COMMENT ON COLUMN TB_NTI_TRSM_TRGT_DTL.SEQ IS '일련번호';
+COMMENT ON COLUMN TB_NTI_TRSM_TRGT_DTL.EMP_ID IS '직원 ID';
+COMMENT ON COLUMN TB_NTI_TRSM_TRGT_DTL.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_NTI_TRSM_TRGT_DTL.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_NTI_TRSM_TRGT_DTL.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_NTI_TRSM_TRGT_DTL.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_NTI_TRSM_TRGT_DTL_DEL_YN ON TB_NTI_TRSM_TRGT_DTL (DEL_YN);
 
 -- =================================================================
@@ -55,77 +78,127 @@ CREATE INDEX IDX_NTI_TRSM_TRGT_DTL_DEL_YN ON TB_NTI_TRSM_TRGT_DTL (DEL_YN);
 -- =================================================================
 
 CREATE TABLE TB_PGM_LST (
-    SEQ             BIGSERIAL    NOT NULL,
-    PGM_ID          VARCHAR(20)  NULL,
-    PGM_NM          VARCHAR(100) NULL,
-    PGM_DESC        TEXT         NULL,
-    PGM_TY_CD       VARCHAR(20)  NULL,
-    PGM_APP_UNIT_CD VARCHAR(20)  NULL,
-    PGM_STT_DT      DATE         NULL,
-    PGM_END_DT      DATE         NULL,
-    PGM_STT_TM      TIME         NULL,
-    PGM_END_TM      TIME         NULL,
-    PGM_PLCE        VARCHAR(100) NULL,
-    PGM_CNT         INTEGER      NULL,
-    PGM_CNT_LMT     INTEGER      NULL,
-    PGM_STS_CD      VARCHAR(20)  NULL,
-    FILE_ATTACH_YN  CHAR(1)      NOT NULL DEFAULT 'N', -- 첨부파일 존재 여부
-    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP     NULL,
-    REG_EMP_ID      VARCHAR(255)  NULL,
-    UPD_EMP_ID      VARCHAR(255)  NULL,
-    REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    SEQ             BIGSERIAL    NOT NULL,                    -- 일련번호 (PK)
+    PGM_ID          VARCHAR(20)  NULL,                        -- 프로그램 ID
+    PGM_NM          VARCHAR(100) NULL,                        -- 프로그램명
+    PGM_DESC        TEXT         NULL,                        -- 프로그램 설명
+    PGM_TY_CD       VARCHAR(20)  NULL,                        -- 프로그램 유형코드
+    PGM_APP_UNIT_CD VARCHAR(20)  NULL,                        -- 프로그램 신청단위코드
+    PGM_STT_DT      DATE         NULL,                        -- 프로그램 시작일자
+    PGM_END_DT      DATE         NULL,                        -- 프로그램 종료일자
+    PGM_STT_TM      TIME         NULL,                        -- 프로그램 시작시간
+    PGM_END_TM      TIME         NULL,                        -- 프로그램 종료시간
+    PGM_PLCE        VARCHAR(100) NULL,                        -- 프로그램 장소
+    PGM_CNT         INTEGER      NULL,                        -- 프로그램 인원수
+    PGM_CNT_LMT     INTEGER      NULL,                        -- 프로그램 인원제한
+    PGM_STS_CD      VARCHAR(20)  NULL,                        -- 프로그램 상태코드
+    FILE_ATT_YN     CHAR(1)      NOT NULL DEFAULT 'N',        -- 첨부파일 존재 여부
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT          TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_EMP_ID      VARCHAR(255) NULL,                        -- 등록 직원 ID
+    UPD_EMP_ID      VARCHAR(255) NULL,                        -- 수정 직원 ID
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (SEQ)
 );
 COMMENT ON TABLE TB_PGM_LST IS '프로그램 목록';
+COMMENT ON COLUMN TB_PGM_LST.SEQ IS '일련번호';
+COMMENT ON COLUMN TB_PGM_LST.PGM_ID IS '프로그램 ID';
+COMMENT ON COLUMN TB_PGM_LST.PGM_NM IS '프로그램명';
+COMMENT ON COLUMN TB_PGM_LST.PGM_DESC IS '프로그램 설명';
+COMMENT ON COLUMN TB_PGM_LST.PGM_TY_CD IS '프로그램 유형코드';
+COMMENT ON COLUMN TB_PGM_LST.PGM_APP_UNIT_CD IS '프로그램 신청단위코드';
+COMMENT ON COLUMN TB_PGM_LST.PGM_STT_DT IS '프로그램 시작일자';
+COMMENT ON COLUMN TB_PGM_LST.PGM_END_DT IS '프로그램 종료일자';
+COMMENT ON COLUMN TB_PGM_LST.PGM_STT_TM IS '프로그램 시작시간';
+COMMENT ON COLUMN TB_PGM_LST.PGM_END_TM IS '프로그램 종료시간';
+COMMENT ON COLUMN TB_PGM_LST.PGM_PLCE IS '프로그램 장소';
+COMMENT ON COLUMN TB_PGM_LST.PGM_CNT IS '프로그램 인원수';
+COMMENT ON COLUMN TB_PGM_LST.PGM_CNT_LMT IS '프로그램 인원제한';
+COMMENT ON COLUMN TB_PGM_LST.PGM_STS_CD IS '프로그램 상태코드';
+COMMENT ON COLUMN TB_PGM_LST.FILE_ATT_YN IS '첨부파일 존재 여부';
+COMMENT ON COLUMN TB_PGM_LST.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_PGM_LST.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_PGM_LST.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_PGM_LST.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_PGM_LST.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_PGM_LST.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_PGM_LST_DEL_YN ON TB_PGM_LST (DEL_YN);
 
 CREATE TABLE TB_PGM_PRE_ASGN_DTL (
-    PGM_ID          VARCHAR(20) NOT NULL,
-    PRE_ASGN_SEQ    BIGINT      NOT NULL,
-    PRE_ASGN_TTL    VARCHAR(255) NULL,
-    PRE_ASGN_CNTN   TEXT         NULL,
-    PRE_ASGN_DUE_DT DATE         NULL,
-    PRE_ASGN_DUE_TM TIME         NULL,
-    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP     NULL,
-    REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    PGM_ID          VARCHAR(20) NOT NULL,                    -- 프로그램 ID (PK)
+    PRE_ASGN_SEQ    BIGINT      NOT NULL,                    -- 사전과제 일련번호 (PK)
+    PRE_ASGN_TTL    VARCHAR(255) NULL,                        -- 사전과제 제목
+    PRE_ASGN_CNTN   TEXT         NULL,                        -- 사전과제 내용
+    PRE_ASGN_DUE_DT DATE         NULL,                        -- 사전과제 마감일자
+    PRE_ASGN_DUE_TM TIME         NULL,                        -- 사전과제 마감시간
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT          TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (PGM_ID, PRE_ASGN_SEQ)
 );
 COMMENT ON TABLE TB_PGM_PRE_ASGN_DTL IS '프로그램 사전과제 명세';
+COMMENT ON COLUMN TB_PGM_PRE_ASGN_DTL.PGM_ID IS '프로그램 ID';
+COMMENT ON COLUMN TB_PGM_PRE_ASGN_DTL.PRE_ASGN_SEQ IS '사전과제 일련번호';
+COMMENT ON COLUMN TB_PGM_PRE_ASGN_DTL.PRE_ASGN_TTL IS '사전과제 제목';
+COMMENT ON COLUMN TB_PGM_PRE_ASGN_DTL.PRE_ASGN_CNTN IS '사전과제 내용';
+COMMENT ON COLUMN TB_PGM_PRE_ASGN_DTL.PRE_ASGN_DUE_DT IS '사전과제 마감일자';
+COMMENT ON COLUMN TB_PGM_PRE_ASGN_DTL.PRE_ASGN_DUE_TM IS '사전과제 마감시간';
+COMMENT ON COLUMN TB_PGM_PRE_ASGN_DTL.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_PGM_PRE_ASGN_DTL.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_PGM_PRE_ASGN_DTL.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_PGM_PRE_ASGN_DTL.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_PGM_PRE_ASGN_DTL_DEL_YN ON TB_PGM_PRE_ASGN_DTL (DEL_YN);
 
 CREATE TABLE TB_PGM_CNTN_TRSM_DTL (
-    PGM_ID          VARCHAR(20) NOT NULL,
-    CNTN_SEQ        BIGINT      NOT NULL,
-    CNTN_TTL        VARCHAR(255) NULL,
-    CNTN_CNTN       TEXT        NULL,
-    CNTN_TRSM_DT    DATE        NULL,
-    CNTN_TRSM_TM    TIME        NULL,
-    REG_EMP_ID      VARCHAR(255)  NULL,
-    UPD_EMP_ID      VARCHAR(255)  NULL,
-    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP     NULL,
-    REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    PGM_ID          VARCHAR(20) NOT NULL,                    -- 프로그램 ID (PK)
+    CNTN_SEQ        BIGINT      NOT NULL,                    -- 콘텐츠 일련번호 (PK)
+    CNTN_TTL        VARCHAR(255) NULL,                        -- 콘텐츠 제목
+    CNTN_CNTN       TEXT        NULL,                        -- 콘텐츠 내용
+    CNTN_TRSM_DT    DATE        NULL,                        -- 콘텐츠 발송일자
+    CNTN_TRSM_TM    TIME        NULL,                        -- 콘텐츠 발송시간
+    REG_EMP_ID      VARCHAR(255) NULL,                        -- 등록 직원 ID
+    UPD_EMP_ID      VARCHAR(255) NULL,                        -- 수정 직원 ID
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT          TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (PGM_ID, CNTN_SEQ)
 );
 COMMENT ON TABLE TB_PGM_CNTN_TRSM_DTL IS '프로그램 콘텐츠 발송 명세';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.PGM_ID IS '프로그램 ID';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.CNTN_SEQ IS '콘텐츠 일련번호';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.CNTN_TTL IS '콘텐츠 제목';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.CNTN_CNTN IS '콘텐츠 내용';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.CNTN_TRSM_DT IS '콘텐츠 발송일자';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.CNTN_TRSM_TM IS '콘텐츠 발송시간';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_PGM_CNTN_TRSM_DTL.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_PGM_CNTN_TRSM_DTL_DEL_YN ON TB_PGM_CNTN_TRSM_DTL (DEL_YN);
 
 CREATE TABLE TB_CNTN_TRSM_TRGT_DTL (
-    PGM_ID          VARCHAR(20) NOT NULL,
-    CNTN_SEQ        BIGINT      NOT NULL,
-    EMP_ID          VARCHAR(255) NOT NULL,
-    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP     NULL,
-    REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    PGM_ID          VARCHAR(20) NOT NULL,                    -- 프로그램 ID (PK)
+    CNTN_SEQ        BIGINT      NOT NULL,                    -- 콘텐츠 일련번호 (PK)
+    EMP_ID          VARCHAR(255) NOT NULL,                    -- 직원 ID (PK)
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT          TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (PGM_ID, CNTN_SEQ, EMP_ID)
 );
 COMMENT ON TABLE TB_CNTN_TRSM_TRGT_DTL IS '콘텐츠 발송대상자 명세';
+COMMENT ON COLUMN TB_CNTN_TRSM_TRGT_DTL.PGM_ID IS '프로그램 ID';
+COMMENT ON COLUMN TB_CNTN_TRSM_TRGT_DTL.CNTN_SEQ IS '콘텐츠 일련번호';
+COMMENT ON COLUMN TB_CNTN_TRSM_TRGT_DTL.EMP_ID IS '직원 ID';
+COMMENT ON COLUMN TB_CNTN_TRSM_TRGT_DTL.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_CNTN_TRSM_TRGT_DTL.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_CNTN_TRSM_TRGT_DTL.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_CNTN_TRSM_TRGT_DTL.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_CNTN_TRSM_TRGT_DTL_DEL_YN ON TB_CNTN_TRSM_TRGT_DTL (DEL_YN);
 
 -- =================================================================
@@ -133,97 +206,420 @@ CREATE INDEX IDX_CNTN_TRSM_TRGT_DTL_DEL_YN ON TB_CNTN_TRSM_TRGT_DTL (DEL_YN);
 -- =================================================================
 
 CREATE TABLE TB_GNRL_CNSL (
-    APP_DT          DATE        NOT NULL,
-    CNSL_APP_SEQ    BIGINT      NOT NULL,
-    CNSL_SEQ        BIGINT      NOT NULL,
-    CNSL_TY_CD      VARCHAR(20) NULL,
-    CNSL_LCTN_CD    VARCHAR(20) NULL,
-    CNSL_DT         DATE        NULL,
-    CNSL_TM         TIME        NULL,
-    CNSL_DUR        INTEGER     NULL,
-    CNSL_CNTN       TEXT        NULL,
-    CNSL_STS_CD     VARCHAR(20) NULL,
-    FILE_ATTACH_YN  CHAR(1)      NOT NULL DEFAULT 'N', -- 첨부파일 존재 여부
-    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP     NULL,
-    REG_EMP_ID      VARCHAR(255)  NULL,
-    UPD_EMP_ID      VARCHAR(255)  NULL,
-    REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    APP_DT          DATE        NOT NULL,                     -- 신청일자 (PK)
+    CNSL_APP_SEQ    BIGINT      NOT NULL,                    -- 상담신청 일련번호 (PK)
+    CNSL_SEQ        BIGINT      NOT NULL,                    -- 상담 일련번호 (PK)
+    CNSL_TY_CD      VARCHAR(20) NULL,                        -- 상담 유형코드
+    CNSL_LCTN_CD    VARCHAR(20) NULL,                        -- 상담 위치코드
+    CNSL_DT         DATE        NULL,                        -- 상담일자
+    CNSL_TM         TIME        NULL,                        -- 상담시간
+    CNSL_DUR        INTEGER     NULL,                        -- 상담시간(분)
+    CNSL_CNTN       TEXT        NULL,                        -- 상담내용
+    CNSL_STS_CD     VARCHAR(20) NULL,                        -- 상담상태코드
+    FILE_ATT_YN     CHAR(1)      NOT NULL DEFAULT 'N',        -- 첨부파일 존재 여부
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT          TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_EMP_ID      VARCHAR(255) NULL,                        -- 등록 직원 ID
+    UPD_EMP_ID      VARCHAR(255) NULL,                        -- 수정 직원 ID
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (APP_DT, CNSL_APP_SEQ, CNSL_SEQ)
 );
 COMMENT ON TABLE TB_GNRL_CNSL IS '일반 상담';
+COMMENT ON COLUMN TB_GNRL_CNSL.APP_DT IS '신청일자';
+COMMENT ON COLUMN TB_GNRL_CNSL.CNSL_APP_SEQ IS '상담신청 일련번호';
+COMMENT ON COLUMN TB_GNRL_CNSL.CNSL_SEQ IS '상담 일련번호';
+COMMENT ON COLUMN TB_GNRL_CNSL.CNSL_TY_CD IS '상담 유형코드';
+COMMENT ON COLUMN TB_GNRL_CNSL.CNSL_LCTN_CD IS '상담 위치코드';
+COMMENT ON COLUMN TB_GNRL_CNSL.CNSL_DT IS '상담일자';
+COMMENT ON COLUMN TB_GNRL_CNSL.CNSL_TM IS '상담시간';
+COMMENT ON COLUMN TB_GNRL_CNSL.CNSL_DUR IS '상담시간(분)';
+COMMENT ON COLUMN TB_GNRL_CNSL.CNSL_CNTN IS '상담내용';
+COMMENT ON COLUMN TB_GNRL_CNSL.CNSL_STS_CD IS '상담상태코드';
+COMMENT ON COLUMN TB_GNRL_CNSL.FILE_ATT_YN IS '첨부파일 존재 여부';
+COMMENT ON COLUMN TB_GNRL_CNSL.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_GNRL_CNSL.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_GNRL_CNSL.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_GNRL_CNSL.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_GNRL_CNSL.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_GNRL_CNSL.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_GNRL_CNSL_DEL_YN ON TB_GNRL_CNSL (DEL_YN);
 
 CREATE TABLE TB_GNRL_CNSL_DTL (
-    APP_DT          DATE        NOT NULL,
-    CNSL_APP_SEQ    BIGINT      NOT NULL,
-    CNSL_SEQ        BIGINT      NOT NULL,
-    DTL_SEQ         BIGINT      NOT NULL,
-    CNSL_DTL_CNTN   TEXT        NULL,
-    CNSL_DTL_RCMD   TEXT        NULL,
-    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP     NULL,
-    REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    APP_DT          DATE        NOT NULL,                     -- 신청일자 (PK)
+    CNSL_APP_SEQ    BIGINT      NOT NULL,                    -- 상담신청 일련번호 (PK)
+    CNSL_SEQ        BIGINT      NOT NULL,                    -- 상담 일련번호 (PK)
+    DTL_SEQ         BIGINT      NOT NULL,                    -- 상세 일련번호 (PK)
+    CNSL_DTL_CNTN   TEXT        NULL,                        -- 상담 상세내용
+    CNSL_DTL_RCMD   TEXT        NULL,                        -- 상담 상세권고사항
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT          TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (APP_DT, CNSL_APP_SEQ, CNSL_SEQ, DTL_SEQ)
 );
 COMMENT ON TABLE TB_GNRL_CNSL_DTL IS '일반 상담 명세';
+COMMENT ON COLUMN TB_GNRL_CNSL_DTL.APP_DT IS '신청일자';
+COMMENT ON COLUMN TB_GNRL_CNSL_DTL.CNSL_APP_SEQ IS '상담신청 일련번호';
+COMMENT ON COLUMN TB_GNRL_CNSL_DTL.CNSL_SEQ IS '상담 일련번호';
+COMMENT ON COLUMN TB_GNRL_CNSL_DTL.DTL_SEQ IS '상세 일련번호';
+COMMENT ON COLUMN TB_GNRL_CNSL_DTL.CNSL_DTL_CNTN IS '상담 상세내용';
+COMMENT ON COLUMN TB_GNRL_CNSL_DTL.CNSL_DTL_RCMD IS '상담 상세권고사항';
+COMMENT ON COLUMN TB_GNRL_CNSL_DTL.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_GNRL_CNSL_DTL.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_GNRL_CNSL_DTL.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_GNRL_CNSL_DTL.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_GNRL_CNSL_DTL_DEL_YN ON TB_GNRL_CNSL_DTL (DEL_YN);
 
 CREATE TABLE TB_DSRD_PSY_TEST_DTL (
-    APP_DT          DATE        NOT NULL,
-    CNSL_APP_SEQ    BIGINT      NOT NULL,
-    CNSL_SEQ        BIGINT      NOT NULL,
-    PSY_TEST_CD     VARCHAR(20) NOT NULL,
-    PSY_TEST_NM     VARCHAR(100) NULL,
-    PSY_TEST_DESC   TEXT        NULL,
-    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP     NULL,
-    REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    APP_DT          DATE        NOT NULL,                     -- 신청일자 (PK)
+    CNSL_APP_SEQ    BIGINT      NOT NULL,                    -- 상담신청 일련번호 (PK)
+    CNSL_SEQ        BIGINT      NOT NULL,                    -- 상담 일련번호 (PK)
+    PSY_TEST_CD     VARCHAR(20) NOT NULL,                    -- 심리검사 코드 (PK)
+    PSY_TEST_NM     VARCHAR(100) NULL,                        -- 심리검사명
+    PSY_TEST_DESC   TEXT        NULL,                        -- 심리검사 설명
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT          TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (APP_DT, CNSL_APP_SEQ, CNSL_SEQ, PSY_TEST_CD)
 );
 COMMENT ON TABLE TB_DSRD_PSY_TEST_DTL IS '희망 심리검사 명세';
+COMMENT ON COLUMN TB_DSRD_PSY_TEST_DTL.APP_DT IS '신청일자';
+COMMENT ON COLUMN TB_DSRD_PSY_TEST_DTL.CNSL_APP_SEQ IS '상담신청 일련번호';
+COMMENT ON COLUMN TB_DSRD_PSY_TEST_DTL.CNSL_SEQ IS '상담 일련번호';
+COMMENT ON COLUMN TB_DSRD_PSY_TEST_DTL.PSY_TEST_CD IS '심리검사 코드';
+COMMENT ON COLUMN TB_DSRD_PSY_TEST_DTL.PSY_TEST_NM IS '심리검사명';
+COMMENT ON COLUMN TB_DSRD_PSY_TEST_DTL.PSY_TEST_DESC IS '심리검사 설명';
+COMMENT ON COLUMN TB_DSRD_PSY_TEST_DTL.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_DSRD_PSY_TEST_DTL.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_DSRD_PSY_TEST_DTL.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_DSRD_PSY_TEST_DTL.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_DSRD_PSY_TEST_DTL_DEL_YN ON TB_DSRD_PSY_TEST_DTL (DEL_YN);
 
 CREATE TABLE TB_RMT_CNSL (
-    APP_DT          DATE        NOT NULL,
-    CNSL_APP_SEQ    BIGINT      NOT NULL,
-    CMT_SEQ         BIGINT      NOT NULL,
-    CMT_TY_CD       VARCHAR(20) NULL,
-    CMT_DT          DATE        NULL,
-    CMT_TM          TIME        NULL,
-    CMT_DUR         INTEGER     NULL,
-    CMT_CNTN        TEXT        NULL,
-    CMT_STS_CD      VARCHAR(20) NULL,
-    FILE_ATTACH_YN  CHAR(1)      NOT NULL DEFAULT 'N', -- 첨부파일 존재 여부
-    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP     NULL,
-    REG_EMP_ID      VARCHAR(255)  NULL,
-    UPD_EMP_ID      VARCHAR(255)  NULL,
-    REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    APP_DT          DATE        NOT NULL,                     -- 신청일자 (PK)
+    CNSL_APP_SEQ    BIGINT      NOT NULL,                    -- 상담신청 일련번호 (PK)
+    CMT_SEQ         BIGINT      NOT NULL,                    -- 상담 일련번호 (PK)
+    CMT_TY_CD       VARCHAR(20) NULL,                        -- 상담 유형코드
+    CMT_DT          DATE        NULL,                        -- 상담일자
+    CMT_TM          TIME        NULL,                        -- 상담시간
+    CMT_DUR         INTEGER     NULL,                        -- 상담시간(분)
+    CMT_CNTN        TEXT        NULL,                        -- 상담내용
+    CMT_STS_CD      VARCHAR(20) NULL,                        -- 상담상태코드
+    FILE_ATT_YN     CHAR(1)      NOT NULL DEFAULT 'N',        -- 첨부파일 존재 여부
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT          TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_EMP_ID      VARCHAR(255) NULL,                        -- 등록 직원 ID
+    UPD_EMP_ID      VARCHAR(255) NULL,                        -- 수정 직원 ID
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (APP_DT, CNSL_APP_SEQ, CMT_SEQ)
 );
 COMMENT ON TABLE TB_RMT_CNSL IS '비대면 상담';
+COMMENT ON COLUMN TB_RMT_CNSL.APP_DT IS '신청일자';
+COMMENT ON COLUMN TB_RMT_CNSL.CNSL_APP_SEQ IS '상담신청 일련번호';
+COMMENT ON COLUMN TB_RMT_CNSL.CMT_SEQ IS '상담 일련번호';
+COMMENT ON COLUMN TB_RMT_CNSL.CMT_TY_CD IS '상담 유형코드';
+COMMENT ON COLUMN TB_RMT_CNSL.CMT_DT IS '상담일자';
+COMMENT ON COLUMN TB_RMT_CNSL.CMT_TM IS '상담시간';
+COMMENT ON COLUMN TB_RMT_CNSL.CMT_DUR IS '상담시간(분)';
+COMMENT ON COLUMN TB_RMT_CNSL.CMT_CNTN IS '상담내용';
+COMMENT ON COLUMN TB_RMT_CNSL.CMT_STS_CD IS '상담상태코드';
+COMMENT ON COLUMN TB_RMT_CNSL.FILE_ATT_YN IS '첨부파일 존재 여부';
+COMMENT ON COLUMN TB_RMT_CNSL.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_RMT_CNSL.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_RMT_CNSL.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_RMT_CNSL.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_RMT_CNSL.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_RMT_CNSL.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_RMT_CNSL_DEL_YN ON TB_RMT_CNSL (DEL_YN);
 
 CREATE TABLE TB_RMT_CNSL_DTL (
-    APP_DT          DATE        NOT NULL,
-    CNSL_APP_SEQ    BIGINT      NOT NULL,
-    CMT_SEQ         BIGINT      NOT NULL,
-    DTL_SEQ         BIGINT      NOT NULL,
-    CMT_DTL_CNTN    TEXT        NULL,
-    CMT_DTL_RCMD    TEXT        NULL,
-    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP     NULL,
-    REG_DATE        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    APP_DT          DATE        NOT NULL,                     -- 신청일자 (PK)
+    CNSL_APP_SEQ    BIGINT      NOT NULL,                    -- 상담신청 일련번호 (PK)
+    CMT_SEQ         BIGINT      NOT NULL,                    -- 상담 일련번호 (PK)
+    DTL_SEQ         BIGINT      NOT NULL,                    -- 상세 일련번호 (PK)
+    CMT_DTL_CNTN    TEXT        NULL,                        -- 상담 상세내용
+    CMT_DTL_RCMD    TEXT        NULL,                        -- 상담 상세권고사항
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',        -- 삭제 여부 (Y/N)
+    DEL_DT          TIMESTAMP    NULL,                        -- 삭제 일시
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,   -- 수정 일시
     PRIMARY KEY (APP_DT, CNSL_APP_SEQ, CMT_SEQ, DTL_SEQ)
 );
 COMMENT ON TABLE TB_RMT_CNSL_DTL IS '비대면 상담 명세';
+COMMENT ON COLUMN TB_RMT_CNSL_DTL.APP_DT IS '신청일자';
+COMMENT ON COLUMN TB_RMT_CNSL_DTL.CNSL_APP_SEQ IS '상담신청 일련번호';
+COMMENT ON COLUMN TB_RMT_CNSL_DTL.CMT_SEQ IS '상담 일련번호';
+COMMENT ON COLUMN TB_RMT_CNSL_DTL.DTL_SEQ IS '상세 일련번호';
+COMMENT ON COLUMN TB_RMT_CNSL_DTL.CMT_DTL_CNTN IS '상담 상세내용';
+COMMENT ON COLUMN TB_RMT_CNSL_DTL.CMT_DTL_RCMD IS '상담 상세권고사항';
+COMMENT ON COLUMN TB_RMT_CNSL_DTL.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_RMT_CNSL_DTL.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_RMT_CNSL_DTL.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_RMT_CNSL_DTL.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_RMT_CNSL_DTL_DEL_YN ON TB_RMT_CNSL_DTL (DEL_YN);
+
+-- =================================================================
+-- 3.1. 전문가 상담관리시스템 (Expert Counseling Management System)
+-- =================================================================
+
+-- 3.1.1. 전문가 상담 신청 (TB_EXP_CNSL_APP)
+-- 직원의 전문가 상담 신청 정보를 관리합니다.
+CREATE TABLE TB_EXP_CNSL_APP (
+    APP_SEQ         BIGSERIAL    NOT NULL,                -- 신청 일련번호 (PK)
+    APP_DT          DATE         NOT NULL,                -- 신청일자
+    APP_TM          TIME         NOT NULL,                -- 신청시간
+    EMP_ID          VARCHAR(255) NOT NULL,                -- 신청자 직원ID
+    CNSL_DT         DATE         NULL,                    -- 상담일자
+    CNSL_TM         TIME         NULL,                    -- 상담시간
+    CNSLR_EMP_ID    VARCHAR(255) NULL,                    -- 상담사 직원ID
+    CNSL_TY_CD      VARCHAR(20)  NULL,                    -- 상담유형코드 (FACE_TO_FACE/REMOTE)
+    CNSL_CNTN       TEXT         NULL,                    -- 상담내용
+    ANONYMOUS_YN    CHAR(1)      NOT NULL DEFAULT 'N',    -- 익명신청여부
+    APRV_STS_CD     VARCHAR(20)  NOT NULL DEFAULT 'PENDING', -- 승인상태코드 (PENDING/APPROVED/REJECTED/COMPLETED)
+    APRV_EMP_ID     VARCHAR(255) NULL,                    -- 승인자 직원ID
+    APRV_DT         DATE         NULL,                    -- 승인일자
+    APRV_TM         TIME         NULL,                    -- 승인시간
+    REJ_RSN         TEXT         NULL,                    -- 반려사유
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',    -- 삭제여부
+    DEL_DT          TIMESTAMP    NULL,                    -- 삭제일시
+    REG_EMP_ID      VARCHAR(255) NULL,                    -- 등록직원ID
+    UPD_EMP_ID      VARCHAR(255) NULL,                    -- 수정직원ID
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,         -- 수정일시
+    PRIMARY KEY (APP_SEQ)
+);
+
+COMMENT ON TABLE TB_EXP_CNSL_APP IS '전문가 상담 신청';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.APP_SEQ IS '신청 일련번호';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.APP_DT IS '신청일자';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.APP_TM IS '신청시간';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.EMP_ID IS '신청자 직원ID';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.CNSL_DT IS '상담일자';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.CNSL_TM IS '상담시간';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.CNSLR_EMP_ID IS '상담사 직원ID';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.CNSL_TY_CD IS '상담유형코드';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.CNSL_CNTN IS '상담내용';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.ANONYMOUS_YN IS '익명신청여부';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.APRV_STS_CD IS '승인상태코드';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.APRV_EMP_ID IS '승인자 직원ID';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.APRV_DT IS '승인일자';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.APRV_TM IS '승인시간';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.REJ_RSN IS '반려사유';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_EXP_CNSL_APP.UPD_DT IS '수정 일시';
+
+CREATE INDEX IDX_EXP_CNSL_APP_EMP ON TB_EXP_CNSL_APP (EMP_ID);
+CREATE INDEX IDX_EXP_CNSL_APP_CNSLR ON TB_EXP_CNSL_APP (CNSLR_EMP_ID);
+CREATE INDEX IDX_EXP_CNSL_APP_APRV_STS ON TB_EXP_CNSL_APP (APRV_STS_CD);
+CREATE INDEX IDX_EXP_CNSL_APP_DT_TM ON TB_EXP_CNSL_APP (APP_DT, APP_TM);
+CREATE INDEX IDX_EXP_CNSL_APP_DEL_YN ON TB_EXP_CNSL_APP (DEL_YN);
+CREATE INDEX IDX_EXP_CNSL_APP_REG_DT ON TB_EXP_CNSL_APP (REG_DT);
+
+-- 3.1.2. 전문가 상담 일지 (TB_EXP_CNSL_DRY)
+CREATE TABLE TB_EXP_CNSL_DRY (
+    DRY_SEQ       BIGSERIAL    NOT NULL,                -- 일지 일련번호 (PK)
+    APP_SEQ         BIGINT       NOT NULL,                -- 신청 일련번호
+    CNSL_DT         DATE         NOT NULL,                -- 상담일자
+    CNSL_TM         TIME         NOT NULL,                -- 상담시간
+    CNSLR_EMP_ID    VARCHAR(255) NOT NULL,                -- 상담사 직원ID
+    CNSL_CNTN       TEXT         NOT NULL,                -- 상담내용
+    CNSL_RES        TEXT         NULL,                    -- 상담결과
+    CNSL_RCMD       TEXT         NULL,                    -- 상담권고사항
+    CNSL_DUR        INTEGER      NULL,                    -- 상담시간(분)
+    CNSL_STS_CD     VARCHAR(20)  NOT NULL DEFAULT 'COMPLETED', -- 상담상태코드 (SCHEDULED/IN_PROGRESS/COMPLETED/CANCELLED)
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',    -- 삭제여부
+    DEL_DT          TIMESTAMP    NULL,                    -- 삭제일시
+    REG_EMP_ID      VARCHAR(255) NULL,                    -- 등록직원ID
+    UPD_EMP_ID      VARCHAR(255) NULL,                    -- 수정직원ID
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,         -- 수정일시
+    PRIMARY KEY (DRY_SEQ)
+);
+
+COMMENT ON TABLE TB_EXP_CNSL_DRY IS '전문가 상담 일지';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.DRY_SEQ IS '일지 일련번호';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.APP_SEQ IS '신청 일련번호';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.CNSL_DT IS '상담일자';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.CNSL_TM IS '상담시간';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.CNSLR_EMP_ID IS '상담사 직원ID';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.CNSL_CNTN IS '상담내용';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.CNSL_RES IS '상담결과';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.CNSL_RCMD IS '상담권고사항';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.CNSL_DUR IS '상담시간(분)';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.CNSL_STS_CD IS '상담상태코드';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_EXP_CNSL_DRY.UPD_DT IS '수정 일시';
+
+CREATE INDEX IDX_EXP_CNSL_DRY_APP ON TB_EXP_CNSL_DRY (APP_SEQ);
+CREATE INDEX IDX_EXP_CNSL_DRY_CNSLR ON TB_EXP_CNSL_DRY (CNSLR_EMP_ID);
+CREATE INDEX IDX_EXP_CNSL_DRY_DT_TM ON TB_EXP_CNSL_DRY (CNSL_DT, CNSL_TM);
+CREATE INDEX IDX_EXP_CNSL_DRY_STS ON TB_EXP_CNSL_DRY (CNSL_STS_CD);
+CREATE INDEX IDX_EXP_CNSL_DRY_DEL_YN ON TB_EXP_CNSL_DRY (DEL_YN);
+CREATE INDEX IDX_EXP_CNSL_DRY_REG_DT ON TB_EXP_CNSL_DRY (REG_DT);
+
+-- 3.1.3. 상담사 스케줄 (TB_CNSLR_SCHEDULE)
+CREATE TABLE TB_CNSLR_SCHEDULE (
+    SCH_SEQ         BIGSERIAL    NOT NULL,                -- 스케줄 일련번호 (PK)
+    CNSLR_EMP_ID    VARCHAR(255) NOT NULL,                -- 상담사 직원ID
+    SCH_DT          DATE         NOT NULL,                -- 스케줄일자
+    SCH_TM          TIME         NOT NULL,                -- 스케줄시간
+    SCH_TY_CD       VARCHAR(20)  NOT NULL,                -- 스케줄유형코드 (AVAILABLE/UNAVAILABLE/BREAK)
+    SCH_CNTN        TEXT         NULL,                    -- 스케줄내용
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',    -- 삭제여부
+    DEL_DT          TIMESTAMP    NULL,                    -- 삭제일시
+    REG_EMP_ID      VARCHAR(255) NULL,                    -- 등록직원ID
+    UPD_EMP_ID      VARCHAR(255) NULL,                    -- 수정직원ID
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,         -- 수정일시
+    PRIMARY KEY (SCH_SEQ)
+);
+
+COMMENT ON TABLE TB_CNSLR_SCHEDULE IS '상담사 스케줄';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.SCH_SEQ IS '스케줄 일련번호';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.CNSLR_EMP_ID IS '상담사 직원ID';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.SCH_DT IS '스케줄일자';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.SCH_TM IS '스케줄시간';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.SCH_TY_CD IS '스케줄유형코드';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.SCH_CNTN IS '스케줄내용';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_CNSLR_SCHEDULE.UPD_DT IS '수정 일시';
+
+CREATE INDEX IDX_CNSLR_SCHEDULE_CNSLR ON TB_CNSLR_SCHEDULE (CNSLR_EMP_ID);
+CREATE INDEX IDX_CNSLR_SCHEDULE_DT_TM ON TB_CNSLR_SCHEDULE (SCH_DT, SCH_TM);
+CREATE INDEX IDX_CNSLR_SCHEDULE_TY ON TB_CNSLR_SCHEDULE (SCH_TY_CD);
+CREATE INDEX IDX_CNSLR_SCHEDULE_DEL_YN ON TB_CNSLR_SCHEDULE (DEL_YN);
+CREATE INDEX IDX_CNSLR_SCHEDULE_REG_DT ON TB_CNSLR_SCHEDULE (REG_DT);
+
+-- 3.1.4. 상담사 배정 관리 (TB_CNSL_ASSIGNMENT)
+CREATE TABLE TB_CNSL_ASSIGNMENT (
+    ASGN_SEQ        BIGSERIAL    NOT NULL,                -- 배정 일련번호 (PK)
+    APP_SEQ         BIGINT       NOT NULL,                -- 신청 일련번호
+    CNSLR_EMP_ID    VARCHAR(255) NOT NULL,                -- 상담사 직원ID
+    ASGN_DT         DATE         NOT NULL,                -- 배정일자
+    ASGN_TM         TIME         NOT NULL,                -- 배정시간
+    ASGN_STS_CD     VARCHAR(20)  NOT NULL DEFAULT 'ASSIGNED', -- 배정상태코드 (ASSIGNED/CONFIRMED/CANCELLED)
+    ASGN_RSN        TEXT         NULL,                    -- 배정사유
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',    -- 삭제여부
+    DEL_DT          TIMESTAMP    NULL,                    -- 삭제일시
+    REG_EMP_ID      VARCHAR(255) NULL,                    -- 등록직원ID
+    UPD_EMP_ID      VARCHAR(255) NULL,                    -- 수정직원ID
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,         -- 수정일시
+    PRIMARY KEY (ASGN_SEQ)
+);
+
+COMMENT ON TABLE TB_CNSL_ASSIGNMENT IS '상담사 배정 관리';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.ASGN_SEQ IS '배정 일련번호';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.APP_SEQ IS '신청 일련번호';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.CNSLR_EMP_ID IS '상담사 직원ID';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.ASGN_DT IS '배정일자';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.ASGN_TM IS '배정시간';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.ASGN_STS_CD IS '배정상태코드';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.ASGN_RSN IS '배정사유';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_CNSL_ASSIGNMENT.UPD_DT IS '수정 일시';
+
+CREATE INDEX IDX_CNSL_ASSIGNMENT_APP ON TB_CNSL_ASSIGNMENT (APP_SEQ);
+CREATE INDEX IDX_CNSL_ASSIGNMENT_CNSLR ON TB_CNSL_ASSIGNMENT (CNSLR_EMP_ID);
+CREATE INDEX IDX_CNSL_ASSIGNMENT_DT_TM ON TB_CNSL_ASSIGNMENT (ASGN_DT, ASGN_TM);
+CREATE INDEX IDX_CNSL_ASSIGNMENT_STS ON TB_CNSL_ASSIGNMENT (ASGN_STS_CD);
+CREATE INDEX IDX_CNSL_ASSIGNMENT_DEL_YN ON TB_CNSL_ASSIGNMENT (DEL_YN);
+CREATE INDEX IDX_CNSL_ASSIGNMENT_REG_DT ON TB_CNSL_ASSIGNMENT (REG_DT);
+
+-- 3.1.5. 상담 시간대별 제한 설정 (TB_CNSL_TIME_LIMIT)
+CREATE TABLE TB_CNSL_TIME_LIMIT (
+    LIMIT_SEQ       BIGSERIAL    NOT NULL,                -- 제한 일련번호 (PK)
+    CNSL_DT         DATE         NOT NULL,                -- 상담일자
+    CNSL_TM         TIME         NOT NULL,                -- 상담시간
+    MAX_CNT         INTEGER      NOT NULL DEFAULT 3,      -- 최대신청수 (기본값 3)
+    CURRENT_CNT     INTEGER      NOT NULL DEFAULT 0,      -- 현재신청수
+    AVAIL_YN        CHAR(1)      NOT NULL DEFAULT 'Y',    -- 신청가능여부
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',    -- 삭제여부
+    DEL_DT          TIMESTAMP    NULL,                    -- 삭제일시
+    REG_EMP_ID      VARCHAR(255) NULL,                    -- 등록직원ID
+    UPD_EMP_ID      VARCHAR(255) NULL,                    -- 수정직원ID
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,         -- 수정일시
+    PRIMARY KEY (LIMIT_SEQ)
+);
+
+COMMENT ON TABLE TB_CNSL_TIME_LIMIT IS '상담 시간대별 제한 설정';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.LIMIT_SEQ IS '제한 일련번호';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.CNSL_DT IS '상담일자';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.CNSL_TM IS '상담시간';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.MAX_CNT IS '최대신청수';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.CURRENT_CNT IS '현재신청수';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.AVAIL_YN IS '신청가능여부';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_CNSL_TIME_LIMIT.UPD_DT IS '수정 일시';
+
+CREATE INDEX IDX_CNSL_TIME_LIMIT_DT_TM ON TB_CNSL_TIME_LIMIT (CNSL_DT, CNSL_TM);
+CREATE INDEX IDX_CNSL_TIME_LIMIT_AVAIL ON TB_CNSL_TIME_LIMIT (AVAIL_YN);
+CREATE INDEX IDX_CNSL_TIME_LIMIT_DEL_YN ON TB_CNSL_TIME_LIMIT (DEL_YN);
+CREATE INDEX IDX_CNSL_TIME_LIMIT_REG_DT ON TB_CNSL_TIME_LIMIT (REG_DT);
+
+-- 3.1.6. 상담사 정보 (TB_CNSLR_INFO)
+CREATE TABLE TB_CNSLR_INFO (
+    CNSLR_EMP_ID    VARCHAR(255) NOT NULL,                -- 상담사 직원ID (PK)
+    CNSLR_NM        VARCHAR(100) NOT NULL,                -- 상담사명
+    CNSLR_CLSF_CD   VARCHAR(20)  NOT NULL,                -- 상담사구분코드 (PROF/GEN/INT)
+    CNSLR_SPCL_CD   VARCHAR(20)  NULL,                    -- 상담사전문분야코드
+    CNSLR_LIC_CD    VARCHAR(20)  NULL,                    -- 상담사자격증코드
+    CNSLR_INTRO     TEXT         NULL,                    -- 상담사소개
+    CNSLR_IMG_URL   VARCHAR(255) NULL,                    -- 상담사이미지URL
+    AVAIL_YN        CHAR(1)      NOT NULL DEFAULT 'Y',    -- 상담가능여부
+    DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',    -- 삭제여부
+    DEL_DT          TIMESTAMP    NULL,                    -- 삭제일시
+    REG_EMP_ID      VARCHAR(255) NULL,                    -- 등록직원ID
+    UPD_EMP_ID      VARCHAR(255) NULL,                    -- 수정직원ID
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록일시
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,         -- 수정일시
+    PRIMARY KEY (CNSLR_EMP_ID)
+);
+
+COMMENT ON TABLE TB_CNSLR_INFO IS '상담사 정보';
+COMMENT ON COLUMN TB_CNSLR_INFO.CNSLR_EMP_ID IS '상담사 직원ID';
+COMMENT ON COLUMN TB_CNSLR_INFO.CNSLR_NM IS '상담사명';
+COMMENT ON COLUMN TB_CNSLR_INFO.CNSLR_CLSF_CD IS '상담사구분코드';
+COMMENT ON COLUMN TB_CNSLR_INFO.CNSLR_SPCL_CD IS '상담사전문분야코드';
+COMMENT ON COLUMN TB_CNSLR_INFO.CNSLR_LIC_CD IS '상담사자격증코드';
+COMMENT ON COLUMN TB_CNSLR_INFO.CNSLR_INTRO IS '상담사소개';
+COMMENT ON COLUMN TB_CNSLR_INFO.CNSLR_IMG_URL IS '상담사이미지URL';
+COMMENT ON COLUMN TB_CNSLR_INFO.AVAIL_YN IS '상담가능여부';
+COMMENT ON COLUMN TB_CNSLR_INFO.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_CNSLR_INFO.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_CNSLR_INFO.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_CNSLR_INFO.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_CNSLR_INFO.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_CNSLR_INFO.UPD_DT IS '수정 일시';
+
+CREATE INDEX IDX_CNSLR_INFO_CLSF ON TB_CNSLR_INFO (CNSLR_CLSF_CD);
+CREATE INDEX IDX_CNSLR_INFO_AVAIL ON TB_CNSLR_INFO (AVAIL_YN);
+CREATE INDEX IDX_CNSLR_INFO_DEL_YN ON TB_CNSLR_INFO (DEL_YN);
+CREATE INDEX IDX_CNSLR_INFO_REG_DT ON TB_CNSLR_INFO (REG_DT);
 
 -- =================================================================
 -- 4. 관리자 관리 (Admin Management)
@@ -233,16 +629,22 @@ CREATE TABLE TB_ADMIN_LST (
     ADMIN_ID    VARCHAR(255) NOT NULL,
     ADMIN_STS_CD VARCHAR(20)  NULL,
     DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE    TIMESTAMP     NULL,
-    REG_EMP_ID  VARCHAR(255)  NULL,
-    UPD_EMP_ID  VARCHAR(255)  NULL,
-    REG_DATE    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    DEL_DT      TIMESTAMP    NULL,
+    REG_EMP_ID  VARCHAR(255) NULL,
+    UPD_EMP_ID  VARCHAR(255) NULL,
+    REG_DT      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPD_DT      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (ADMIN_ID)
 );
 COMMENT ON TABLE TB_ADMIN_LST IS '관리자 목록';
 COMMENT ON COLUMN TB_ADMIN_LST.ADMIN_ID IS '관리자 ID';
 COMMENT ON COLUMN TB_ADMIN_LST.ADMIN_STS_CD IS '관리자 상태코드';
+COMMENT ON COLUMN TB_ADMIN_LST.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_ADMIN_LST.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_ADMIN_LST.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_ADMIN_LST.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_ADMIN_LST.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_ADMIN_LST.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_ADMIN_LST_DEL_YN ON TB_ADMIN_LST (DEL_YN);
 CREATE INDEX IDX_ADMIN_LST_STS_CD ON TB_ADMIN_LST (ADMIN_STS_CD);
 
@@ -272,9 +674,9 @@ CREATE TABLE TB_EMP_REF (
     EMP_EXTI_NO     VARCHAR(50)  NULL,               -- 직원내선번호
     EAD             VARCHAR(50)  NULL,               -- 이메일주소
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP    NULL,
-    REG_DATE        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    DEL_DT          TIMESTAMP    NULL,
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (ERI_EMP_ID)
 );
 
@@ -299,6 +701,10 @@ COMMENT ON COLUMN TB_EMP_REF.INSL_DCD IS '음양구분코드 (S:양력, L:음력
 COMMENT ON COLUMN TB_EMP_REF.EMP_CPN IS '직원휴대폰번호';
 COMMENT ON COLUMN TB_EMP_REF.EMP_EXTI_NO IS '직원내선번호';
 COMMENT ON COLUMN TB_EMP_REF.EAD IS '이메일주소';
+COMMENT ON COLUMN TB_EMP_REF.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_EMP_REF.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_EMP_REF.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_EMP_REF.UPD_DT IS '수정 일시';
 
 -- 인덱스 생성
 CREATE INDEX IDX_EMP_REF_DEL_YN ON TB_EMP_REF (DEL_YN);
@@ -315,19 +721,29 @@ CREATE INDEX IDX_EMP_REF_EMP_CPN ON TB_EMP_REF (EMP_CPN);
 -- =================================================================
 
 CREATE TABLE TB_AUTH_LST (
-    AUTH_CD     VARCHAR(20)  NOT NULL,
-    AUTH_NM     VARCHAR(100) NULL,
-    AUTH_DESC   TEXT         NULL,
-    AUTH_LVL    INTEGER      NOT NULL DEFAULT 1,  -- 권한레벨 (1~10, 숫자가 클수록 높은 권한)
-    DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE    TIMESTAMP     NULL,
-    REG_EMP_ID  VARCHAR(255)  NULL,
-    UPD_EMP_ID  VARCHAR(255)  NULL,
-    REG_DATE    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    AUTH_CD     VARCHAR(20)  NOT NULL,                        -- 권한 코드 (PK)
+    AUTH_NM     VARCHAR(100) NULL,                            -- 권한명
+    AUTH_DESC   TEXT         NULL,                            -- 권한 설명
+    AUTH_LVL    INTEGER      NOT NULL DEFAULT 1,              -- 권한레벨 (1~10, 숫자가 클수록 높은 권한)
+    DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',            -- 삭제 여부 (Y/N)
+    DEL_DT      TIMESTAMP    NULL,                            -- 삭제 일시
+    REG_EMP_ID  VARCHAR(255) NULL,                            -- 등록 직원 ID
+    UPD_EMP_ID  VARCHAR(255) NULL,                            -- 수정 직원 ID
+    REG_DT      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,       -- 수정 일시
     PRIMARY KEY (AUTH_CD)
 );
 COMMENT ON TABLE TB_AUTH_LST IS '권한 목록';
+COMMENT ON COLUMN TB_AUTH_LST.AUTH_CD IS '권한 코드';
+COMMENT ON COLUMN TB_AUTH_LST.AUTH_NM IS '권한명';
+COMMENT ON COLUMN TB_AUTH_LST.AUTH_DESC IS '권한 설명';
+COMMENT ON COLUMN TB_AUTH_LST.AUTH_LVL IS '권한레벨 (1~10, 숫자가 클수록 높은 권한)';
+COMMENT ON COLUMN TB_AUTH_LST.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_AUTH_LST.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_AUTH_LST.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_AUTH_LST.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_AUTH_LST.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_AUTH_LST.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_AUTH_LST_DEL_YN ON TB_AUTH_LST (DEL_YN);
 
 CREATE TABLE TB_MNU_LST (
@@ -341,11 +757,11 @@ CREATE TABLE TB_MNU_LST (
     MNU_USE_YN  CHAR(1)      NOT NULL DEFAULT 'Y', -- 사용여부
     MNU_AUTH_TYPE VARCHAR(20) NOT NULL DEFAULT 'USER', -- 메뉴권한구분 (USER: 일반사용자, COUNSELOR: 상담사, ADMIN: 관리자)
     DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE    TIMESTAMP    NULL,
+    DEL_DT      TIMESTAMP    NULL,
     REG_EMP_ID  VARCHAR(255) NULL,
     UPD_EMP_ID  VARCHAR(255) NULL,
-    REG_DATE    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    REG_DT      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPD_DT      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (MNU_CD)
 );
 COMMENT ON TABLE TB_MNU_LST IS '메뉴 목록';
@@ -371,11 +787,11 @@ CREATE TABLE TB_AUTH_GRP_AUTH_MAP (
     AUTH_CD     VARCHAR(20)  NOT NULL,
     MNU_CD      VARCHAR(20)  NOT NULL,
     DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE    TIMESTAMP    NULL,
+    DEL_DT      TIMESTAMP    NULL,
     REG_EMP_ID  VARCHAR(255) NULL,
     UPD_EMP_ID  VARCHAR(255) NULL,
-    REG_DATE    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    REG_DT      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPD_DT      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (AUTH_CD, MNU_CD)
 );
 COMMENT ON TABLE TB_AUTH_GRP_AUTH_MAP IS '권한-메뉴 매핑';
@@ -387,39 +803,64 @@ CREATE INDEX IDX_AUTH_GRP_AUTH_MAP_MNU ON TB_AUTH_GRP_AUTH_MAP (MNU_CD);
 
 
 CREATE TABLE TB_DEPT_LST (
-    DEPT_CD     VARCHAR(20)  NOT NULL,
-    DEPT_NM     VARCHAR(100) NULL,
-    DEPT_DESC   TEXT         NULL,
-    DEPT_MGR_EMP_ID VARCHAR(255)  NULL,
-    DEPT_STS_CD VARCHAR(20)  NULL,
-    FILE_ATTACH_YN CHAR(1)   NOT NULL DEFAULT 'N', -- 부파일 존재 여부
-    DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE    TIMESTAMP     NULL,
-    REG_EMP_ID  VARCHAR(255)  NULL,
-    UPD_EMP_ID  VARCHAR(255)  NULL,
-    REG_DATE    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    DEPT_CD     VARCHAR(20)  NOT NULL,                        -- 부서 코드 (PK)
+    DEPT_NM     VARCHAR(100) NULL,                            -- 부서명
+    DEPT_DESC   TEXT         NULL,                            -- 부서 설명
+    DEPT_MGR_EMP_ID VARCHAR(255) NULL,                        -- 부서장 직원 ID
+    DEPT_STS_CD VARCHAR(20)  NULL,                            -- 부서 상태코드
+    FILE_ATT_YN CHAR(1)      NOT NULL DEFAULT 'N',            -- 첨부파일 존재 여부
+    DEL_YN      CHAR(1)      NOT NULL DEFAULT 'N',            -- 삭제 여부 (Y/N)
+    DEL_DT      TIMESTAMP    NULL,                            -- 삭제 일시
+    REG_EMP_ID  VARCHAR(255) NULL,                            -- 등록 직원 ID
+    UPD_EMP_ID  VARCHAR(255) NULL,                            -- 수정 직원 ID
+    REG_DT      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 등록 일시
+    UPD_DT      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,       -- 수정 일시
     PRIMARY KEY (DEPT_CD)
 );
 COMMENT ON TABLE TB_DEPT_LST IS '부서 목록';
+COMMENT ON COLUMN TB_DEPT_LST.DEPT_CD IS '부서 코드';
+COMMENT ON COLUMN TB_DEPT_LST.DEPT_NM IS '부서명';
+COMMENT ON COLUMN TB_DEPT_LST.DEPT_DESC IS '부서 설명';
+COMMENT ON COLUMN TB_DEPT_LST.DEPT_MGR_EMP_ID IS '부서장 직원 ID';
+COMMENT ON COLUMN TB_DEPT_LST.DEPT_STS_CD IS '부서 상태코드';
+COMMENT ON COLUMN TB_DEPT_LST.FILE_ATT_YN IS '첨부파일 존재 여부';
+COMMENT ON COLUMN TB_DEPT_LST.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_DEPT_LST.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_DEPT_LST.REG_EMP_ID IS '등록 직원 ID';
+COMMENT ON COLUMN TB_DEPT_LST.UPD_EMP_ID IS '수정 직원 ID';
+COMMENT ON COLUMN TB_DEPT_LST.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_DEPT_LST.UPD_DT IS '수정 일시';
 CREATE INDEX IDX_DEPT_LST_DEL_YN ON TB_DEPT_LST (DEL_YN);
 
 CREATE TABLE TB_CNSLR_LST (
-    CNSLR_EMP_ID VARCHAR(255) NOT NULL,
-    CNSLR_INFO_CLSF_CD VARCHAR(20) NULL,  -- 상담자정보구분코드
+    CNSLR_EMP_ID     VARCHAR(255) NOT NULL,     -- 상담사직원ID
+    CNSLR_INFO_CLSF_CD VARCHAR(20) NULL,        -- 상담자정보구분코드
+    CNSLR_NM         VARCHAR(100) NULL,         -- 상담사명
+    CNSLR_EXP_YR     INTEGER      NULL,         -- 상담사경력년수
+    CNSLR_STS_CD     VARCHAR(20)  NULL,         -- 상담사상태코드 (ACT:활성, INACT:비활성)
+    CNSLR_AVL_YN     CHAR(1)      NOT NULL DEFAULT 'Y', -- 상담사가능여부
+    CNSLR_DESC       TEXT         NULL,         -- 상담사설명
     
-    DEL_YN       CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE     TIMESTAMP     NULL,
-    REG_EMP_ID   VARCHAR(255)  NULL,
-    UPD_EMP_ID   VARCHAR(255)  NULL,
-    REG_DATE     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+    DEL_YN           CHAR(1)      NOT NULL DEFAULT 'N',
+    DEL_DT           TIMESTAMP    NULL,
+    REG_EMP_ID       VARCHAR(255) NULL,
+    UPD_EMP_ID       VARCHAR(255) NULL,
+    REG_DT           TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPD_DT           TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (CNSLR_EMP_ID)
 );
 COMMENT ON TABLE TB_CNSLR_LST IS '상담사 목록';
+COMMENT ON COLUMN TB_CNSLR_LST.CNSLR_EMP_ID IS '상담사직원ID';
 COMMENT ON COLUMN TB_CNSLR_LST.CNSLR_INFO_CLSF_CD IS '상담자정보구분코드';
+COMMENT ON COLUMN TB_CNSLR_LST.CNSLR_NM IS '상담사명';
+COMMENT ON COLUMN TB_CNSLR_LST.CNSLR_EXP_YR IS '상담사경력년수';
+COMMENT ON COLUMN TB_CNSLR_LST.CNSLR_STS_CD IS '상담사상태코드 (ACT:활성, INACT:비활성)';
+COMMENT ON COLUMN TB_CNSLR_LST.CNSLR_AVL_YN IS '상담사가능여부 (Y:가능, N:불가능)';
+COMMENT ON COLUMN TB_CNSLR_LST.CNSLR_DESC IS '상담사설명';
 CREATE INDEX IDX_CNSLR_LST_DEL_YN ON TB_CNSLR_LST (DEL_YN);
 CREATE INDEX IDX_CNSLR_LST_INFO_CLSF ON TB_CNSLR_LST (CNSLR_INFO_CLSF_CD);
+CREATE INDEX IDX_CNSLR_LST_STS_CD ON TB_CNSLR_LST (CNSLR_STS_CD);
+CREATE INDEX IDX_CNSLR_LST_AVL_YN ON TB_CNSLR_LST (CNSLR_AVL_YN);
 
 -- =================================================================
 -- 6. 첨부파일 관리 (File Attachment Management)
@@ -440,13 +881,13 @@ CREATE TABLE TB_FILE_ATTACH (
     FILE_MIME_TYPE  VARCHAR(100) NULL,         -- MIME 타입
     FILE_DESC       TEXT         NULL,         -- 파일 설명
     FILE_ORD        INTEGER      NOT NULL DEFAULT 1, -- 파일 순서
-    DOWNLOAD_CNT    INTEGER      NOT NULL DEFAULT 0, -- 다운로드 횟수
+    DOWN_CNT        INTEGER      NOT NULL DEFAULT 0, -- 다운로드 횟수
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP    NULL,
+    DEL_DT          TIMESTAMP    NULL,
     REG_EMP_ID      VARCHAR(255) NULL,
     UPD_EMP_ID      VARCHAR(255) NULL,
-    REG_DATE        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (FILE_SEQ)
 );
 COMMENT ON TABLE TB_FILE_ATTACH IS '첨부파일 관리';
@@ -460,7 +901,7 @@ COMMENT ON COLUMN TB_FILE_ATTACH.FILE_EXT IS '파일 확장자';
 COMMENT ON COLUMN TB_FILE_ATTACH.FILE_MIME_TYPE IS 'MIME 타입';
 COMMENT ON COLUMN TB_FILE_ATTACH.FILE_DESC IS '파일 설명';
 COMMENT ON COLUMN TB_FILE_ATTACH.FILE_ORD IS '파일 순서';
-COMMENT ON COLUMN TB_FILE_ATTACH.DOWNLOAD_CNT IS '다운로드 횟수';
+COMMENT ON COLUMN TB_FILE_ATTACH.DOWN_CNT IS '다운로드 횟수';
 CREATE INDEX IDX_FILE_ATTACH_REF ON TB_FILE_ATTACH (REF_TBL_CD, REF_PK_VAL);
 CREATE INDEX IDX_FILE_ATTACH_DEL_YN ON TB_FILE_ATTACH (DEL_YN);
 CREATE INDEX IDX_FILE_ATTACH_ORD ON TB_FILE_ATTACH (FILE_ORD);
@@ -587,11 +1028,11 @@ INSERT INTO TB_FILE_ATTACH (REF_TBL_CD, REF_PK_VAL, FILE_NM, FILE_SAVE_NM, FILE_
 -- 9. 시스템 로그 관리 (System Log Management)
 -- =================================================================
 
-CREATE TABLE TB_SYSTEM_LOG (
+CREATE TABLE TB_SYS_LOG (
     LOG_SEQ BIGSERIAL NOT NULL,
     LOG_LEVEL VARCHAR(10) NOT NULL,
     LOG_TYPE VARCHAR(50) NOT NULL,
-    LOG_MESSAGE TEXT NOT NULL,
+    LOG_MSG TEXT NOT NULL,
     LOG_DETAIL TEXT NULL,
     CLASS_NAME VARCHAR(200) NULL,
     METHOD_NAME VARCHAR(100) NULL,
@@ -606,184 +1047,159 @@ CREATE TABLE TB_SYSTEM_LOG (
     EXECUTION_TIME BIGINT NULL,
     IP_ADDRESS VARCHAR(45) NULL,
     USER_AGENT TEXT NULL,
-    ERROR_CODE VARCHAR(50) NULL,
-    ERROR_CATEGORY VARCHAR(50) NULL,
-    CREATED_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CREATED_BY VARCHAR(20) NOT NULL DEFAULT 'SYSTEM',
+    ERR_CODE VARCHAR(50) NULL,
+    ERR_CAT VARCHAR(50) NULL,
+    CRTD_DT TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CRTD_BY VARCHAR(20) NOT NULL DEFAULT 'SYSTEM',
     PRIMARY KEY (LOG_SEQ)
 );
 
-COMMENT ON TABLE TB_SYSTEM_LOG IS '시스템 로그 테이블';
-COMMENT ON COLUMN TB_SYSTEM_LOG.LOG_SEQ IS '로그 시퀀스';
-COMMENT ON COLUMN TB_SYSTEM_LOG.LOG_LEVEL IS '로그 레벨 (INFO, WARN, ERROR, DEBUG)';
-COMMENT ON COLUMN TB_SYSTEM_LOG.LOG_TYPE IS '로그 타입 (SYSTEM, API, DATABASE, SECURITY, MESSENGER)';
-COMMENT ON COLUMN TB_SYSTEM_LOG.LOG_MESSAGE IS '로그 메시지';
-COMMENT ON COLUMN TB_SYSTEM_LOG.LOG_DETAIL IS '상세 로그 내용';
-COMMENT ON COLUMN TB_SYSTEM_LOG.CLASS_NAME IS '발생 클래스명';
-COMMENT ON COLUMN TB_SYSTEM_LOG.METHOD_NAME IS '발생 메서드명';
-COMMENT ON COLUMN TB_SYSTEM_LOG.LINE_NUMBER IS '발생 라인 번호';
-COMMENT ON COLUMN TB_SYSTEM_LOG.STACK_TRACE IS '스택 트레이스';
-COMMENT ON COLUMN TB_SYSTEM_LOG.EMP_ID IS '사용자 사번';
-COMMENT ON COLUMN TB_SYSTEM_LOG.SESSION_ID IS '세션 ID';
-COMMENT ON COLUMN TB_SYSTEM_LOG.REQUEST_URI IS '요청 URI';
-COMMENT ON COLUMN TB_SYSTEM_LOG.REQUEST_METHOD IS '요청 메서드';
-COMMENT ON COLUMN TB_SYSTEM_LOG.REQUEST_PARAMS IS '요청 파라미터';
-COMMENT ON COLUMN TB_SYSTEM_LOG.RESPONSE_STATUS IS '응답 상태 코드';
-COMMENT ON COLUMN TB_SYSTEM_LOG.EXECUTION_TIME IS '실행 시간 (ms)';
-COMMENT ON COLUMN TB_SYSTEM_LOG.IP_ADDRESS IS 'IP 주소';
-COMMENT ON COLUMN TB_SYSTEM_LOG.USER_AGENT IS '사용자 에이전트';
-COMMENT ON COLUMN TB_SYSTEM_LOG.ERROR_CODE IS '에러 코드';
-COMMENT ON COLUMN TB_SYSTEM_LOG.ERROR_CATEGORY IS '에러 카테고리';
-COMMENT ON COLUMN TB_SYSTEM_LOG.CREATED_DATE IS '생성일시';
-COMMENT ON COLUMN TB_SYSTEM_LOG.CREATED_BY IS '생성자';
+COMMENT ON TABLE TB_SYS_LOG IS '시스템 로그 테이블';
+COMMENT ON COLUMN TB_SYS_LOG.LOG_SEQ IS '로그 시퀀스';
+COMMENT ON COLUMN TB_SYS_LOG.LOG_LEVEL IS '로그 레벨 (INFO, WARN, ERROR, DEBUG)';
+COMMENT ON COLUMN TB_SYS_LOG.LOG_TYPE IS '로그 타입 (SYSTEM, API, DATABASE, SECURITY, MESSENGER)';
+COMMENT ON COLUMN TB_SYS_LOG.LOG_MSG IS '로그 메시지';
+COMMENT ON COLUMN TB_SYS_LOG.LOG_DETAIL IS '상세 로그 내용';
+COMMENT ON COLUMN TB_SYS_LOG.CLASS_NAME IS '발생 클래스명';
+COMMENT ON COLUMN TB_SYS_LOG.METHOD_NAME IS '발생 메서드명';
+COMMENT ON COLUMN TB_SYS_LOG.LINE_NUMBER IS '발생 라인 번호';
+COMMENT ON COLUMN TB_SYS_LOG.STACK_TRACE IS '스택 트레이스';
+COMMENT ON COLUMN TB_SYS_LOG.EMP_ID IS '사용자 사번';
+COMMENT ON COLUMN TB_SYS_LOG.SESSION_ID IS '세션 ID';
+COMMENT ON COLUMN TB_SYS_LOG.REQUEST_URI IS '요청 URI';
+COMMENT ON COLUMN TB_SYS_LOG.REQUEST_METHOD IS '요청 메서드';
+COMMENT ON COLUMN TB_SYS_LOG.REQUEST_PARAMS IS '요청 파라미터';
+COMMENT ON COLUMN TB_SYS_LOG.RESPONSE_STATUS IS '응답 상태 코드';
+COMMENT ON COLUMN TB_SYS_LOG.EXECUTION_TIME IS '실행 시간 (ms)';
+COMMENT ON COLUMN TB_SYS_LOG.IP_ADDRESS IS 'IP 주소';
+COMMENT ON COLUMN TB_SYS_LOG.USER_AGENT IS '사용자 에이전트';
+COMMENT ON COLUMN TB_SYS_LOG.ERR_CODE IS '에러 코드';
+COMMENT ON COLUMN TB_SYS_LOG.ERR_CAT IS '에러 카테고리';
+COMMENT ON COLUMN TB_SYS_LOG.CRTD_DT IS '생성일시';
+COMMENT ON COLUMN TB_SYS_LOG.CRTD_BY IS '생성자';
 
 -- 시스템 로그 인덱스 생성
-CREATE INDEX IDX_SYSTEM_LOG_LEVEL ON TB_SYSTEM_LOG (LOG_LEVEL);
-CREATE INDEX IDX_SYSTEM_LOG_TYPE ON TB_SYSTEM_LOG (LOG_TYPE);
-CREATE INDEX IDX_SYSTEM_LOG_DATE ON TB_SYSTEM_LOG (CREATED_DATE);
-CREATE INDEX IDX_SYSTEM_LOG_EMP ON TB_SYSTEM_LOG (EMP_ID);
-CREATE INDEX IDX_SYSTEM_LOG_ERROR ON TB_SYSTEM_LOG (ERROR_CODE);
-CREATE INDEX IDX_SYSTEM_LOG_ERROR_CATEGORY ON TB_SYSTEM_LOG (ERROR_CATEGORY);
-CREATE INDEX IDX_SYSTEM_LOG_CLASS ON TB_SYSTEM_LOG (CLASS_NAME);
+CREATE INDEX IDX_SYS_LOG_LEVEL ON TB_SYS_LOG (LOG_LEVEL);
+CREATE INDEX IDX_SYS_LOG_TYPE ON TB_SYS_LOG (LOG_TYPE);
+CREATE INDEX IDX_SYS_LOG_DATE ON TB_SYS_LOG (CRTD_DT);
+CREATE INDEX IDX_SYS_LOG_EMP ON TB_SYS_LOG (EMP_ID);
+CREATE INDEX IDX_SYS_LOG_ERROR ON TB_SYS_LOG (ERR_CODE);
+CREATE INDEX IDX_SYS_LOG_ERROR_CATEGORY ON TB_SYS_LOG (ERR_CAT);
+CREATE INDEX IDX_SYS_LOG_CLASS ON TB_SYS_LOG (CLASS_NAME);
 
--- 시스템 로그 샘플 데이터
-INSERT INTO TB_SYSTEM_LOG (LOG_LEVEL, LOG_TYPE, LOG_MESSAGE, LOG_DETAIL, CLASS_NAME, METHOD_NAME, EMP_ID, ERROR_CODE, ERROR_CATEGORY, CREATED_BY) VALUES
-('INFO', 'SYSTEM', '시스템 시작', 'ERI 시스템이 정상적으로 시작되었습니다.', 'com.ERI.demo.EriApplication', 'main', 'SYSTEM', NULL, NULL, 'SYSTEM'),
-('INFO', 'API', 'API 호출 성공', '사용자 로그인 API 호출이 성공했습니다.', 'com.ERI.demo.controller.AuthController', 'login', 'ADMIN001', NULL, NULL, 'ADMIN001'),
-('WARN', 'DATABASE', '데이터베이스 연결 지연', '데이터베이스 연결에 3초 이상 소요되었습니다.', 'com.ERI.demo.config.DatabaseConfig', 'getConnection', 'SYSTEM', 'DB_CONNECTION_SLOW', 'PERFORMANCE', 'SYSTEM'),
-('ERROR', 'API', 'API 호출 실패', '메신저 API 호출 중 네트워크 오류가 발생했습니다.', 'com.ERI.demo.service.MessengerService', 'sendAlert', 'ADMIN001', 'NETWORK_ERROR', 'EXTERNAL_API', 'ADMIN001'),
-('DEBUG', 'SYSTEM', '메모리 사용량 확인', '현재 메모리 사용량: 512MB / 2GB', 'com.ERI.demo.util.SystemMonitor', 'checkMemoryUsage', 'SYSTEM', NULL, NULL, 'SYSTEM'),
-('INFO', 'SECURITY', '로그인 성공', '사용자 ADMIN001이 성공적으로 로그인했습니다.', 'com.ERI.demo.service.AuthService', 'authenticate', 'ADMIN001', NULL, NULL, 'ADMIN001'),
-('ERROR', 'DATABASE', 'SQL 실행 오류', '잘못된 SQL 구문으로 인한 실행 오류가 발생했습니다.', 'com.ERI.demo.mapper.UserMapper', 'selectUserList', 'ADMIN001', 'SQL_SYNTAX_ERROR', 'DATABASE', 'ADMIN001'),
-('WARN', 'MESSENGER', '메신저 전송 지연', '메신저 전송이 5초 이상 지연되고 있습니다.', 'com.ERI.demo.service.MessengerService', 'sendMessage', 'ADMIN001', 'MESSENGER_DELAY', 'EXTERNAL_API', 'ADMIN001'),
-('INFO', 'API', '파일 업로드 성공', '파일 업로드가 성공적으로 완료되었습니다.', 'com.ERI.demo.controller.FileController', 'uploadFile', 'ADMIN001', NULL, NULL, 'ADMIN001'),
-('ERROR', 'SECURITY', '권한 없음', '사용자가 권한이 없는 페이지에 접근을 시도했습니다.', 'com.ERI.demo.interceptor.AuthInterceptor', 'preHandle', 'USER001', 'ACCESS_DENIED', 'SECURITY', 'USER001');
-
--- 시스템 로그 관련 뷰 생성 (통계 조회용)
-CREATE VIEW V_SYSTEM_LOG_STATS AS
-SELECT 
-    LOG_LEVEL,
-    LOG_TYPE,
-    ERROR_CODE,
-    ERROR_CATEGORY,
-    COUNT(*) as LOG_COUNT,
-    DATE(CREATED_DATE) as LOG_DATE
-FROM TB_SYSTEM_LOG
-GROUP BY LOG_LEVEL, LOG_TYPE, ERROR_CODE, ERROR_CATEGORY, DATE(CREATED_DATE);
-
-COMMENT ON VIEW V_SYSTEM_LOG_STATS IS '시스템 로그 통계 뷰';
-
--- 시스템 로그 자동 정리 함수 (PostgreSQL용)
-CREATE OR REPLACE FUNCTION CLEAN_OLD_SYSTEM_LOGS(days_to_keep INTEGER DEFAULT 90)
-RETURNS INTEGER AS $$
-DECLARE
-    deleted_count INTEGER;
-BEGIN
-    DELETE FROM TB_SYSTEM_LOG 
-    WHERE CREATED_DATE < CURRENT_DATE - INTERVAL '1 day' * days_to_keep;
-    
-    GET DIAGNOSTICS deleted_count = ROW_COUNT;
-    
-    RETURN deleted_count;
-END;
-$$ LANGUAGE plpgsql;
-
-COMMENT ON FUNCTION CLEAN_OLD_SYSTEM_LOGS IS '오래된 시스템 로그를 자동으로 정리하는 함수';
-
--- 시스템 로그 통계 함수
-CREATE OR REPLACE FUNCTION GET_SYSTEM_LOG_STATS(
-    p_start_date DATE DEFAULT NULL,
-    p_end_date DATE DEFAULT NULL
-)
-RETURNS TABLE (
-    log_level VARCHAR(10),
-    log_type VARCHAR(50),
-    error_code VARCHAR(50),
-    log_count BIGINT
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        sl.LOG_LEVEL,
-        sl.LOG_TYPE,
-        sl.ERROR_CODE,
-        COUNT(*) as LOG_COUNT
-    FROM TB_SYSTEM_LOG sl
-    WHERE (p_start_date IS NULL OR sl.CREATED_DATE >= p_start_date)
-      AND (p_end_date IS NULL OR sl.CREATED_DATE <= p_end_date)
-    GROUP BY sl.LOG_LEVEL, sl.LOG_TYPE, sl.ERROR_CODE
-    ORDER BY LOG_COUNT DESC;
-END;
-$$ LANGUAGE plpgsql;
-
-COMMENT ON FUNCTION GET_SYSTEM_LOG_STATS IS '시스템 로그 통계를 조회하는 함수';
-
--- 시스템 로그 트리거 (로그 레벨별 자동 분류)
-CREATE OR REPLACE FUNCTION TRIGGER_SYSTEM_LOG_CLASSIFICATION()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- ERROR 레벨 로그는 자동으로 ERROR_CATEGORY 설정
-    IF NEW.LOG_LEVEL = 'ERROR' AND NEW.ERROR_CATEGORY IS NULL THEN
-        CASE 
-            WHEN NEW.LOG_TYPE = 'DATABASE' THEN NEW.ERROR_CATEGORY := 'DATABASE';
-            WHEN NEW.LOG_TYPE = 'API' THEN NEW.ERROR_CATEGORY := 'API';
-            WHEN NEW.LOG_TYPE = 'SECURITY' THEN NEW.ERROR_CATEGORY := 'SECURITY';
-            WHEN NEW.LOG_TYPE = 'MESSENGER' THEN NEW.ERROR_CATEGORY := 'EXTERNAL_API';
-            ELSE NEW.ERROR_CATEGORY := 'SYSTEM';
-        END CASE;
-    END IF;
-    
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER TR_SYSTEM_LOG_CLASSIFICATION
-    BEFORE INSERT ON TB_SYSTEM_LOG
-    FOR EACH ROW
-    EXECUTE FUNCTION TRIGGER_SYSTEM_LOG_CLASSIFICATION();
-
-COMMENT ON TRIGGER TR_SYSTEM_LOG_CLASSIFICATION ON TB_SYSTEM_LOG IS '시스템 로그 자동 분류 트리거';
 
 -- =================================================================
--- 10. 시스템 로그 샘플 데이터 추가
+-- 2. 직급 코드 테이블
 -- =================================================================
 
--- 추가 시스템 로그 샘플 데이터
-INSERT INTO TB_SYSTEM_LOG (LOG_LEVEL, LOG_TYPE, LOG_MESSAGE, LOG_DETAIL, CLASS_NAME, METHOD_NAME, EMP_ID, ERROR_CODE, ERROR_CATEGORY, CREATED_BY) VALUES
-('INFO', 'SYSTEM', '백업 작업 완료', '일일 백업 작업이 성공적으로 완료되었습니다.', 'com.ERI.demo.service.BackupService', 'performDailyBackup', 'SYSTEM', NULL, NULL, 'SYSTEM'),
-('INFO', 'API', '사용자 등록 성공', '새로운 사용자가 성공적으로 등록되었습니다.', 'com.ERI.demo.controller.UserController', 'registerUser', 'ADMIN001', NULL, NULL, 'ADMIN001'),
-('WARN', 'DATABASE', '인덱스 최적화 필요', '테이블 TB_USER_LST의 인덱스 최적화가 필요합니다.', 'com.ERI.demo.util.DatabaseOptimizer', 'checkIndexPerformance', 'SYSTEM', 'INDEX_OPTIMIZATION_NEEDED', 'PERFORMANCE', 'SYSTEM'),
-('ERROR', 'API', '외부 API 타임아웃', '메신저 API 호출 시 타임아웃이 발생했습니다.', 'com.ERI.demo.service.MessengerService', 'sendAlert', 'ADMIN001', 'API_TIMEOUT', 'EXTERNAL_API', 'ADMIN001'),
-('DEBUG', 'SYSTEM', '세션 정보 확인', '현재 활성 세션 수: 15개', 'com.ERI.demo.util.SessionMonitor', 'checkActiveSessions', 'SYSTEM', NULL, NULL, 'SYSTEM'),
-('INFO', 'SECURITY', '비밀번호 변경', '사용자 ADMIN001의 비밀번호가 변경되었습니다.', 'com.ERI.demo.service.UserService', 'changePassword', 'ADMIN001', NULL, NULL, 'ADMIN001'),
-('ERROR', 'DATABASE', '트랜잭션 롤백', '데이터베이스 트랜잭션이 롤백되었습니다.', 'com.ERI.demo.service.TransactionService', 'commitTransaction', 'ADMIN001', 'TRANSACTION_ROLLBACK', 'DATABASE', 'ADMIN001'),
-('WARN', 'MESSENGER', '메신저 서버 응답 지연', '메신저 서버 응답이 10초 이상 지연되고 있습니다.', 'com.ERI.demo.service.MessengerService', 'sendMessage', 'ADMIN001', 'MESSENGER_SERVER_DELAY', 'EXTERNAL_API', 'ADMIN001'),
-('INFO', 'API', '파일 다운로드 성공', '파일 다운로드가 성공적으로 완료되었습니다.', 'com.ERI.demo.controller.FileController', 'downloadFile', 'USER001', NULL, NULL, 'USER001'),
-('ERROR', 'SECURITY', '잘못된 로그인 시도', '잘못된 비밀번호로 로그인을 시도했습니다.', 'com.ERI.demo.service.AuthService', 'authenticate', 'UNKNOWN', 'INVALID_PASSWORD', 'SECURITY', 'UNKNOWN');
+CREATE TABLE TB_EMP_JBCL_CD (
+    JBCL_CD     CHAR(1)      NOT NULL,           -- 직급코드
+    JBCL_NM     VARCHAR(20)  NOT NULL,           -- 직급명
+    JBCL_ORD    INTEGER      NOT NULL,           -- 정렬순서
+    USE_YN      CHAR(1)      NOT NULL DEFAULT 'Y',
+    REG_DT      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPD_DT      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (JBCL_CD)
+);
+
+COMMENT ON TABLE TB_EMP_JBCL_CD IS '직급 코드';
+COMMENT ON COLUMN TB_EMP_JBCL_CD.JBCL_CD IS '직급코드';
+COMMENT ON COLUMN TB_EMP_JBCL_CD.JBCL_NM IS '직급명';
+COMMENT ON COLUMN TB_EMP_JBCL_CD.JBCL_ORD IS '정렬순서';
+COMMENT ON COLUMN TB_EMP_JBCL_CD.USE_YN IS '사용여부';
+COMMENT ON COLUMN TB_EMP_JBCL_CD.REG_DT IS '등록일시';
+COMMENT ON COLUMN TB_EMP_JBCL_CD.UPD_DT IS '수정일시';
+
+-- 직급 코드 데이터 삽입
+INSERT INTO TB_EMP_JBCL_CD (JBCL_CD, JBCL_NM, JBCL_ORD) VALUES
+('1', '1급', 1),
+('2', '2급', 2),
+('3', '3급', 3),
+('4', '4급', 4),
+('5', '5급', 5),
+('6', '6급', 6),
+('9', '9급', 7);
 
 -- =================================================================
--- 11. 시스템 로그 관리 권한 추가
+-- 3. 부점 코드 테이블
 -- =================================================================
 
--- 시스템 로그 관리 권한 추가
-INSERT INTO TB_AUTH_LST (AUTH_CD, AUTH_NM, AUTH_DESC, AUTH_LVL) VALUES
-('AUTH_009', '시스템 로그 관리', '시스템 로그 조회 및 관리', 10);
+CREATE TABLE TB_EMP_BRCD (
+    BRCD        CHAR(4)      NOT NULL,           -- 부점코드
+    BR_NM       VARCHAR(50)  NOT NULL,           -- 부점명
+    USE_YN      CHAR(1)      NOT NULL DEFAULT 'Y',
+    REG_DT      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPD_DT      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (BRCD)
+);
 
--- 시스템 로그 관리 메뉴 추가
-INSERT INTO TB_MNU_LST (MNU_CD, MNU_NM, MNU_URL, MNU_DESC, MNU_ORD, MNU_LVL, P_MNU_CD, MNU_USE_YN, MNU_AUTH_TYPE, REG_EMP_ID)
-VALUES ('MNU_006_13', '시스템 로그 관리', '/admin/systemLogMng', '시스템 로그를 조회하고 관리하는 메뉴', 13, 2, 'MNU_006', 'Y', 'ADMIN', 'ADMIN001');
+COMMENT ON TABLE TB_EMP_BRCD IS '부점 코드';
+COMMENT ON COLUMN TB_EMP_BRCD.BRCD IS '부점코드';
+COMMENT ON COLUMN TB_EMP_BRCD.BR_NM IS '부점명';
+COMMENT ON COLUMN TB_EMP_BRCD.USE_YN IS '사용여부';
+COMMENT ON COLUMN TB_EMP_BRCD.REG_DT IS '등록일시';
+COMMENT ON COLUMN TB_EMP_BRCD.UPD_DT IS '수정일시';
 
--- 시스템 로그 관리 권한-메뉴 매핑
-INSERT INTO TB_AUTH_GRP_AUTH_MAP (AUTH_CD, MNU_CD, REG_EMP_ID) VALUES
-('AUTH_009', 'MNU_006_13', 'ADMIN001');
+
 
 -- =================================================================
--- 12. 시스템 로그 관련 샘플 데이터 완료
+-- 5. 직위 코드 테이블
 -- =================================================================
 
--- 시스템 로그 테이블 생성 및 샘플 데이터 삽입 완료
--- 총 20개의 샘플 로그 데이터가 포함되어 있음
--- 로그 레벨: INFO(8개), WARN(4개), ERROR(6개), DEBUG(2개)
--- 로그 타입: SYSTEM(4개), API(5개), DATABASE(3개), SECURITY(3개), MESSENGER(3개), DEBUG(2개)
--- 에러 카테고리: DATABASE(2개), API(2개), SECURITY(2개), EXTERNAL_API(3개), PERFORMANCE(2개), SYSTEM(1개)
- 
+CREATE TABLE TB_EMP_JBTT_CD (
+    JBTT_CD     CHAR(4)      NOT NULL,           -- 직위코드
+    JBTT_NM     VARCHAR(20)  NOT NULL,           -- 직위명
+    JBTT_ORD    INTEGER      NOT NULL,           -- 정렬순서
+    USE_YN      CHAR(1)      NOT NULL DEFAULT 'Y',
+    REG_DT      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPD_DT      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (JBTT_CD)
+);
+
+COMMENT ON TABLE TB_EMP_JBTT_CD IS '직위 코드';
+COMMENT ON COLUMN TB_EMP_JBTT_CD.JBTT_CD IS '직위코드';
+COMMENT ON COLUMN TB_EMP_JBTT_CD.JBTT_NM IS '직위명';
+COMMENT ON COLUMN TB_EMP_JBTT_CD.JBTT_ORD IS '정렬순서';
+COMMENT ON COLUMN TB_EMP_JBTT_CD.USE_YN IS '사용여부';
+COMMENT ON COLUMN TB_EMP_JBTT_CD.REG_DT IS '등록일시';
+COMMENT ON COLUMN TB_EMP_JBTT_CD.UPD_DT IS '수정일시';
+
+-- 직위 코드 데이터 삽입
+INSERT INTO TB_EMP_JBTT_CD (JBTT_CD, JBTT_NM, JBTT_ORD) VALUES
+('01', '사원', 1),
+('02', '대리', 2),
+('03', '과장', 3),
+('04', '차장', 4),
+('05', '부장', 5),
+('06', '이사', 6),
+('07', '상무', 7),
+('08', '전무', 8),
+('09', '부사장', 9),
+('10', '사장', 10);
+
+-- =================================================================
+-- 파일 요약
+-- =================================================================
+-- 
+-- 이 파일은 ERI Employee Rights Protection System (Management System)의 DDL 스크립트입니다.
+-- 
+-- 생성된 테이블:
+-- 1. 공지사항 관리: TB_NTI_LST, TB_NTI_TRSM_RGST_DTL, TB_NTI_TRSM_TRGT_DTL
+-- 2. 프로그램 관리: TB_PGM_LST, TB_PGM_PRE_ASGN_DTL, TB_PGM_CNTN_TRSM_DTL, TB_CNTN_TRSM_TRGT_DTL
+-- 3. 상담 관리: TB_GNRL_CNSL, TB_GNRL_CNSL_DTL, TB_DSRD_PSY_TEST_DTL, TB_RMT_CNSL, TB_RMT_CNSL_DTL
+-- 4. 관리자 관리: TB_ADMIN_LST
+-- 5. 직원 참조: TB_EMP_REF
+-- 6. 권한 관리: TB_AUTH_LST, TB_MNU_LST, TB_AUTH_GRP_AUTH_MAP
+-- 7. 부서 관리: TB_DEPT_LST
+-- 8. 상담사 관리: TB_CNSLR_LST
+-- 9. 파일 첨부: TB_FILE_ATTACH
+-- 10. 시스템 로그: TB_SYS_LOG
+-- 11. 코드 테이블: TB_EMP_JBCL_CD, TB_EMP_BRCD, TB_EMP_JBTT_CD
+-- 
+-- 주요 특징:
+-- - 모든 테이블에 테이블 및 컬럼 주석 추가
+-- - 영문 약어를 Upper Camel Case 규칙으로 적용 (예: DATE -> DT, FILE_ATTACH -> FILE_ATT)
+-- - 공통 컬럼 (DEL_YN, DEL_DT, REG_EMP_ID, UPD_EMP_ID, REG_DT, UPD_DT) 포함
+-- - 인덱스 및 제약조건 정의
+-- - 샘플 데이터 포함
+-- =================================================================

@@ -48,9 +48,9 @@ CREATE TABLE TB_EMP_LST (
     EMP_EXTI_NO     VARCHAR(50)  NULL,               -- 직원내선번호
     EAD             VARCHAR(50)  NULL,               -- 이메일주소
     DEL_YN          CHAR(1)      NOT NULL DEFAULT 'N',
-    DEL_DATE        TIMESTAMP    NULL,
-    REG_DATE        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE        TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    DEL_DT          TIMESTAMP    NULL,
+    REG_DT          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UPD_DT          TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (EMP_ID),
     UNIQUE (ERI_EMP_ID)
 );
@@ -77,6 +77,10 @@ COMMENT ON COLUMN TB_EMP_LST.INSL_DCD IS '음양구분코드 (S:양력, L:음력
 COMMENT ON COLUMN TB_EMP_LST.EMP_CPN IS '직원휴대폰번호';
 COMMENT ON COLUMN TB_EMP_LST.EMP_EXTI_NO IS '직원내선번호';
 COMMENT ON COLUMN TB_EMP_LST.EAD IS '이메일주소';
+COMMENT ON COLUMN TB_EMP_LST.DEL_YN IS '삭제 여부 (Y/N)';
+COMMENT ON COLUMN TB_EMP_LST.DEL_DT IS '삭제 일시';
+COMMENT ON COLUMN TB_EMP_LST.REG_DT IS '등록 일시';
+COMMENT ON COLUMN TB_EMP_LST.UPD_DT IS '수정 일시';
 
 -- 인덱스 생성
 CREATE INDEX IDX_EMP_LST_DEL_YN ON TB_EMP_LST (DEL_YN);
@@ -90,100 +94,18 @@ CREATE INDEX IDX_EMP_LST_EAD ON TB_EMP_LST (EAD);
 CREATE INDEX IDX_EMP_LST_EMP_CPN ON TB_EMP_LST (EMP_CPN);
 
 -- =================================================================
--- 2. 직급 코드 테이블
+-- 파일 요약
 -- =================================================================
-
-CREATE TABLE TB_EMP_JBCL_CD (
-    JBCL_CD     CHAR(1)      NOT NULL,           -- 직급코드
-    JBCL_NM     VARCHAR(20)  NOT NULL,           -- 직급명
-    JBCL_ORD    INTEGER      NOT NULL,           -- 정렬순서
-    USE_YN      CHAR(1)      NOT NULL DEFAULT 'Y',
-    REG_DATE    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (JBCL_CD)
-);
-
-COMMENT ON TABLE TB_EMP_JBCL_CD IS '직급 코드';
-COMMENT ON COLUMN TB_EMP_JBCL_CD.JBCL_CD IS '직급코드';
-COMMENT ON COLUMN TB_EMP_JBCL_CD.JBCL_NM IS '직급명';
-COMMENT ON COLUMN TB_EMP_JBCL_CD.JBCL_ORD IS '정렬순서';
-
--- 직급 코드 데이터 삽입
-INSERT INTO TB_EMP_JBCL_CD (JBCL_CD, JBCL_NM, JBCL_ORD) VALUES
-('1', '11급', 1),
-('2', '22급', 2),
-('3', '33급', 3),
-('4', '44급', 4),
-('5', '55급', 5),
-('6', '66급', 6),
-('9', '99급', 7);
-
--- =================================================================
--- 3. 부점 코드 테이블
--- =================================================================
-
-CREATE TABLE TB_EMP_BRCD (
-    BRCD        CHAR(4)      NOT NULL,           -- 부점코드
-    BR_NM       VARCHAR(50)  NOT NULL,           -- 부점명
-    USE_YN      CHAR(1)      NOT NULL DEFAULT 'Y',
-    REG_DATE    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (BRCD)
-);
-
-COMMENT ON TABLE TB_EMP_BRCD IS '부점 코드';
-COMMENT ON COLUMN TB_EMP_BRCD.BRCD IS '부점코드';
-COMMENT ON COLUMN TB_EMP_BRCD.BR_NM IS '부점명';
-
--- =================================================================
--- 4. 팀 코드 테이블
--- =================================================================
-
-CREATE TABLE TB_EMP_TEAM_CD (
-    TEAM_CD     CHAR(4)      NOT NULL,           -- 팀코드
-    TEAM_NM     VARCHAR(50)  NOT NULL,           -- 팀명
-    USE_YN      CHAR(1)      NOT NULL DEFAULT 'Y',
-    REG_DATE    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (TEAM_CD)
-);
-
-COMMENT ON TABLE TB_EMP_TEAM_CD IS '팀 코드';
-COMMENT ON COLUMN TB_EMP_TEAM_CD.TEAM_CD IS '팀코드';
-COMMENT ON COLUMN TB_EMP_TEAM_CD.TEAM_NM IS '팀명';
-
--- =================================================================
--- 5. 직위 코드 테이블
--- =================================================================
-
-CREATE TABLE TB_EMP_JBTT_CD (
-    JBTT_CD     CHAR(4)      NOT NULL,           -- 직위코드
-    JBTT_NM     VARCHAR(20)  NOT NULL,           -- 직위명
-    JBTT_ORD    INTEGER      NOT NULL,           -- 정렬순서
-    USE_YN      CHAR(1)      NOT NULL DEFAULT 'Y',
-    REG_DATE    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UPD_DATE    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (JBTT_CD)
-);
-
-COMMENT ON TABLE TB_EMP_JBTT_CD IS '직위 코드';
-COMMENT ON COLUMN TB_EMP_JBTT_CD.JBTT_CD IS '직위코드';
-COMMENT ON COLUMN TB_EMP_JBTT_CD.JBTT_NM IS '직위명';
-COMMENT ON COLUMN TB_EMP_JBTT_CD.JBTT_ORD IS '정렬순서';
-
--- 직위 코드 데이터 삽입
-INSERT INTO TB_EMP_JBTT_CD (JBTT_CD, JBTT_NM, JBTT_ORD) VALUES
-('01', '사원', 1),
-('02', '대리', 2),
-('03', '과장', 3),
-('04', '차장', 4),
-('05', '부장', 5),
-('06', '이사', 6),
-('07', '상무', 7),
-('08', '전무', 8),
-('09', '부사장', 9),
-('10', '사장', 10);
-
-
-
+-- 생성된 테이블:
+-- 1. TB_EMP_LST - 직원 기본 정보 (데이터 사전 기반)
+-- 
+-- 주요 특징:
+-- - 직원 정보는 보안상 별도 PostgreSQL 인스턴스에서 관리
+-- - 실제 직원번호와 ERI 시스템 내부 식별번호를 분리하여 관리
+-- - 은행 데이터 사전 기반의 표준화된 컬럼명 사용
+-- - 재직/퇴직 상태, 부서/팀 정보, 직급/직위 정보 등 포함
+-- - 개인정보(휴대폰, 이메일 등) 포함
+-- 
+-- 인덱스:
+-- - 삭제여부, ERI 직원ID, 재직여부, 소속부점, 소속팀, 직급, 입행일자, 이메일, 휴대폰
 -- =================================================================

@@ -185,4 +185,12 @@ public class PageController {
     public String empRightsBoardPage() {
         return "emp-rights-board";
     }
+    
+    /**
+     * 암호화 테스트 페이지
+     */
+    @GetMapping("/encryption-test")
+    public String encryptionTestPage() {
+        return "encryption-test";
+    }
 } 

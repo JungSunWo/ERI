@@ -30,7 +30,7 @@ public class SchedulerController {
     private SchedulerConfigService schedulerConfigService;
 
     /**
-     * empInfo.txt 파일 배치 적재 수동 실행
+     * empInfo.txt 파일 배치 적재 수동 실행 (이메일, 전화번호 암호화)
      */
     @PostMapping("/manual-emp-info-batch")
     @ResponseBody
@@ -40,7 +40,7 @@ public class SchedulerController {
         try {
             long startTime = System.currentTimeMillis();
             
-            // 배치 실행
+            // 배치 실행 (이메일과 전화번호가 암호화되어 저장됨)
             empLstService.manualBatchLoadEmpInfo();
             
             long endTime = System.currentTimeMillis();
@@ -50,11 +50,11 @@ public class SchedulerController {
             int totalEmployees = empLstService.getEmployeeCount();
             
             response.put("success", true);
-            response.put("message", "empInfo.txt 파일 배치 적재 실행 완료");
+            response.put("message", "empInfo.txt 파일 배치 적재 실행 완료 (이메일, 전화번호 암호화)");
             response.put("processingTime", processingTime + "ms");
             response.put("timestamp", System.currentTimeMillis());
             response.put("totalEmployees", totalEmployees);
-            response.put("details", "empInfo.txt 파일을 읽어서 TB_EMP_LST 테이블에 직원 정보를 적재했습니다. ERI_EMP_ID는 E00000001 형식으로 자동 생성됩니다. TB_EMP_REF 동기화도 자동으로 실행되었습니다.");
+            response.put("details", "empInfo.txt 파일을 읽어서 TB_EMP_LST 테이블에 직원 정보를 적재했습니다. 이메일과 전화번호는 암호화되어 저장됩니다. ERI_EMP_ID는 E00000001 형식으로 자동 생성됩니다. TB_EMP_REF 동기화도 자동으로 실행되었습니다.");
             
             return ResponseEntity.ok(response);
             

@@ -6,11 +6,11 @@ import java.time.LocalTime;
 import java.time.LocalDateTime;
 
 /**
- * 상담 신청 VO
- * TB_CNSL_APP 테이블과 매핑
+ * 전문가 상담 신청 VO
+ * TB_EXP_CNSL_APP 테이블과 매핑
  */
 @Data
-public class CnslAppVO {
+public class ExpertConsultationAppVO {
     
     // 기본 정보
     private Long appSeq;                    // 신청 일련번호 (PK)
@@ -22,7 +22,7 @@ public class CnslAppVO {
     private LocalDate cnslDt;               // 상담일자
     private LocalTime cnslTm;               // 상담시간
     private String cnslrEmpId;              // 상담사 직원ID
-    private String cnslTyCd;                // 상담유형코드
+    private String cnslTyCd;                // 상담유형코드 (FACE_TO_FACE/REMOTE)
     private String cnslCntn;                // 상담내용
     
     // 익명 및 승인 정보

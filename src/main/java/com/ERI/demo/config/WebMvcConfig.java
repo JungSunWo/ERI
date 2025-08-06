@@ -26,7 +26,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 "/api/auth/session-status",
                 "/api/menu/list",
                 "/api/scheduler/**",
-                "/api/db-test/**"
+                "/api/db-test/**",
+                "/api/encryption-test/**"  // 암호화 테스트 API
                 
             );
     }

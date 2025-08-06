@@ -9,24 +9,23 @@
             TTL,
             CNTN,
             STS_CD,
-            CATEGORY_CD,
-            ANONYMOUS_YN,
-            ANONYMOUS_ID,
-            NICKNAME,
-            FILE_ATTACH_YN,
+            CAT_CD,
+            ANON_YN,
+            NICK_NM,
+            FILE_ATT_YN,
             VIEW_CNT,
-            ANSWER_YN,
-            ANSWER_EMP_ID,
-            ANSWER_DATE,
-            PRIORITY_CD,
-            URGENT_YN,
+            ANS_YN,
+            ANS_EMP_ID,
+            ANS_DT,
+            PRI_CD,
+            URG_YN,
             REG_EMP_ID,
             UPD_EMP_ID,
             DEL_YN,
-            DEL_DATE,
-            REG_DATE,
-            UPD_DATE
-        FROM TB_CONSULTATION_BOARD
+            DEL_DT,
+            REG_DT,
+            UPD_DT
+        FROM TB_CNSL_BRD
         WHERE DEL_YN = 'N'
         <if test="searchCondition != null">
             <if test="searchCondition.searchType != null and searchCondition.searchType != ''">
@@ -44,29 +43,29 @@
                 </choose>
             </if>
             <if test="searchCondition.categoryCd != null and searchCondition.categoryCd != ''">
-                AND CATEGORY_CD = #{searchCondition.categoryCd}
+                AND CAT_CD = #{searchCondition.categoryCd}
             </if>
             <if test="searchCondition.stsCd != null and searchCondition.stsCd != ''">
                 AND STS_CD = #{searchCondition.stsCd}
             </if>
             <if test="searchCondition.anonymousYn != null and searchCondition.anonymousYn != ''">
-                AND ANONYMOUS_YN = #{searchCondition.anonymousYn}
+                AND ANON_YN = #{searchCondition.anonymousYn}
             </if>
             <if test="searchCondition.urgentYn != null and searchCondition.urgentYn != ''">
-                AND URGENT_YN = #{searchCondition.urgentYn}
+                AND URG_YN = #{searchCondition.urgentYn}
             </if>
             <if test="searchCondition.startDate != null and searchCondition.startDate != ''">
-                AND REG_DATE >= #{searchCondition.startDate}::timestamp
+                AND REG_DT >= #{searchCondition.startDate}::timestamp
             </if>
             <if test="searchCondition.endDate != null and searchCondition.endDate != ''">
-                AND REG_DATE &lt;= #{searchCondition.endDate}::timestamp + INTERVAL '1 day'
+                AND REG_DT &lt;= #{searchCondition.endDate}::timestamp + INTERVAL '1 day'
             </if>
         </if>
         ORDER BY 
         <choose>
             <when test="sortBy == 'viewCnt'">VIEW_CNT</when>
-            <when test="sortBy == 'answerDate'">ANSWER_DATE</when>
-            <otherwise>REG_DATE</otherwise>
+            <when test="sortBy == 'answerDate'">ANS_DT</when>
+            <otherwise>REG_DT</otherwise>
         </choose>
         <choose>
             <when test="sortDirection == 'ASC'">ASC</when>
@@ -78,7 +77,7 @@
     <!-- 상담 게시글 총 개수 조회 -->
     <select id="selectConsultationBoardCount" resultType="int">
         SELECT COUNT(*)
-        FROM TB_CONSULTATION_BOARD
+        FROM TB_CNSL_BRD
         WHERE DEL_YN = 'N'
         <if test="searchCondition != null">
             <if test="searchCondition.searchType != null and searchCondition.searchType != ''">
@@ -96,22 +95,22 @@
                 </choose>
             </if>
             <if test="searchCondition.categoryCd != null and searchCondition.categoryCd != ''">
-                AND CATEGORY_CD = #{searchCondition.categoryCd}
+                AND CAT_CD = #{searchCondition.categoryCd}
             </if>
             <if test="searchCondition.stsCd != null and searchCondition.stsCd != ''">
                 AND STS_CD = #{searchCondition.stsCd}
             </if>
             <if test="searchCondition.anonymousYn != null and searchCondition.anonymousYn != ''">
-                AND ANONYMOUS_YN = #{searchCondition.anonymousYn}
+                AND ANON_YN = #{searchCondition.anonymousYn}
             </if>
             <if test="searchCondition.urgentYn != null and searchCondition.urgentYn != ''">
-                AND URGENT_YN = #{searchCondition.urgentYn}
+                AND URG_YN = #{searchCondition.urgentYn}
             </if>
             <if test="searchCondition.startDate != null and searchCondition.startDate != ''">
-                AND REG_DATE >= #{searchCondition.startDate}::timestamp
+                AND REG_DT >= #{searchCondition.startDate}::timestamp
             </if>
             <if test="searchCondition.endDate != null and searchCondition.endDate != ''">
-                AND REG_DATE &lt;= #{searchCondition.endDate}::timestamp + INTERVAL '1 day'
+                AND REG_DT &lt;= #{searchCondition.endDate}::timestamp + INTERVAL '1 day'
             </if>
         </if>
     </select>
@@ -123,55 +122,52 @@
             TTL,
             CNTN,
             STS_CD,
-            CATEGORY_CD,
-            ANONYMOUS_YN,
-            ANONYMOUS_ID,
-            NICKNAME,
-            FILE_ATTACH_YN,
+            CAT_CD,
+            ANON_YN,
+            NICK_NM,
+            FILE_ATT_YN,
             VIEW_CNT,
-            ANSWER_YN,
-            ANSWER_EMP_ID,
-            ANSWER_DATE,
-            PRIORITY_CD,
-            URGENT_YN,
+            ANS_YN,
+            ANS_EMP_ID,
+            ANS_DT,
+            PRI_CD,
+            URG_YN,
             REG_EMP_ID,
             UPD_EMP_ID,
             DEL_YN,
-            DEL_DATE,
-            REG_DATE,
-            UPD_DATE
-        FROM TB_CONSULTATION_BOARD
+            DEL_DT,
+            REG_DT,
+            UPD_DT
+        FROM TB_CNSL_BRD
         WHERE SEQ = #{seq,jdbcType=BIGINT}
         AND DEL_YN = 'N'
     </select>
 
     <!-- 상담 게시글 등록 -->
     <insert id="insertConsultationBoard" parameterType="com.ERI.demo.vo.ConsultationBoardVO" useGeneratedKeys="true" keyProperty="seq">
-        INSERT INTO TB_CONSULTATION_BOARD (
+        INSERT INTO TB_CNSL_BRD (
             TTL,
             CNTN,
             STS_CD,
-            CATEGORY_CD,
-            ANONYMOUS_YN,
-            ANONYMOUS_ID,
-            NICKNAME,
-            FILE_ATTACH_YN,
+            CAT_CD,
+            ANON_YN,
+            NICK_NM,
+            FILE_ATT_YN,
             VIEW_CNT,
-            ANSWER_YN,
-            PRIORITY_CD,
-            URGENT_YN,
+            ANS_YN,
+            PRI_CD,
+            URG_YN,
             REG_EMP_ID,
             UPD_EMP_ID,
             DEL_YN,
-            REG_DATE,
-            UPD_DATE
+            REG_DT,
+            UPD_DT
         ) VALUES (
             #{ttl,jdbcType=VARCHAR},
             #{cntn,jdbcType=VARCHAR},
             #{stsCd,jdbcType=VARCHAR},
             #{categoryCd,jdbcType=VARCHAR},
             #{anonymousYn,jdbcType=CHAR},
-            #{anonymousId,jdbcType=BIGINT},
             #{nickname,jdbcType=VARCHAR},
             #{fileAttachYn,jdbcType=CHAR},
             0,
@@ -188,39 +184,38 @@
 
     <!-- 상담 게시글 수정 -->
     <update id="updateConsultationBoard" parameterType="com.ERI.demo.vo.ConsultationBoardVO">
-        UPDATE TB_CONSULTATION_BOARD
+        UPDATE TB_CNSL_BRD
         SET 
             TTL = #{ttl,jdbcType=VARCHAR},
             CNTN = #{cntn,jdbcType=VARCHAR},
             STS_CD = #{stsCd,jdbcType=VARCHAR},
-            CATEGORY_CD = #{categoryCd,jdbcType=VARCHAR},
-            ANONYMOUS_YN = #{anonymousYn,jdbcType=CHAR},
-            ANONYMOUS_ID = #{anonymousId,jdbcType=BIGINT},
-            NICKNAME = #{nickname,jdbcType=VARCHAR},
-            FILE_ATTACH_YN = #{fileAttachYn,jdbcType=CHAR},
-            PRIORITY_CD = #{priorityCd,jdbcType=VARCHAR},
-            URGENT_YN = #{urgentYn,jdbcType=CHAR},
+            CAT_CD = #{categoryCd,jdbcType=VARCHAR},
+            ANON_YN = #{anonymousYn,jdbcType=CHAR},
+            NICK_NM = #{nickname,jdbcType=VARCHAR},
+            FILE_ATT_YN = #{fileAttachYn,jdbcType=CHAR},
+            PRI_CD = #{priorityCd,jdbcType=VARCHAR},
+            URG_YN = #{urgentYn,jdbcType=CHAR},
             UPD_EMP_ID = #{updEmpId,jdbcType=VARCHAR},
-            UPD_DATE = CURRENT_TIMESTAMP
+            UPD_DT = CURRENT_TIMESTAMP
         WHERE SEQ = #{seq,jdbcType=BIGINT}
         AND DEL_YN = 'N'
     </update>
 
     <!-- 상담 게시글 삭제 (논리 삭제) -->
     <update id="deleteConsultationBoard">
-        UPDATE TB_CONSULTATION_BOARD
+        UPDATE TB_CNSL_BRD
         SET 
             DEL_YN = 'Y',
-            DEL_DATE = CURRENT_TIMESTAMP,
+            DEL_DT = CURRENT_TIMESTAMP,
             UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
-            UPD_DATE = CURRENT_TIMESTAMP
+            UPD_DT = CURRENT_TIMESTAMP
         WHERE SEQ = #{seq,jdbcType=BIGINT}
         AND DEL_YN = 'N'
     </update>
 
     <!-- 조회수 증가 -->
     <update id="incrementViewCount">
-        UPDATE TB_CONSULTATION_BOARD
+        UPDATE TB_CNSL_BRD
         SET VIEW_CNT = VIEW_CNT + 1
         WHERE SEQ = #{seq,jdbcType=BIGINT}
         AND DEL_YN = 'N'
@@ -228,12 +223,12 @@
 
     <!-- 답변 상태 업데이트 -->
     <update id="updateAnswerStatus">
-        UPDATE TB_CONSULTATION_BOARD
+        UPDATE TB_CNSL_BRD
         SET 
-            ANSWER_YN = #{answerYn,jdbcType=CHAR},
-            ANSWER_EMP_ID = #{answerEmpId,jdbcType=VARCHAR},
-            ANSWER_DATE = CURRENT_TIMESTAMP,
-            UPD_DATE = CURRENT_TIMESTAMP
+            ANS_YN = #{answerYn,jdbcType=CHAR},
+            ANS_EMP_ID = #{answerEmpId,jdbcType=VARCHAR},
+            ANS_DT = CURRENT_TIMESTAMP,
+            UPD_DT = CURRENT_TIMESTAMP
         WHERE SEQ = #{seq,jdbcType=BIGINT}
         AND DEL_YN = 'N'
     </update>
@@ -245,34 +240,33 @@
             TTL,
             CNTN,
             STS_CD,
-            CATEGORY_CD,
-            ANONYMOUS_YN,
-            ANONYMOUS_ID,
-            NICKNAME,
-            FILE_ATTACH_YN,
+            CAT_CD,
+            ANON_YN,
+            NICK_NM,
+            FILE_ATT_YN,
             VIEW_CNT,
-            ANSWER_YN,
-            ANSWER_EMP_ID,
-            ANSWER_DATE,
-            PRIORITY_CD,
-            URGENT_YN,
+            ANS_YN,
+            ANS_EMP_ID,
+            ANS_DT,
+            PRI_CD,
+            URG_YN,
             REG_EMP_ID,
             UPD_EMP_ID,
             DEL_YN,
-            DEL_DATE,
-            REG_DATE,
-            UPD_DATE
-        FROM TB_CONSULTATION_BOARD
+            DEL_DT,
+            REG_DT,
+            UPD_DT
+        FROM TB_CNSL_BRD
         WHERE REG_EMP_ID = #{empId,jdbcType=VARCHAR}
         AND DEL_YN = 'N'
-        ORDER BY REG_DATE DESC
+        ORDER BY REG_DT DESC
         LIMIT #{size} OFFSET #{offset}
     </select>
 
     <!-- 내가 작성한 상담 게시글 총 개수 조회 -->
     <select id="selectMyConsultationBoardCount" resultType="int">
         SELECT COUNT(*)
-        FROM TB_CONSULTATION_BOARD
+        FROM TB_CNSL_BRD
         WHERE REG_EMP_ID = #{empId,jdbcType=VARCHAR}
         AND DEL_YN = 'N'
     </select>

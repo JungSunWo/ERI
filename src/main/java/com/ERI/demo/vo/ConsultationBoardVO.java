@@ -19,7 +19,6 @@ public class ConsultationBoardVO {
     // 분류 정보
     private String categoryCd;           // 카테고리 코드 (CAT001: 업무, CAT002: 인사, CAT003: 복지, CAT004: 기타)
     private String anonymousYn;          // 익명여부 (Y/N)
-    private Long anonymousId;            // 익명 사용자 ID (익명인 경우)
     private String nickname;             // 익명 닉네임 (익명인 경우)
     private String priorityCd;           // 우선순위 (PRI001: 긴급, PRI002: 높음, PRI003: 보통, PRI004: 낮음)
     private String urgentYn;             // 긴급여부 (Y/N)

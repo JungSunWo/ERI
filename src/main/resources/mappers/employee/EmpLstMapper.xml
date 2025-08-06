@@ -26,9 +26,9 @@
         <result column="EMP_EXTI_NO" property="empExtiNo" />
         <result column="EAD" property="ead" />
         <result column="DEL_YN" property="delYn" />
-        <result column="DEL_DATE" property="delDate" />
-        <result column="REG_DATE" property="regDate" />
-        <result column="UPD_DATE" property="updDate" />
+        <result column="DEL_DT" property="delDt" />
+        <result column="REG_DT" property="regDt" />
+        <result column="UPD_DT" property="updDt" />
     </resultMap>
 
     <!-- 전체 직원 목록 조회 -->
@@ -56,9 +56,9 @@
             EMP_EXTI_NO,
             EAD,
             DEL_YN,
-            DEL_DATE,
-            REG_DATE,
-            UPD_DATE
+            DEL_DT,
+            REG_DT,
+            UPD_DT
         FROM TB_EMP_LST
         WHERE DEL_YN = 'N'
         ORDER BY EMP_NM
@@ -89,9 +89,9 @@
             EMP_EXTI_NO,
             EAD,
             DEL_YN,
-            DEL_DATE,
-            REG_DATE,
-            UPD_DATE
+            DEL_DT,
+            REG_DT,
+            UPD_DT
         FROM TB_EMP_LST
         WHERE ERI_EMP_ID = #{eriEmpId}
         AND DEL_YN = 'N'
@@ -122,9 +122,9 @@
             EMP_EXTI_NO,
             EAD,
             DEL_YN,
-            DEL_DATE,
-            REG_DATE,
-            UPD_DATE
+            DEL_DT,
+            REG_DT,
+            UPD_DT
         FROM TB_EMP_LST
         WHERE EMP_ID = #{empId}
         AND DEL_YN = 'N'
@@ -155,9 +155,9 @@
             EMP_EXTI_NO,
             EAD,
             DEL_YN,
-            DEL_DATE,
-            REG_DATE,
-            UPD_DATE
+            DEL_DT,
+            REG_DT,
+            UPD_DT
         FROM TB_EMP_LST
         WHERE BLNG_BRCD = #{branchCd}
         AND DEL_YN = 'N'
@@ -237,7 +237,7 @@
             EMP_CPN = #{empCpn},
             EMP_EXTI_NO = #{empExtiNo},
             EAD = #{ead},
-            UPD_DATE = CURRENT_TIMESTAMP
+            UPD_DT = CURRENT_TIMESTAMP
         WHERE EMP_ID = #{empId}
     </update>
 
@@ -245,8 +245,8 @@
     <update id="deleteEmployee" parameterType="string">
         UPDATE TB_EMP_LST SET
             DEL_YN = 'Y',
-            DEL_DATE = CURRENT_TIMESTAMP,
-            UPD_DATE = CURRENT_TIMESTAMP
+            DEL_DT = CURRENT_TIMESTAMP,
+            UPD_DT = CURRENT_TIMESTAMP
         WHERE ERI_EMP_ID = #{eriEmpId}
     </update>
 
@@ -282,9 +282,9 @@
             EMP_EXTI_NO,
             EAD,
             DEL_YN,
-            DEL_DATE,
-            REG_DATE,
-            UPD_DATE
+            DEL_DT,
+            REG_DT,
+            UPD_DT
         FROM TB_EMP_LST
         WHERE DEL_YN = 'N'
         <if test="searchKeyword != null and searchKeyword != ''">
@@ -335,9 +335,9 @@
             EMP_EXTI_NO,
             EAD,
             DEL_YN,
-            DEL_DATE,
-            REG_DATE,
-            UPD_DATE
+            DEL_DT,
+            REG_DT,
+            UPD_DT
         FROM TB_EMP_LST
         WHERE DEL_YN = 'N'
         <if test="searchKeyword != null and searchKeyword != ''">
@@ -407,9 +407,9 @@
             EMP_EXTI_NO,
             EAD,
             DEL_YN,
-            DEL_DATE,
-            REG_DATE,
-            UPD_DATE
+            DEL_DT,
+            REG_DT,
+            UPD_DT
         FROM TB_EMP_LST
         WHERE EMP_ID = #{empId}
           AND DEL_YN = 'N'

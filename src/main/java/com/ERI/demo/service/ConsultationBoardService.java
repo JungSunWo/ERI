@@ -263,7 +263,6 @@ public class ConsultationBoardService {
         
         if (existingUser != null) {
             // 기존 익명 사용자 사용
-            consultationBoard.setAnonymousId(existingUser.getAnonymousId());
             consultationBoard.setNickname(existingUser.getNickname());
         } else {
             // 새로운 익명 사용자 생성
@@ -272,7 +271,6 @@ public class ConsultationBoardService {
             newUser.setUseYn("Y");
             
             AnonymousUserVO createdUser = anonymousUserService.createAnonymousUser(newUser);
-            consultationBoard.setAnonymousId(createdUser.getAnonymousId());
             consultationBoard.setNickname(createdUser.getNickname());
         }
     }

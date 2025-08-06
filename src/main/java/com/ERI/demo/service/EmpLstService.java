@@ -2,6 +2,7 @@ package com.ERI.demo.service;
 
 import com.ERI.demo.mappers.employee.EmpLstMapper;
 import com.ERI.demo.vo.employee.EmpLstVO;
+import com.ERI.demo.util.EncryptionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,31 +39,65 @@ public class EmpLstService {
     private com.ERI.demo.mappers.EmpRefMapper empRefMapper;
 
     /**
-     * 전체 직원 목록 조회
+     * 전체 직원 목록 조회 (복호화된 데이터)
      */
     public List<EmpLstVO> getAllEmployees() {
-        return empLstMapper.selectAllEmployees();
+        List<EmpLstVO> employees = empLstMapper.selectAllEmployees();
+        // 이메일과 전화번호 복호화
+        for (EmpLstVO employee : employees) {
+            if (employee.getEad() != null && EncryptionUtil.isEncrypted(employee.getEad())) {
+                employee.setEad(EncryptionUtil.decryptEmail(employee.getEad()));
+            }
+            if (employee.getEmpCpn() != null && EncryptionUtil.isEncrypted(employee.getEmpCpn())) {
+                employee.setEmpCpn(EncryptionUtil.decryptPhone(employee.getEmpCpn()));
+            }
+        }
+        return employees;
     }
 
     /**
-     * ERI_EMP_ID로 직원 정보 조회
+     * ERI_EMP_ID로 직원 정보 조회 (복호화된 데이터)
      */
     public EmpLstVO getEmployeeByEriId(String eriEmpId) {
-        return empLstMapper.selectEmployeeByEriId(eriEmpId);
+        EmpLstVO employee = empLstMapper.selectEmployeeByEriId(eriEmpId);
+        if (employee != null) {
+            decryptEmployeeData(employee);
+        }
+        return employee;
     }
 
     /**
-     * EMP_ID로 직원 정보 조회
+     * EMP_ID로 직원 정보 조회 (복호화된 데이터)
      */
     public EmpLstVO getEmployeeByEmpId(String empId) {
-        return empLstMapper.selectEmployeeByEmpId(empId);
+        EmpLstVO employee = empLstMapper.selectEmployeeByEmpId(empId);
+        if (employee != null) {
+            decryptEmployeeData(employee);
+        }
+        return employee;
     }
 
     /**
-     * 직원번호로 직원 정보 조회 (AuthController용)
+     * 직원번호로 직원 정보 조회 (AuthController용) (복호화된 데이터)
      */
     public EmpLstVO getEmployeeById(String empId) {
-        return empLstMapper.selectEmployeeByEmpId(empId);
+        EmpLstVO employee = empLstMapper.selectEmployeeByEmpId(empId);
+        if (employee != null) {
+            decryptEmployeeData(employee);
+        }
+        return employee;
+    }
+
+    /**
+     * 직원 데이터 복호화 헬퍼 메서드
+     */
+    private void decryptEmployeeData(EmpLstVO employee) {
+        if (employee.getEad() != null && EncryptionUtil.isEncrypted(employee.getEad())) {
+            employee.setEad(EncryptionUtil.decryptEmail(employee.getEad()));
+        }
+        if (employee.getEmpCpn() != null && EncryptionUtil.isEncrypted(employee.getEmpCpn())) {
+            employee.setEmpCpn(EncryptionUtil.decryptPhone(employee.getEmpCpn()));
+        }
     }
 
     /**
@@ -73,25 +108,43 @@ public class EmpLstService {
     }
 
     /**
-     * 부점별 직원 목록 조회
+     * 부점별 직원 목록 조회 (복호화된 데이터)
      */
     public List<EmpLstVO> getEmployeesByBranch(String branchCd) {
-        return empLstMapper.selectEmployeesByBranch(branchCd);
+        List<EmpLstVO> employees = empLstMapper.selectEmployeesByBranch(branchCd);
+        for (EmpLstVO employee : employees) {
+            decryptEmployeeData(employee);
+        }
+        return employees;
     }
 
     /**
-     * 직원 정보 등록
+     * 직원 정보 등록 (이메일과 전화번호 암호화)
      */
     @Transactional(transactionManager = "employeeTransactionManager")
     public int insertEmployee(EmpLstVO employee) {
+        // 이메일과 전화번호 암호화
+        if (employee.getEad() != null && !EncryptionUtil.isEncrypted(employee.getEad())) {
+            employee.setEad(EncryptionUtil.encryptEmail(employee.getEad()));
+        }
+        if (employee.getEmpCpn() != null && !EncryptionUtil.isEncrypted(employee.getEmpCpn())) {
+            employee.setEmpCpn(EncryptionUtil.encryptPhone(employee.getEmpCpn()));
+        }
         return empLstMapper.insertEmployee(employee);
     }
 
     /**
-     * 직원 정보 수정
+     * 직원 정보 수정 (이메일과 전화번호 암호화)
      */
     @Transactional(transactionManager = "employeeTransactionManager")
     public int updateEmployee(EmpLstVO employee) {
+        // 이메일과 전화번호 암호화
+        if (employee.getEad() != null && !EncryptionUtil.isEncrypted(employee.getEad())) {
+            employee.setEad(EncryptionUtil.encryptEmail(employee.getEad()));
+        }
+        if (employee.getEmpCpn() != null && !EncryptionUtil.isEncrypted(employee.getEmpCpn())) {
+            employee.setEmpCpn(EncryptionUtil.encryptPhone(employee.getEmpCpn()));
+        }
         return empLstMapper.updateEmployee(employee);
     }
 
@@ -111,10 +164,14 @@ public class EmpLstService {
     }
 
     /**
-     * 조건별 직원 검색
+     * 조건별 직원 검색 (복호화된 데이터)
      */
     public List<EmpLstVO> searchEmployees(String searchKeyword, String branchCd, String jbclCd, String jbttCd, String hlofYn) {
-        return empLstMapper.searchEmployees(searchKeyword, branchCd, jbclCd, jbttCd, hlofYn);
+        List<EmpLstVO> employees = empLstMapper.searchEmployees(searchKeyword, branchCd, jbclCd, jbttCd, hlofYn);
+        for (EmpLstVO employee : employees) {
+            decryptEmployeeData(employee);
+        }
+        return employees;
     }
 
     /**
@@ -205,9 +262,13 @@ public class EmpLstService {
                 employee.setTrthBirtYmd(parseDate(fields[14].trim()));  // 실제생년월일
                 employee.setSlcnUncgBirtYmd(parseDate(fields[15].trim())); // 양력환산생년월일
                 employee.setInslDcd(fields[16].trim());                 // 음양구분코드
-                employee.setEmpCpn(fields[17].trim());                  // 직원휴대폰번호
-                employee.setEmpExtiNo(fields[18].trim());               // 직원내선번호
-                employee.setEad(fields[19].trim());                     // 이메일주소
+                // 전화번호와 이메일 암호화
+                String phoneNumber = fields[17].trim();
+                String email = fields[19].trim();
+                
+                employee.setEmpCpn(EncryptionUtil.encryptPhone(phoneNumber));  // 직원휴대폰번호 (암호화)
+                employee.setEmpExtiNo(fields[18].trim());                       // 직원내선번호
+                employee.setEad(EncryptionUtil.encryptEmail(email));            // 이메일주소 (암호화)
                 
                 // 기본값 설정
                 employee.setDelYn("N");
@@ -226,7 +287,7 @@ public class EmpLstService {
                     employee.setHlofYn("Y");
                 }
                 if (employee.getEad() == null || employee.getEad().isEmpty()) {
-                    employee.setEad("no-email@company.com");
+                    employee.setEad(EncryptionUtil.encryptEmail("no-email@company.com"));
                 }
                 
                 employees.add(employee);
@@ -389,8 +450,8 @@ public class EmpLstService {
         empRefVO.setEmpExtiNo(empLstVO.getEmpExtiNo());
         empRefVO.setEad(empLstVO.getEad());
         empRefVO.setDelYn("N"); // 기본값
-        empRefVO.setRegDate(empLstVO.getRegDate());
-        empRefVO.setUpdDate(empLstVO.getUpdDate());
+        empRefVO.setRegDt(empLstVO.getRegDt());
+        empRefVO.setUpdDt(empLstVO.getUpdDt());
         
         return empRefVO;
     }

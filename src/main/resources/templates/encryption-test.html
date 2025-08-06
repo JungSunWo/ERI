@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>암호화 테스트</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .section h2 {
+            color: #555;
+            margin-top: 0;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"], input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .employee-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: white;
+        }
+        .employee-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 5px;
+        }
+        .employee-item:last-child {
+            border-bottom: none;
+        }
+        .encrypted {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .decrypted {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 암호화 테스트 페이지</h1>
+        
+        <!-- 기본 암호화 테스트 -->
+        <div class="section">
+            <h2>📝 기본 암호화 테스트</h2>
+            <div class="form-group">
+                <label for="testText">테스트할 텍스트:</label>
+                <input type="text" id="testText" placeholder="암호화할 텍스트를 입력하세요">
+            </div>
+            <button onclick="testEncryption()">암호화 테스트</button>
+            <div id="encryptionResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 이메일 암호화 테스트 -->
+        <div class="section">
+            <h2>📧 이메일 암호화 테스트</h2>
+            <div class="form-group">
+                <label for="testEmail">테스트할 이메일:</label>
+                <input type="email" id="testEmail" placeholder="test@example.com">
+            </div>
+            <button onclick="testEmailEncryption()">이메일 암호화 테스트</button>
+            <div id="emailResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 전화번호 암호화 테스트 -->
+        <div class="section">
+            <h2>📞 전화번호 암호화 테스트</h2>
+            <div class="form-group">
+                <label for="testPhone">테스트할 전화번호:</label>
+                <input type="text" id="testPhone" placeholder="010-1234-5678">
+            </div>
+            <button onclick="testPhoneEncryption()">전화번호 암호화 테스트</button>
+            <div id="phoneResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 암호화 확인 테스트 -->
+        <div class="section">
+            <h2>🔍 암호화 확인 테스트</h2>
+            <div class="form-group">
+                <label for="checkText">확인할 텍스트:</label>
+                <input type="text" id="checkText" placeholder="암호화된 텍스트 또는 일반 텍스트">
+            </div>
+            <button onclick="checkEncrypted()">암호화 여부 확인</button>
+            <div id="checkResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 복호화 테스트 -->
+        <div class="section">
+            <h2>🔓 복호화 테스트</h2>
+            <div class="form-group">
+                <label for="decryptText">암호화된 텍스트:</label>
+                <input type="text" id="decryptText" placeholder="복호화할 암호화된 텍스트를 입력하세요">
+            </div>
+            <button onclick="testDecryption()">복호화 테스트</button>
+            <div id="decryptResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 이메일 복호화 테스트 -->
+        <div class="section">
+            <h2>📧 이메일 복호화 테스트</h2>
+            <div class="form-group">
+                <label for="decryptEmail">암호화된 이메일:</label>
+                <input type="text" id="decryptEmail" placeholder="복호화할 암호화된 이메일을 입력하세요">
+            </div>
+            <button onclick="testEmailDecryption()">이메일 복호화 테스트</button>
+            <div id="decryptEmailResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 전화번호 복호화 테스트 -->
+        <div class="section">
+            <h2>📞 전화번호 복호화 테스트</h2>
+            <div class="form-group">
+                <label for="decryptPhone">암호화된 전화번호:</label>
+                <input type="text" id="decryptPhone" placeholder="복호화할 암호화된 전화번호를 입력하세요">
+            </div>
+            <button onclick="testPhoneDecryption()">전화번호 복호화 테스트</button>
+            <div id="decryptPhoneResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 직원 정보 조회 -->
+        <div class="section">
+            <h2>👥 직원 정보 조회 (암호화 확인)</h2>
+            <button onclick="getEmployees()">전체 직원 조회</button>
+            <button onclick="getSpecificEmployee()">특정 직원 조회</button>
+            <div class="form-group" style="margin-top: 10px;">
+                <label for="empId">직원 ID:</label>
+                <input type="text" id="empId" placeholder="S97441">
+            </div>
+            <div id="employeeResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- 배치 처리 실행 -->
+        <div class="section">
+            <h2>⚙️ 배치 처리 실행</h2>
+            <p><strong>주의:</strong> 이 기능은 empInfo.txt 파일을 읽어서 DB에 직원 정보를 저장합니다. 이메일과 전화번호는 암호화되어 저장됩니다.</p>
+            <button onclick="runBatchProcess()" style="background-color: #dc3545;">배치 처리 실행</button>
+            <div id="batchResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 기본 암호화 테스트
+        async function testEncryption() {
+            const text = document.getElementById('testText').value;
+            if (!text) {
+                alert('테스트할 텍스트를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/encryption-test/test-encryption', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('encryptionResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ 암호화 테스트 성공!\n\n원본: ${result.original}\n암호화: ${result.encrypted}\n복호화: ${result.decrypted}\n일치 여부: ${result.isMatch ? '✅ 일치' : '❌ 불일치'}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ 암호화 테스트 실패: ${result.error}`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('encryptionResult');
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 오류 발생: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // 이메일 암호화 테스트
+        async function testEmailEncryption() {
+            const email = document.getElementById('testEmail').value;
+            if (!email) {
+                alert('테스트할 이메일을 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/encryption-test/test-email-encryption', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('emailResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ 이메일 암호화 테스트 성공!\n\n원본: ${result.original}\n암호화: ${result.encrypted}\n복호화: ${result.decrypted}\n일치 여부: ${result.isMatch ? '✅ 일치' : '❌ 불일치'}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ 이메일 암호화 테스트 실패: ${result.error}`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('emailResult');
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 오류 발생: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // 전화번호 암호화 테스트
+        async function testPhoneEncryption() {
+            const phone = document.getElementById('testPhone').value;
+            if (!phone) {
+                alert('테스트할 전화번호를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/encryption-test/test-phone-encryption', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ phone: phone })
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('phoneResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ 전화번호 암호화 테스트 성공!\n\n원본: ${result.original}\n암호화: ${result.encrypted}\n복호화: ${result.decrypted}\n일치 여부: ${result.isMatch ? '✅ 일치' : '❌ 불일치'}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ 전화번호 암호화 테스트 실패: ${result.error}`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('phoneResult');
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 오류 발생: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // 암호화 확인 테스트
+        async function checkEncrypted() {
+            const text = document.getElementById('checkText').value;
+            if (!text) {
+                alert('확인할 텍스트를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/encryption-test/check-encrypted', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('checkResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result info';
+                    resultDiv.innerHTML = `🔍 암호화 확인 결과:\n\n텍스트: ${result.text}\n암호화 여부: ${result.isEncrypted ? '✅ 암호화됨' : '❌ 암호화되지 않음'}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ 확인 실패: ${result.error}`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('checkResult');
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 오류 발생: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // 복호화 테스트
+        async function testDecryption() {
+            const encryptedText = document.getElementById('decryptText').value;
+            if (!encryptedText) {
+                alert('암호화된 텍스트를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/encryption-test/test-decryption', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ encryptedText: encryptedText })
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('decryptResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ 복호화 테스트 성공!\n\n암호화된 텍스트: ${result.encrypted}\n복호화된 텍스트: ${result.decrypted}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ 복호화 테스트 실패: ${result.error}`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('decryptResult');
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 오류 발생: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // 이메일 복호화 테스트
+        async function testEmailDecryption() {
+            const encryptedEmail = document.getElementById('decryptEmail').value;
+            if (!encryptedEmail) {
+                alert('암호화된 이메일을 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/encryption-test/test-email-decryption', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ encryptedEmail: encryptedEmail })
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('decryptEmailResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ 이메일 복호화 테스트 성공!\n\n암호화된 이메일: ${result.encrypted}\n복호화된 이메일: ${result.decrypted}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ 이메일 복호화 테스트 실패: ${result.error}`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('decryptEmailResult');
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 오류 발생: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // 전화번호 복호화 테스트
+        async function testPhoneDecryption() {
+            const encryptedPhone = document.getElementById('decryptPhone').value;
+            if (!encryptedPhone) {
+                alert('암호화된 전화번호를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/encryption-test/test-phone-decryption', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ encryptedPhone: encryptedPhone })
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('decryptPhoneResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ 전화번호 복호화 테스트 성공!\n\n암호화된 전화번호: ${result.encrypted}\n복호화된 전화번호: ${result.decrypted}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ 전화번호 복호화 테스트 실패: ${result.error}`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('decryptPhoneResult');
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 오류 발생: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // 전체 직원 조회
+        async function getEmployees() {
+            try {
+                const response = await fetch('/api/encryption-test/employees');
+                const result = await response.json();
+                const resultDiv = document.getElementById('employeeResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    let html = `✅ 직원 조회 성공!\n\n총 직원 수: ${result.count}명\n\n`;
+                    
+                    if (result.employees && result.employees.length > 0) {
+                        html += '<div class="employee-list">';
+                        result.employees.slice(0, 10).forEach(emp => {
+                            html += `<div class="employee-item">
+                                <strong>${emp.empId}</strong> - ${emp.empNm}<br>
+                                이메일: <span class="${emp.ead && emp.ead.includes('==') ? 'encrypted' : 'decrypted'}">${emp.ead || 'N/A'}</span><br>
+                                전화번호: <span class="${emp.empCpn && emp.empCpn.includes('==') ? 'encrypted' : 'decrypted'}">${emp.empCpn || 'N/A'}</span>
+                            </div>`;
+                        });
+                        if (result.employees.length > 10) {
+                            html += `<div class="employee-item">... 외 ${result.employees.length - 10}명 더</div>`;
+                        }
+                        html += '</div>';
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ 직원 조회 실패: ${result.error}`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('employeeResult');
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 오류 발생: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // 특정 직원 조회
+        async function getSpecificEmployee() {
+            const empId = document.getElementById('empId').value;
+            if (!empId) {
+                alert('직원 ID를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/encryption-test/employee/${empId}`);
+                const result = await response.json();
+                const resultDiv = document.getElementById('employeeResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    const emp = result.employee;
+                    resultDiv.innerHTML = `✅ 직원 조회 성공!\n\n직원 ID: ${emp.empId}\n이름: ${emp.empNm}\n이메일: <span class="${emp.ead && emp.ead.includes('==') ? 'encrypted' : 'decrypted'}">${emp.ead || 'N/A'}</span>\n전화번호: <span class="${emp.empCpn && emp.empCpn.includes('==') ? 'encrypted' : 'decrypted'}">${emp.empCpn || 'N/A'}</span>`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ 직원 조회 실패: ${result.error}`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('employeeResult');
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 오류 발생: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // 배치 처리 실행
+        async function runBatchProcess() {
+            if (!confirm('empInfo.txt 파일을 읽어서 DB에 직원 정보를 저장하시겠습니까? 이메일과 전화번호는 암호화되어 저장됩니다.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/scheduler/manual-emp-info-batch', {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('batchResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ 배치 처리 성공!\n\n메시지: ${result.message}\n처리 시간: ${result.processingTime}\n총 직원 수: ${result.totalEmployees}\n상세 정보: ${result.details}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ 배치 처리 실패: ${result.message}\n오류: ${result.error}`;
+                }
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('batchResult');
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 오류 발생: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html> 

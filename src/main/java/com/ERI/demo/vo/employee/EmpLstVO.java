@@ -32,7 +32,7 @@ public class EmpLstVO {
     private String ead;          // 이메일주소
 
     private String delYn;        // 삭제 여부 (Y: 삭제, N: 사용)
-    private LocalDateTime delDate; // 삭제 일시
-    private LocalDateTime regDate; // 등록 일시
-    private LocalDateTime updDate; // 수정 일시
+    private LocalDateTime delDt;  // 삭제 일시
+    private LocalDateTime regDt;  // 등록 일시
+    private LocalDateTime updDt;  // 수정 일시
 } 

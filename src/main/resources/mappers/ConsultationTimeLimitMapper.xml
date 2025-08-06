@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mappers.ConsultationTimeLimitMapper">
+
+    <!-- 상담 시간 제한 목록 조회 (페이징) -->
+    <select id="selectConsultationTimeLimitList" resultType="com.ERI.demo.vo.ConsultationTimeLimitVO">
+        SELECT 
+            LIMIT_SEQ,
+            CNSL_DT,
+            CNSL_TM,
+            MAX_CNT,
+            CURRENT_CNT,
+            AVAIL_YN,
+            DEL_YN,
+            DEL_DT,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DT,
+            UPD_DT
+        FROM TB_CNSL_TIME_LIMIT
+        WHERE DEL_YN = 'N'
+        <if test="searchCondition != null">
+            <if test="searchCondition.cnslDt != null">
+                AND CNSL_DT = #{searchCondition.cnslDt}
+            </if>
+            <if test="searchCondition.cnslTm != null">
+                AND CNSL_TM = #{searchCondition.cnslTm}
+            </if>
+            <if test="searchCondition.availYn != null and searchCondition.availYn != ''">
+                AND AVAIL_YN = #{searchCondition.availYn}
+            </if>
+            <if test="searchCondition.startDate != null and searchCondition.startDate != ''">
+                AND CNSL_DT >= #{searchCondition.startDate}::date
+            </if>
+            <if test="searchCondition.endDate != null and searchCondition.endDate != ''">
+                AND CNSL_DT &lt;= #{searchCondition.endDate}::date
+            </if>
+        </if>
+        ORDER BY CNSL_DT ASC, CNSL_TM ASC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 상담 시간 제한 총 개수 조회 -->
+    <select id="selectConsultationTimeLimitCount" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_CNSL_TIME_LIMIT
+        WHERE DEL_YN = 'N'
+        <if test="searchCondition != null">
+            <if test="searchCondition.cnslDt != null">
+                AND CNSL_DT = #{searchCondition.cnslDt}
+            </if>
+            <if test="searchCondition.cnslTm != null">
+                AND CNSL_TM = #{searchCondition.cnslTm}
+            </if>
+            <if test="searchCondition.availYn != null and searchCondition.availYn != ''">
+                AND AVAIL_YN = #{searchCondition.availYn}
+            </if>
+            <if test="searchCondition.startDate != null and searchCondition.startDate != ''">
+                AND CNSL_DT >= #{searchCondition.startDate}::date
+            </if>
+            <if test="searchCondition.endDate != null and searchCondition.endDate != ''">
+                AND CNSL_DT &lt;= #{searchCondition.endDate}::date
+            </if>
+        </if>
+    </select>
+
+    <!-- 상담 시간 제한 상세 조회 -->
+    <select id="selectConsultationTimeLimitBySeq" resultType="com.ERI.demo.vo.ConsultationTimeLimitVO">
+        SELECT 
+            LIMIT_SEQ,
+            CNSL_DT,
+            CNSL_TM,
+            MAX_CNT,
+            CURRENT_CNT,
+            AVAIL_YN,
+            DEL_YN,
+            DEL_DT,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DT,
+            UPD_DT
+        FROM TB_CNSL_TIME_LIMIT
+        WHERE LIMIT_SEQ = #{limitSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 특정 날짜/시간의 상담 시간 제한 조회 -->
+    <select id="selectConsultationTimeLimitByDateTime" resultType="com.ERI.demo.vo.ConsultationTimeLimitVO">
+        SELECT 
+            LIMIT_SEQ,
+            CNSL_DT,
+            CNSL_TM,
+            MAX_CNT,
+            CURRENT_CNT,
+            AVAIL_YN,
+            DEL_YN,
+            DEL_DT,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DT,
+            UPD_DT
+        FROM TB_CNSL_TIME_LIMIT
+        WHERE CNSL_DT = #{cnslDt,jdbcType=DATE}
+        AND CNSL_TM = #{cnslTm,jdbcType=TIME}
+        AND DEL_YN = 'N'
+    </select>
+
+    <!-- 상담 시간 제한 등록 -->
+    <insert id="insertConsultationTimeLimit" parameterType="com.ERI.demo.vo.ConsultationTimeLimitVO" useGeneratedKeys="true" keyProperty="limitSeq">
+        INSERT INTO TB_CNSL_TIME_LIMIT (
+            CNSL_DT,
+            CNSL_TM,
+            MAX_CNT,
+            CURRENT_CNT,
+            AVAIL_YN,
+            DEL_YN,
+            REG_EMP_ID,
+            UPD_EMP_ID,
+            REG_DT,
+            UPD_DT
+        ) VALUES (
+            #{cnslDt,jdbcType=DATE},
+            #{cnslTm,jdbcType=TIME},
+            #{maxCnt,jdbcType=INTEGER},
+            #{currentCnt,jdbcType=INTEGER},
+            #{availYn,jdbcType=CHAR},
+            'N',
+            #{regEmpId,jdbcType=VARCHAR},
+            #{updEmpId,jdbcType=VARCHAR},
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 상담 시간 제한 수정 -->
+    <update id="updateConsultationTimeLimit" parameterType="com.ERI.demo.vo.ConsultationTimeLimitVO">
+        UPDATE TB_CNSL_TIME_LIMIT
+        SET 
+            CNSL_DT = #{cnslDt,jdbcType=DATE},
+            CNSL_TM = #{cnslTm,jdbcType=TIME},
+            MAX_CNT = #{maxCnt,jdbcType=INTEGER},
+            CURRENT_CNT = #{currentCnt,jdbcType=INTEGER},
+            AVAIL_YN = #{availYn,jdbcType=CHAR},
+            UPD_EMP_ID = #{updEmpId,jdbcType=VARCHAR},
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE LIMIT_SEQ = #{limitSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 상담 시간 제한 삭제 (논리 삭제) -->
+    <update id="deleteConsultationTimeLimit">
+        UPDATE TB_CNSL_TIME_LIMIT
+        SET 
+            DEL_YN = 'Y',
+            DEL_DT = CURRENT_TIMESTAMP,
+            UPD_EMP_ID = #{empId,jdbcType=VARCHAR},
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE LIMIT_SEQ = #{limitSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+    <!-- 현재 신청 수 증가 -->
+    <update id="incrementCurrentCount">
+        UPDATE TB_CNSL_TIME_LIMIT
+        SET 
+            CURRENT_CNT = CURRENT_CNT + 1,
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE LIMIT_SEQ = #{limitSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+        AND CURRENT_CNT &lt; MAX_CNT
+    </update>
+
+    <!-- 현재 신청 수 감소 -->
+    <update id="decrementCurrentCount">
+        UPDATE TB_CNSL_TIME_LIMIT
+        SET 
+            CURRENT_CNT = GREATEST(CURRENT_CNT - 1, 0),
+            UPD_DT = CURRENT_TIMESTAMP
+        WHERE LIMIT_SEQ = #{limitSeq,jdbcType=BIGINT}
+        AND DEL_YN = 'N'
+    </update>
+
+</mapper> 
