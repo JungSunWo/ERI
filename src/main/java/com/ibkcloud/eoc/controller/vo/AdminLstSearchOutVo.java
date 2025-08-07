@@ -1,0 +1,41 @@
+package com.ibkcloud.eoc.controller.vo;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
+import java.util.List;
+
+/**
+ * 관리자 정보 검색 출력 VO
+ */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class AdminLstSearchOutVo {
+    
+    private boolean success;
+    private String message;
+    private String errorCode;
+    
+    private List<AdminLstOutVo> data;
+    private Integer count;
+    private Integer pageNo;
+    private Integer pageSize;
+    private Integer ttalPageNbi;
+    
+    // 검색 조건들
+    private String keyword;
+    private String sortBy;
+    private String sortDirection;
+    private String adminLevel;
+    private String adminSts;
+    private String empId;
+    private String empNm;
+    private String startDtFrom;
+    private String startDtTo;
+    private String endDtFrom;
+    private String endDtTo;
+} 

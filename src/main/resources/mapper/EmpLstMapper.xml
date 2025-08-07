@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ibkcloud.eoc.dao.EmpLstDao">
+    
+    <!-- 전체 직원 목록 조회 -->
+    <select id="selectAllEmployees" resultType="com.ibkcloud.eoc.dao.dto.EmpLstDto">
+        /* com.ibkcloud.eoc.dao.EmpLstDao.selectAllEmployees */
+        SELECT 
+            ERI_EMP_ID,
+            EMP_ID,
+            EMP_NM,
+            BLNG_BRCD,
+            BLNG_BRNM,
+            JBTT_CD,
+            JBTT_NM,
+            JBCL_CD,
+            JBCL_NM,
+            EAD,
+            EMP_CPN,
+            HLOF_YN,
+            ETBN_DT,
+            TZGN_DT,
+            CRET_TS,
+            MDFC_TS
+        FROM TB_EMP_LST
+        ORDER BY EMP_ID
+    </select>
+    
+    <!-- ERI 직원 ID로 직원 정보 조회 -->
+    <select id="selectEmployeeByEriId" parameterType="String" resultType="com.ibkcloud.eoc.dao.dto.EmpLstDto">
+        /* com.ibkcloud.eoc.dao.EmpLstDao.selectEmployeeByEriId */
+        SELECT 
+            ERI_EMP_ID,
+            EMP_ID,
+            EMP_NM,
+            BLNG_BRCD,
+            BLNG_BRNM,
+            JBTT_CD,
+            JBTT_NM,
+            JBCL_CD,
+            JBCL_NM,
+            EAD,
+            EMP_CPN,
+            HLOF_YN,
+            ETBN_DT,
+            TZGN_DT,
+            CRET_TS,
+            MDFC_TS
+        FROM TB_EMP_LST
+        WHERE ERI_EMP_ID = #{eriEmpId}
+    </select>
+    
+    <!-- 직원 ID로 직원 정보 조회 -->
+    <select id="selectEmployeeByEmpId" parameterType="String" resultType="com.ibkcloud.eoc.dao.dto.EmpLstDto">
+        /* com.ibkcloud.eoc.dao.EmpLstDao.selectEmployeeByEmpId */
+        SELECT 
+            ERI_EMP_ID,
+            EMP_ID,
+            EMP_NM,
+            BLNG_BRCD,
+            BLNG_BRNM,
+            JBTT_CD,
+            JBTT_NM,
+            JBCL_CD,
+            JBCL_NM,
+            EAD,
+            EMP_CPN,
+            HLOF_YN,
+            ETBN_DT,
+            TZGN_DT,
+            CRET_TS,
+            MDFC_TS
+        FROM TB_EMP_LST
+        WHERE EMP_ID = #{empId}
+    </select>
+    
+    <!-- 직원 정보 등록 -->
+    <insert id="insertEmployee" parameterType="com.ibkcloud.eoc.dao.dto.EmpLstDto">
+        /* com.ibkcloud.eoc.dao.EmpLstDao.insertEmployee */
+        INSERT INTO TB_EMP_LST (
+            ERI_EMP_ID,
+            EMP_ID,
+            EMP_NM,
+            BLNG_BRCD,
+            BLNG_BRNM,
+            JBTT_CD,
+            JBTT_NM,
+            JBCL_CD,
+            JBCL_NM,
+            EAD,
+            EMP_CPN,
+            HLOF_YN,
+            ETBN_DT,
+            TZGN_DT,
+            CRET_TS,
+            MDFC_TS
+        ) VALUES (
+            #{eriEmpId},
+            #{empId},
+            #{empNm},
+            #{blngBrcd},
+            #{blngBrnm},
+            #{jbttCd},
+            #{jbttNm},
+            #{jbclCd},
+            #{jbclNm},
+            #{ead},
+            #{empCpn},
+            #{hlofYn},
+            #{etbnDt},
+            #{tzgnDt},
+            NOW(),
+            NOW()
+        )
+    </insert>
+    
+    <!-- 직원 정보 수정 -->
+    <update id="updateEmployee" parameterType="com.ibkcloud.eoc.dao.dto.EmpLstDto">
+        /* com.ibkcloud.eoc.dao.EmpLstDao.updateEmployee */
+        UPDATE TB_EMP_LST SET
+            EMP_NM = #{empNm},
+            BLNG_BRCD = #{blngBrcd},
+            BLNG_BRNM = #{blngBrnm},
+            JBTT_CD = #{jbttCd},
+            JBTT_NM = #{jbttNm},
+            JBCL_CD = #{jbclCd},
+            JBCL_NM = #{jbclNm},
+            EAD = #{ead},
+            EMP_CPN = #{empCpn},
+            HLOF_YN = #{hlofYn},
+            ETBN_DT = #{etbnDt},
+            TZGN_DT = #{tzgnDt},
+            MDFC_TS = NOW()
+        WHERE ERI_EMP_ID = #{eriEmpId}
+    </update>
+    
+    <!-- 직원 정보 삭제 -->
+    <delete id="deleteEmployee" parameterType="String">
+        /* com.ibkcloud.eoc.dao.EmpLstDao.deleteEmployee */
+        DELETE FROM TB_EMP_LST
+        WHERE ERI_EMP_ID = #{eriEmpId}
+    </delete>
+    
+    <!-- 직원 수 조회 -->
+    <select id="selectEmployeeCount" resultType="int">
+        /* com.ibkcloud.eoc.dao.EmpLstDao.selectEmployeeCount */
+        SELECT COUNT(*)
+        FROM TB_EMP_LST
+    </select>
+    
+    <!-- 지점별 직원 목록 조회 -->
+    <select id="selectEmployeesByBranch" parameterType="String" resultType="com.ibkcloud.eoc.dao.dto.EmpLstDto">
+        /* com.ibkcloud.eoc.dao.EmpLstDao.selectEmployeesByBranch */
+        SELECT 
+            ERI_EMP_ID,
+            EMP_ID,
+            EMP_NM,
+            BLNG_BRCD,
+            BLNG_BRNM,
+            JBTT_CD,
+            JBTT_NM,
+            JBCL_CD,
+            JBCL_NM,
+            EAD,
+            EMP_CPN,
+            HLOF_YN,
+            ETBN_DT,
+            TZGN_DT,
+            CRET_TS,
+            MDFC_TS
+        FROM TB_EMP_LST
+        WHERE BLNG_BRCD = #{branchCd}
+        ORDER BY EMP_ID
+    </select>
+    
+</mapper> 

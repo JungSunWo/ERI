@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mapper.SurveyQuestionMapper">
+
+    <!-- 설문조사 질문 목록 조회 -->
+    <select id="selectSurveyQuestionList" parameterType="long" resultType="com.ERI.demo.vo.SurveyQuestionVO">
+        SELECT 
+            SURV_SEQ,
+            QST_SEQ,
+            QST_TTL,
+            QST_DESC,
+            QST_TY_CD,
+            QST_ORD,
+            REQUIRED_YN,
+            SKIP_LOGIC_YN,
+            SKIP_CONDITION,
+            SCORE_YN,
+            SCORE_WEIGHT,
+            DEL_YN,
+            REG_DT,
+            REG_EMP_ID,
+            MOD_DT,
+            UPD_EMP_ID
+        FROM TB_SURV_QST
+        WHERE SURV_SEQ = #{surveySeq}
+          AND DEL_YN = 'N'
+        ORDER BY QST_ORD ASC
+    </select>
+
+    <!-- 설문조사 질문 상세 조회 -->
+    <select id="selectSurveyQuestionBySeq" parameterType="long" resultType="com.ERI.demo.vo.SurveyQuestionVO">
+        SELECT 
+            SURV_SEQ,
+            QST_SEQ,
+            QST_TTL,
+            QST_DESC,
+            QST_TY_CD,
+            QST_ORD,
+            REQUIRED_YN,
+            SKIP_LOGIC_YN,
+            SKIP_CONDITION,
+            SCORE_YN,
+            SCORE_WEIGHT,
+            DEL_YN,
+            REG_DT,
+            REG_EMP_ID,
+            MOD_DT,
+            UPD_EMP_ID
+        FROM TB_SURV_QST
+        WHERE QST_SEQ = #{questionSeq}
+          AND DEL_YN = 'N'
+    </select>
+
+    <!-- 설문조사 질문 등록 -->
+    <insert id="insertSurveyQuestion" parameterType="com.ERI.demo.vo.SurveyQuestionVO">
+        INSERT INTO TB_SURV_QST (
+            SURV_SEQ,
+            QST_SEQ,
+            QST_TTL,
+            QST_DESC,
+            QST_TY_CD,
+            QST_ORD,
+            REQUIRED_YN,
+            SKIP_LOGIC_YN,
+            SKIP_CONDITION,
+            SCORE_YN,
+            SCORE_WEIGHT,
+            DEL_YN,
+            REG_DT,
+            REG_EMP_ID
+        ) VALUES (
+            #{surveySeq},
+            NEXTVAL('SEQ_SURV_QST'),
+            #{questionTtl},
+            #{questionDesc},
+            #{questionTyCd},
+            #{questionOrd},
+            #{requiredYn},
+            #{skipLogicYn},
+            #{skipCondition},
+            #{scoreYn},
+            #{scoreWeight},
+            'N',
+            NOW(),
+            #{regEmpId}
+        )
+    </insert>
+
+    <!-- 설문조사 질문 수정 -->
+    <update id="updateSurveyQuestion" parameterType="com.ERI.demo.vo.SurveyQuestionVO">
+        UPDATE TB_SURV_QST
+        SET 
+            QST_TTL = #{questionTtl},
+            QST_DESC = #{questionDesc},
+            QST_TY_CD = #{questionTyCd},
+            QST_ORD = #{questionOrd},
+            REQUIRED_YN = #{requiredYn},
+            SKIP_LOGIC_YN = #{skipLogicYn},
+            SKIP_CONDITION = #{skipCondition},
+            SCORE_YN = #{scoreYn},
+            SCORE_WEIGHT = #{scoreWeight},
+            MOD_DT = NOW(),
+            UPD_EMP_ID = #{updEmpId}
+        WHERE QST_SEQ = #{questionSeq}
+    </update>
+
+    <!-- 설문조사 질문 삭제 -->
+    <update id="deleteSurveyQuestion" parameterType="long">
+        UPDATE TB_SURV_QST
+        SET DEL_YN = 'Y'
+        WHERE QST_SEQ = #{questionSeq}
+    </update>
+
+    <!-- 설문조사 질문 순서 변경 -->
+    <update id="updateQuestionOrder">
+        UPDATE TB_SURV_QST
+        SET QST_ORD = #{questionOrd}
+        WHERE QST_SEQ = #{questionSeq}
+    </update>
+
+    <!-- 설문조사 질문 개수 조회 -->
+    <select id="selectQuestionCount" parameterType="long" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_SURV_QST
+        WHERE SURV_SEQ = #{surveySeq}
+          AND DEL_YN = 'N'
+    </select>
+
+    <!-- 설문조사 질문 순서 재정렬 -->
+    <update id="reorderQuestions" parameterType="long">
+        UPDATE TB_SURV_QST
+        SET QST_ORD = (
+            SELECT ROW_NUMBER() OVER (ORDER BY QST_ORD, QST_SEQ)
+            FROM TB_SURV_QST t2
+            WHERE t2.SURV_SEQ = TB_SURV_QST.SURV_SEQ
+              AND t2.DEL_YN = 'N'
+        )
+        WHERE SURV_SEQ = #{surveySeq}
+          AND DEL_YN = 'N'
+    </update>
+
+</mapper> 

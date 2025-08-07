@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mapper.SurveyChoiceMapper">
+
+    <!-- 설문조사 선택지 목록 조회 -->
+    <select id="selectSurveyChoiceList" parameterType="long" resultType="com.ERI.demo.vo.SurveyChoiceVO">
+        SELECT 
+            SURV_SEQ,
+            QST_SEQ,
+            CHC_SEQ,
+            CHC_TTL,
+            CHC_DESC,
+            CHC_ORD,
+            CHC_SCORE,
+            CHC_VALUE,
+            ETC_YN,
+            DEL_YN,
+            REG_DT,
+            REG_EMP_ID,
+            MOD_DT,
+            UPD_EMP_ID
+        FROM TB_SURV_CHC
+        WHERE QST_SEQ = #{questionSeq}
+          AND DEL_YN = 'N'
+        ORDER BY CHC_ORD ASC
+    </select>
+
+    <!-- 설문조사 선택지 상세 조회 -->
+    <select id="selectSurveyChoiceBySeq" parameterType="long" resultType="com.ERI.demo.vo.SurveyChoiceVO">
+        SELECT 
+            SURV_SEQ,
+            QST_SEQ,
+            CHC_SEQ,
+            CHC_TTL,
+            CHC_DESC,
+            CHC_ORD,
+            CHC_SCORE,
+            CHC_VALUE,
+            ETC_YN,
+            DEL_YN,
+            REG_DT,
+            REG_EMP_ID,
+            MOD_DT,
+            UPD_EMP_ID
+        FROM TB_SURV_CHC
+        WHERE CHC_SEQ = #{choiceSeq}
+          AND DEL_YN = 'N'
+    </select>
+
+    <!-- 설문조사 선택지 등록 -->
+    <insert id="insertSurveyChoice" parameterType="com.ERI.demo.vo.SurveyChoiceVO">
+        INSERT INTO TB_SURV_CHC (
+            SURV_SEQ,
+            QST_SEQ,
+            CHC_SEQ,
+            CHC_TTL,
+            CHC_DESC,
+            CHC_ORD,
+            CHC_SCORE,
+            CHC_VALUE,
+            ETC_YN,
+            DEL_YN,
+            REG_DT,
+            REG_EMP_ID
+        ) VALUES (
+            #{surveySeq},
+            #{questionSeq},
+            NEXTVAL('SEQ_SURV_CHC'),
+            #{choiceTtl},
+            #{choiceDesc},
+            #{choiceOrd},
+            #{choiceScore},
+            #{choiceValue},
+            #{etcYn},
+            'N',
+            NOW(),
+            #{regEmpId}
+        )
+    </insert>
+
+    <!-- 설문조사 선택지 수정 -->
+    <update id="updateSurveyChoice" parameterType="com.ERI.demo.vo.SurveyChoiceVO">
+        UPDATE TB_SURV_CHC
+        SET 
+            CHC_TTL = #{choiceTtl},
+            CHC_DESC = #{choiceDesc},
+            CHC_ORD = #{choiceOrd},
+            CHC_SCORE = #{choiceScore},
+            CHC_VALUE = #{choiceValue},
+            ETC_YN = #{etcYn},
+            MOD_DT = NOW(),
+            UPD_EMP_ID = #{updEmpId}
+        WHERE CHC_SEQ = #{choiceSeq}
+    </update>
+
+    <!-- 설문조사 선택지 삭제 -->
+    <update id="deleteSurveyChoice" parameterType="long">
+        UPDATE TB_SURV_CHC
+        SET DEL_YN = 'Y'
+        WHERE CHC_SEQ = #{choiceSeq}
+    </update>
+
+    <!-- 설문조사 선택지 순서 변경 -->
+    <update id="updateChoiceOrder">
+        UPDATE TB_SURV_CHC
+        SET CHC_ORD = #{choiceOrd}
+        WHERE CHC_SEQ = #{choiceSeq}
+    </update>
+
+    <!-- 설문조사 선택지 개수 조회 -->
+    <select id="selectChoiceCount" parameterType="long" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_SURV_CHC
+        WHERE QST_SEQ = #{questionSeq}
+          AND DEL_YN = 'N'
+    </select>
+
+    <!-- 설문조사 선택지 순서 재정렬 -->
+    <update id="reorderChoices" parameterType="long">
+        UPDATE TB_SURV_CHC
+        SET CHC_ORD = (
+            SELECT ROW_NUMBER() OVER (ORDER BY CHC_ORD, CHC_SEQ)
+            FROM TB_SURV_CHC t2
+            WHERE t2.QST_SEQ = TB_SURV_CHC.QST_SEQ
+              AND t2.DEL_YN = 'N'
+        )
+        WHERE QST_SEQ = #{questionSeq}
+          AND DEL_YN = 'N'
+    </update>
+
+</mapper> 

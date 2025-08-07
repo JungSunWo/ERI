@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ERI.demo.mapper.SurveyStatisticsMapper">
+
+    <!-- 설문조사 통계 목록 조회 -->
+    <select id="selectSurveyStatisticsList" parameterType="long" resultType="com.ERI.demo.vo.SurveyStatsVO">
+        SELECT 
+            SURV_SEQ,
+            QST_SEQ,
+            CHC_SEQ,
+            RESP_CNT,
+            RESP_RATE,
+            AVG_SCORE,
+            MIN_SCORE,
+            MAX_SCORE,
+            STD_DEV_SCORE,
+            LAST_UPD_DATE,
+            QST_TTL,
+            CHC_TTL,
+            QST_TY_CD
+        FROM TB_SURV_STAT
+        WHERE SURV_SEQ = #{surveySeq}
+        ORDER BY QST_SEQ ASC, CHC_SEQ ASC
+    </select>
+
+    <!-- 질문별 통계 조회 -->
+    <select id="selectQuestionStatistics" resultType="com.ERI.demo.vo.SurveyStatsVO">
+        SELECT 
+            SURV_SEQ,
+            QST_SEQ,
+            CHC_SEQ,
+            RESP_CNT,
+            RESP_RATE,
+            AVG_SCORE,
+            MIN_SCORE,
+            MAX_SCORE,
+            STD_DEV_SCORE,
+            LAST_UPD_DATE,
+            QST_TTL,
+            CHC_TTL,
+            QST_TY_CD
+        FROM TB_SURV_STAT
+        WHERE SURV_SEQ = #{surveySeq}
+          AND QST_SEQ = #{questionSeq}
+        ORDER BY CHC_SEQ ASC
+    </select>
+
+    <!-- 선택지별 통계 조회 -->
+    <select id="selectChoiceStatistics" resultType="com.ERI.demo.vo.SurveyStatsVO">
+        SELECT 
+            SURV_SEQ,
+            QST_SEQ,
+            CHC_SEQ,
+            RESP_CNT,
+            RESP_RATE,
+            AVG_SCORE,
+            MIN_SCORE,
+            MAX_SCORE,
+            STD_DEV_SCORE,
+            LAST_UPD_DATE,
+            QST_TTL,
+            CHC_TTL,
+            QST_TY_CD
+        FROM TB_SURV_STAT
+        WHERE SURV_SEQ = #{surveySeq}
+          AND CHC_SEQ = #{choiceSeq}
+    </select>
+
+    <!-- 설문조사 통계 등록 -->
+    <insert id="insertSurveyStatistics" parameterType="com.ERI.demo.vo.SurveyStatsVO">
+        INSERT INTO TB_SURV_STAT (
+            SURV_SEQ,
+            QST_SEQ,
+            CHC_SEQ,
+            RESP_CNT,
+            RESP_RATE,
+            AVG_SCORE,
+            MIN_SCORE,
+            MAX_SCORE,
+            STD_DEV_SCORE,
+            LAST_UPD_DATE
+        ) VALUES (
+            #{surveySeq},
+            #{questionSeq},
+            #{choiceSeq},
+            #{responseCnt},
+            #{responseRate},
+            #{avgScore},
+            #{minScore},
+            #{maxScore},
+            #{stdDevScore},
+            NOW()
+        )
+    </insert>
+
+    <!-- 설문조사 통계 수정 -->
+    <update id="updateSurveyStatistics" parameterType="com.ERI.demo.vo.SurveyStatsVO">
+        UPDATE TB_SURV_STAT
+        SET 
+            RESP_CNT = #{responseCnt},
+            RESP_RATE = #{responseRate},
+            AVG_SCORE = #{avgScore},
+            MIN_SCORE = #{minScore},
+            MAX_SCORE = #{maxScore},
+            STD_DEV_SCORE = #{stdDevScore},
+            LAST_UPD_DATE = NOW()
+        WHERE SURV_SEQ = #{surveySeq}
+          AND QST_SEQ = #{questionSeq}
+          AND CHC_SEQ = #{choiceSeq}
+    </update>
+
+    <!-- 설문조사 통계 삭제 -->
+    <delete id="deleteSurveyStatistics" parameterType="long">
+        DELETE FROM TB_SURV_STAT
+        WHERE SURV_SEQ = #{surveySeq}
+    </delete>
+
+    <!-- 설문조사 통계 계산 및 업데이트 -->
+    <update id="calculateAndUpdateStatistics" parameterType="long">
+        -- 통계 계산 및 업데이트 로직
+        -- 실제 구현에서는 복잡한 통계 계산이 필요
+        UPDATE TB_SURV_STAT
+        SET LAST_UPD_DATE = NOW()
+        WHERE SURV_SEQ = #{surveySeq}
+    </update>
+
+    <!-- 설문조사 전체 통계 조회 -->
+    <select id="selectSurveyOverallStatistics" parameterType="long" resultType="com.ERI.demo.vo.SurveyStatsVO">
+        SELECT 
+            SURV_SEQ,
+            SUM(RESP_CNT) as RESP_CNT,
+            AVG(RESP_RATE) as RESP_RATE,
+            AVG(AVG_SCORE) as AVG_SCORE,
+            MIN(MIN_SCORE) as MIN_SCORE,
+            MAX(MAX_SCORE) as MAX_SCORE,
+            AVG(STD_DEV_SCORE) as STD_DEV_SCORE,
+            MAX(LAST_UPD_DATE) as LAST_UPD_DATE
+        FROM TB_SURV_STAT
+        WHERE SURV_SEQ = #{surveySeq}
+        GROUP BY SURV_SEQ
+    </select>
+
+    <!-- 설문조사 응답률 통계 조회 -->
+    <select id="selectSurveyResponseRateStatistics" parameterType="long" resultType="com.ERI.demo.vo.SurveyStatsVO">
+        SELECT 
+            SURV_SEQ,
+            AVG(RESP_RATE) as RESP_RATE,
+            MAX(LAST_UPD_DATE) as LAST_UPD_DATE
+        FROM TB_SURV_STAT
+        WHERE SURV_SEQ = #{surveySeq}
+        GROUP BY SURV_SEQ
+    </select>
+
+</mapper> 
